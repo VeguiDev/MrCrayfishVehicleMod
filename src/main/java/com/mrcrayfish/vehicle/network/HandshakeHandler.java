@@ -40,9 +40,9 @@ public class HandshakeHandler
         {
             block.await();
         }
-        catch(InterruptedException e)
+        catch(InterruptedException ex)
         {
-            Thread.interrupted();
+            Thread.currentThread().interrupt();
         }
 
         c.get().setPacketHandled(true);

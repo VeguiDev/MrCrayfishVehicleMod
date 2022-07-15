@@ -1,17 +1,14 @@
 package com.mrcrayfish.vehicle.client.audio;
 
 import com.mrcrayfish.vehicle.entity.PoweredVehicleEntity;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.TickableSound;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.lang.ref.WeakReference;
-import java.util.function.Predicate;
 
 /**
  * Author: MrCrayfish

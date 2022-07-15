@@ -9,7 +9,6 @@ import com.mrcrayfish.vehicle.client.handler.InputHandler;
 import com.mrcrayfish.vehicle.client.handler.OverlayHandler;
 import com.mrcrayfish.vehicle.client.handler.PlayerModelHandler;
 import com.mrcrayfish.vehicle.client.handler.SprayCanHandler;
-import com.mrcrayfish.vehicle.client.model.ComponentLoader;
 import com.mrcrayfish.vehicle.client.model.ComponentManager;
 import com.mrcrayfish.vehicle.client.particle.DustParticle;
 import com.mrcrayfish.vehicle.client.particle.TyreSmokeParticle;

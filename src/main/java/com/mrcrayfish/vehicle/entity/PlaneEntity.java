@@ -18,6 +18,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.World;
@@ -110,7 +111,7 @@ public abstract class PlaneEntity extends PoweredVehicleEntity
 
         // Adds delta pitch and yaw to the plane based on the flaps and roll of the plane
         Vector3f elevatorDirection = new Vector3f(Vector3d.directionFromRotation(this.elevatorAngle * elevatorForce * this.getElevatorSensitivity(), 0));
-        elevatorDirection.transform(Vector3f.ZP.rotationDegrees(this.planeRoll.get(this)));
+        elevatorDirection.transform(new Quaternion(Vector3f.ZP, this.planeRoll.get(this), true));
         this.xRot += CommonUtils.pitch(elevatorDirection);
         this.yRot -= CommonUtils.yaw(elevatorDirection);
 

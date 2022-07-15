@@ -2,9 +2,9 @@ package com.mrcrayfish.vehicle.network;
 
 import com.google.common.collect.ImmutableMap;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
+import com.mrcrayfish.vehicle.entity.properties.VehiclePropertiesDataLoader;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import org.apache.commons.lang3.Validate;
 
 import java.util.function.IntSupplier;
 
@@ -52,16 +52,13 @@ public class HandshakeMessages
 
         void encode(PacketBuffer buffer)
         {
-            /* This shouldn't be null as it's encoded from the logical server but
-             * it's just here to avoiding IDE warnings */
-            Validate.notNull(VehicleProperties.Manager.get());
-            VehicleProperties.Manager.get().writeVehicleProperties(buffer);
+            VehiclePropertiesDataLoader.get().writeVehicleProperties(buffer);
         }
 
         static S2CVehicleProperties decode(PacketBuffer buffer)
         {
             S2CVehicleProperties message = new S2CVehicleProperties();
-            message.propertiesMap = VehicleProperties.Manager.readVehicleProperties(buffer);
+            message.propertiesMap = VehiclePropertiesDataLoader.readVehicleProperties(buffer);
             return message;
         }
 

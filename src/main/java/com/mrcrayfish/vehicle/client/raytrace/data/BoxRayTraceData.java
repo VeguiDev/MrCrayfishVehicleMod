@@ -6,7 +6,6 @@ import com.mrcrayfish.vehicle.client.raytrace.RayTraceFunction;
 import com.mrcrayfish.vehicle.client.raytrace.Triangle;
 import com.mrcrayfish.vehicle.client.raytrace.TriangleList;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.vector.Matrix4f;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

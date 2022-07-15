@@ -36,6 +36,7 @@ public class MessageSyncActionData implements IMessage<MessageSyncActionData>
         buffer.writeInt(message.entityId);
         buffer.writeResourceLocation(message.cosmeticId);
         buffer.writeInt(message.actionData.size());
+
         message.actionData.forEach(pair -> {
             buffer.writeResourceLocation(pair.getLeft());
             buffer.writeNbt(pair.getRight());
@@ -47,8 +48,10 @@ public class MessageSyncActionData implements IMessage<MessageSyncActionData>
     {
         int entityId = buffer.readInt();
         ResourceLocation cosmeticId = buffer.readResourceLocation();
+
         List<Pair<ResourceLocation, CompoundNBT>> actionData = new ArrayList<>();
         int size = buffer.readInt();
+
         for(int i = 0; i < size; i++)
         {
             ResourceLocation actionId = buffer.readResourceLocation();

@@ -6,10 +6,10 @@ import com.mrcrayfish.vehicle.network.PacketHandler;
 import com.mrcrayfish.vehicle.network.datasync.VehicleDataValue;
 import com.mrcrayfish.vehicle.network.message.MessageHelicopterInput;
 import com.mrcrayfish.vehicle.util.CommonUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
@@ -41,13 +41,11 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
     protected float bladeRotation;
     @OnlyIn(Dist.CLIENT)
     protected float prevBladeRotation;
-    @OnlyIn(Dist.CLIENT)
+
     protected float joystickStrafe;
-    @OnlyIn(Dist.CLIENT)
     protected float prevJoystickStrafe;
-    @OnlyIn(Dist.CLIENT)
+
     protected float joystickForward;
-    @OnlyIn(Dist.CLIENT)
     protected float prevJoystickForward;
 
     protected HelicopterEntity(EntityType<?> entityType, World worldIn)
@@ -134,6 +132,18 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
         }
     }
 
+    @Override
+    public void onVehicleTick()
+    {
+        super.onVehicleTick();
+
+        this.prevJoystickStrafe = this.joystickStrafe;
+        this.prevJoystickForward = this.joystickForward;
+
+        this.joystickStrafe = MathHelper.lerp(0.25F, this.joystickStrafe, this.getSideInput());
+        this.joystickForward = MathHelper.lerp(0.25F, this.joystickForward, this.getForwardInput());
+    }
+
     private float getPitch()
     {
         return -(float) new Vector3d(-this.motion.x, 0, this.motion.z).scale(this.getMaxLeanAngle()).yRot((float) Math.toRadians(-(this.yRot + 90))).x;
@@ -199,27 +209,28 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void onClientUpdate()
     {
         super.onClientUpdate();
 
         this.prevBladeRotation = this.bladeRotation;
-        this.prevJoystickStrafe = this.joystickStrafe;
-        this.prevJoystickForward = this.joystickForward;
 
-        Entity entity = this.getControllingPassenger();
-        if(entity != null && entity.equals(Minecraft.getInstance().player))
+        LivingEntity entity = (LivingEntity) this.getControllingPassenger();
+        if(entity != null)
         {
-            ClientPlayerEntity player = (ClientPlayerEntity) entity;
-            float lift = VehicleHelper.getLift();
-            this.setLift(lift);
-            this.setForwardInput(player.zza);
-            this.setSideInput(player.xxa);
-            PacketHandler.getPlayChannel().sendToServer(new MessageHelicopterInput(lift, player.zza, player.xxa));
+            if(entity instanceof PlayerEntity)
+            {
+                if(((PlayerEntity) entity).isLocalPlayer())
+                {
+                    float lift = VehicleHelper.getLift();
+                    this.setLift(lift);
+                    this.setForwardInput(entity.zza);
+                    this.setSideInput(entity.xxa);
+                    PacketHandler.getPlayChannel().sendToServer(new MessageHelicopterInput(lift, entity.zza, entity.xxa));
+                }
+            }
         }
-
-        this.joystickStrafe = MathHelper.lerp(0.25F, this.joystickStrafe, this.getSideInput());
-        this.joystickForward = MathHelper.lerp(0.25F, this.joystickForward, this.getForwardInput());
     }
 
     @Override

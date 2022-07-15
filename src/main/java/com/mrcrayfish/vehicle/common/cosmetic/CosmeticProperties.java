@@ -2,10 +2,7 @@ package com.mrcrayfish.vehicle.common.cosmetic;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.mrcrayfish.vehicle.common.cosmetic.actions.Action;
 import com.mrcrayfish.vehicle.util.ExtraJSONUtils;
 import net.minecraft.resources.IResource;
@@ -27,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Author: MrCrayfish
@@ -55,14 +50,22 @@ public class CosmeticProperties
         this.id = new ResourceLocation(JSONUtils.getAsString(object, "id"));
         this.offset = ExtraJSONUtils.getAsVector3d(object, "offset", DEFAULT_OFFSET);
         List<Supplier<Action>> actions = new ArrayList<>();
+
         JsonArray array = JSONUtils.getAsJsonArray(object, "actions", new JsonArray());
-        StreamSupport.stream(array.spliterator(), false).filter(JsonElement::isJsonObject).forEach(element -> {
-            JsonObject action = element.getAsJsonObject();
-            ResourceLocation type = new ResourceLocation(JSONUtils.getAsString(action, "id"));
-            Supplier<Action> actionSupplier = CosmeticActions.getSupplier(type, action);
-            Objects.requireNonNull(actionSupplier, "Unregistered cosmetic action: " + type);
-            actions.add(actionSupplier);
-        });
+
+        for(int idx = 0; idx < array.size(); idx++)
+        {
+            JsonElement element = array.get(idx);
+            if(element.isJsonObject())
+            {
+                JsonObject action = element.getAsJsonObject();
+                ResourceLocation type = new ResourceLocation(JSONUtils.getAsString(action, "id"));
+                Supplier<Action> actionSupplier = CosmeticActions.getSupplier(type, action);
+                Objects.requireNonNull(actionSupplier, "Unregistered cosmetic action: " + type);
+                actions.add(actionSupplier);
+            }
+        }
+
         this.actions = actions;
     }
 
@@ -156,11 +159,25 @@ public class CosmeticProperties
                     JsonObject modelObject = modelElement.getAsJsonObject();
                     ResourceLocation location = new ResourceLocation(JSONUtils.getAsString(modelObject, "model"));
                     JsonArray disabledArray = JSONUtils.getAsJsonArray(modelObject, "disables", new JsonArray());
-                    List<ResourceLocation> disabledCosmetics = StreamSupport.stream(disabledArray.spliterator(), false)
-                            .filter(JsonElement::isJsonPrimitive)
-                            .filter(e -> e.getAsJsonPrimitive().isString())
-                            .map(e -> new ResourceLocation(e.getAsString()))
-                            .collect(Collectors.toList());
+
+                    List<ResourceLocation> disabledCosmetics = new ArrayList<>();
+
+                    if(disabledArray != null)
+                    {
+                        for(int idx = 0; idx < disabledArray.size(); idx++)
+                        {
+                            JsonElement element = disabledArray.get(idx);
+                            if(element.isJsonPrimitive())
+                            {
+                                JsonPrimitive primitive = element.getAsJsonPrimitive();
+                                if(primitive.isString())
+                                {
+                                    disabledCosmetics.add(new ResourceLocation(primitive.getAsString()));
+                                }
+                            }
+                        }
+                    }
+
                     modelMap.computeIfAbsent(cosmeticId, id -> new ArrayList<>()).add(Pair.of(location, disabledCosmetics));
                 }
                 else

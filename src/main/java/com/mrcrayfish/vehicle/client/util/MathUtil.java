@@ -46,6 +46,7 @@ public class MathUtil
         float j = (scale0 * start.j()) + (scale1 * end.j());
         float k = (scale0 * start.k()) + (scale1 * end.k());
         float r = (scale0 * start.r()) + (scale1 * end.r());
+
         return new Quaternion(i, j, k, r);
     }
 }

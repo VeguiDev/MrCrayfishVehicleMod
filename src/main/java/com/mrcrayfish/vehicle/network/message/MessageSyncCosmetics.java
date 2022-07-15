@@ -32,6 +32,7 @@ public class MessageSyncCosmetics implements IMessage<MessageSyncCosmetics>
     {
         buffer.writeInt(message.entityId);
         buffer.writeInt(message.dirtyEntries.size());
+
         message.dirtyEntries.forEach(pair -> {
             buffer.writeResourceLocation(pair.getLeft());
             buffer.writeResourceLocation(pair.getRight());

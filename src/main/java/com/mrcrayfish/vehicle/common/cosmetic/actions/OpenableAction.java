@@ -6,7 +6,6 @@ import com.mrcrayfish.vehicle.client.raytrace.MatrixTransform;
 import com.mrcrayfish.vehicle.entity.VehicleEntity;
 import com.mrcrayfish.vehicle.util.Axis;
 import com.mrcrayfish.vehicle.util.EasingHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
@@ -153,7 +152,7 @@ public class OpenableAction extends Action
             {
                 Vector3d position = vehicle.position();
                 float pitch = 0.8F + 0.2F * vehicle.level.random.nextFloat();
-                vehicle.level.playSound(Minecraft.getInstance().player, position.x, position.y, position.z, event, SoundCategory.NEUTRAL, 1.0F, pitch);
+                vehicle.level.playSound(null, position.x, position.y, position.z, event, SoundCategory.NEUTRAL, 1.0F, pitch);
             }
         }
     }

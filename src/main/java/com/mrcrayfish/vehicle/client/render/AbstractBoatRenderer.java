@@ -4,7 +4,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mrcrayfish.vehicle.common.entity.Transform;
 import com.mrcrayfish.vehicle.entity.BoatEntity;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
-import com.mrcrayfish.vehicle.entity.vehicle.GoKartEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.entity.EntityType;
 

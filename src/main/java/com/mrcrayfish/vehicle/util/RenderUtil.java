@@ -67,6 +67,7 @@ public class RenderUtil
         float greenEnd = (float)(rightColor >> 16 & 255) / 255.0F;
         float blueEnd = (float)(rightColor >> 8 & 255) / 255.0F;
         float alphaEnd = (float)(rightColor & 255) / 255.0F;
+
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.disableAlphaTest();
