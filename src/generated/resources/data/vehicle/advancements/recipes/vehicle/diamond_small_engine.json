@@ -21,7 +21,9 @@
       "conditions": {
         "items": [
           {
-            "item": "vehicle:gold_small_engine"
+            "items": [
+              "vehicle:gold_small_engine"
+            ]
           }
         ]
       }

@@ -2,48 +2,49 @@ package com.mrcrayfish.vehicle.item;
 
 import com.mrcrayfish.vehicle.VehicleMod;
 import com.mrcrayfish.vehicle.util.RenderUtil;
-import net.minecraft.block.Block;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Author: MrCrayfish
  */
 public class ItemTrafficCone extends BlockItem
 {
-    public ItemTrafficCone(Block block)
+    public ItemTrafficCone(Supplier<Block> block)
     {
-        super(block, new Item.Properties().tab(VehicleMod.CREATIVE_TAB));
+        super(block.get(), new Item.Properties().tab(VehicleMod.CREATIVE_TAB));
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltips, TooltipFlag flag)
+    {
+        if(Screen.hasShiftDown())
+        {
+            tooltips.addAll(RenderUtil.lines(new TranslatableComponent(this.getDescriptionId() + ".info"), 150));
+        }
+        else
+        {
+            tooltips.add(new TranslatableComponent("vehicle.info_help").withStyle(ChatFormatting.YELLOW));
+        }
     }
 
     @Nullable
     @Override
-    public EquipmentSlotType getEquipmentSlot(ItemStack stack)
+    public EquipmentSlot getEquipmentSlot(ItemStack stack)
     {
-        return EquipmentSlotType.HEAD;
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn)
-    {
-        if(Screen.hasShiftDown())
-        {
-            tooltip.addAll(RenderUtil.lines(new TranslationTextComponent(this.getDescriptionId() + ".info"), 150));
-        }
-        else
-        {
-            tooltip.add(new TranslationTextComponent("vehicle.info_help").withStyle(TextFormatting.YELLOW));
-        }
+        return EquipmentSlot.HEAD;
     }
 }

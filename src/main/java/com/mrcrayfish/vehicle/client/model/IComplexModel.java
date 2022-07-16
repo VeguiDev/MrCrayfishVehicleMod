@@ -1,8 +1,8 @@
 package com.mrcrayfish.vehicle.client.model;
 
 import com.mrcrayfish.vehicle.client.render.complex.ComplexModel;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 
@@ -13,7 +13,7 @@ public interface IComplexModel
 {
     ResourceLocation getModelLocation();
 
-    IBakedModel getBaseModel();
+    BakedModel getBaseModel();
 
     @Nullable
     ComplexModel getComplexModel();

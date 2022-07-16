@@ -1,13 +1,14 @@
 package com.mrcrayfish.vehicle.network.message;
 
+import com.mrcrayfish.framework.api.network.PlayMessage;
 import com.mrcrayfish.vehicle.network.play.ServerPlayHandler;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class MessageHelicopterInput implements IMessage<MessageHelicopterInput>
+public class MessageHelicopterInput extends PlayMessage<MessageHelicopterInput>
 {
 	private float lift;
 	private float forward;
@@ -23,7 +24,7 @@ public class MessageHelicopterInput implements IMessage<MessageHelicopterInput>
 	}
 
 	@Override
-	public void encode(MessageHelicopterInput message, PacketBuffer buffer)
+	public void encode(MessageHelicopterInput message, FriendlyByteBuf buffer)
 	{
 		buffer.writeFloat(message.lift);
 		buffer.writeFloat(message.forward);
@@ -31,7 +32,7 @@ public class MessageHelicopterInput implements IMessage<MessageHelicopterInput>
 	}
 
 	@Override
-	public MessageHelicopterInput decode(PacketBuffer buffer)
+	public MessageHelicopterInput decode(FriendlyByteBuf buffer)
 	{
 		return new MessageHelicopterInput(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
 	}
@@ -41,7 +42,7 @@ public class MessageHelicopterInput implements IMessage<MessageHelicopterInput>
 	{
 		supplier.get().enqueueWork(() ->
 		{
-			ServerPlayerEntity player = supplier.get().getSender();
+			ServerPlayer player = supplier.get().getSender();
 			if(player != null)
 			{
 				ServerPlayHandler.handleHelicopterInputMessage(player, message);

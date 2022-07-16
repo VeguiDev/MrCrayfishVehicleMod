@@ -1,104 +1,106 @@
 package com.mrcrayfish.vehicle.client.render.tileentity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mrcrayfish.vehicle.client.render.AbstractVehicleRenderer;
 import com.mrcrayfish.vehicle.client.render.Axis;
 import com.mrcrayfish.vehicle.client.render.VehicleRenderRegistry;
 import com.mrcrayfish.vehicle.entity.VehicleEntity;
 import com.mrcrayfish.vehicle.init.ModBlocks;
 import com.mrcrayfish.vehicle.tileentity.JackTileEntity;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-
-import java.util.Random;
-
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.model.data.EmptyModelData;
 /**
  * Author: MrCrayfish
  */
-public class JackRenderer extends TileEntityRenderer<JackTileEntity>
+public class JackRenderer implements BlockEntityRenderer<JackTileEntity>
 {
-    public JackRenderer(TileEntityRendererDispatcher dispatcher)
+    private final BlockRenderDispatcher dispatcher;
+
+    public JackRenderer(BlockEntityRendererProvider.Context ctx)
     {
-        super(dispatcher);
+        this.dispatcher = ctx.getBlockRenderDispatcher();
     }
 
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public void render(JackTileEntity jack, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int light, int i1)
+    public void render(JackTileEntity entity, float delta, PoseStack matrices, MultiBufferSource buffers, int light, int overlay)
     {
-        if(!jack.hasLevel())
+        if(!entity.hasLevel())
             return;
 
-        matrixStack.pushPose();
+        matrices.pushPose();
 
-        BlockPos pos = jack.getBlockPos();
-        BlockState state = jack.getLevel().getBlockState(pos);
+        BlockPos pos = entity.getBlockPos();
+        BlockState state = entity.getLevel().getBlockState(pos);
 
-        matrixStack.pushPose();
+        matrices.pushPose();
         {
-            matrixStack.translate(0.5, 0.0, 0.5);
-            matrixStack.mulPose(Axis.POSITIVE_Y.rotationDegrees(180F));
-            matrixStack.translate(-0.5, 0.0, -0.5);
-            BlockRendererDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-            IBakedModel model = dispatcher.getBlockModel(state);
-            IVertexBuilder builder = renderTypeBuffer.getBuffer(RenderType.cutout());
-            dispatcher.getModelRenderer().tesselateBlock(jack.getLevel(), model, state, pos, matrixStack, builder, true, new Random(), state.getSeed(pos), OverlayTexture.NO_OVERLAY);
+            matrices.translate(0.5, 0.0, 0.5);
+            matrices.mulPose(Axis.POSITIVE_Y.rotationDegrees(180F));
+            matrices.translate(-0.5, 0.0, -0.5);
+            BakedModel model = this.dispatcher.getBlockModel(state);
+            VertexConsumer builder = buffers.getBuffer(RenderType.cutout());
+            this.dispatcher.getModelRenderer().tesselateBlock(entity.getLevel(), model, state, pos, matrices, builder, true, entity.getLevel().getRandom(), state.getSeed(pos), OverlayTexture.NO_OVERLAY, EmptyModelData.INSTANCE);
         }
-        matrixStack.popPose();
+        matrices.popPose();
 
-        matrixStack.pushPose();
+        matrices.pushPose();
         {
-            float progress = (jack.prevLiftProgress + (jack.liftProgress - jack.prevLiftProgress) * partialTicks) / (float) JackTileEntity.MAX_LIFT_PROGRESS;
-            matrixStack.translate(0, 0.5 * progress, 0);
+            float progress = (entity.prevLiftProgress + (entity.liftProgress - entity.prevLiftProgress) * delta) / (float) JackTileEntity.MAX_LIFT_PROGRESS;
+            matrices.translate(0, 0.5 * progress, 0);
 
             //Render the head
-            BlockRendererDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
             BlockState defaultState = ModBlocks.JACK_HEAD.get().defaultBlockState();
-            IBakedModel model = dispatcher.getBlockModel(ModBlocks.JACK_HEAD.get().defaultBlockState());
-            IVertexBuilder builder = renderTypeBuffer.getBuffer(RenderType.cutout());
-            dispatcher.getModelRenderer().tesselateBlock(this.renderer.level, model, defaultState, pos, matrixStack, builder, false, this.renderer.level.random, 0L, light);
+            BakedModel model = dispatcher.getBlockModel(ModBlocks.JACK_HEAD.get().defaultBlockState());
+            VertexConsumer builder = buffers.getBuffer(RenderType.cutout());
+            dispatcher.getModelRenderer().tesselateBlock(entity.getLevel(), model, defaultState, pos, matrices, builder, false, entity.getLevel().getRandom(), 0L, light);
         }
-        matrixStack.popPose();
+        matrices.popPose();
 
-        matrixStack.pushPose();
+        matrices.pushPose();
         {
-            Entity jackEntity = jack.getJack();
+            Entity jackEntity = entity.getJack();
             if(jackEntity != null && jackEntity.getPassengers().size() > 0)
             {
                 Entity passenger = jackEntity.getPassengers().get(0);
                 if(passenger instanceof VehicleEntity && passenger.isAlive())
                 {
-                    matrixStack.translate(0, 1 * 0.0625, 0);
-                    matrixStack.translate(0.5, 0.5, 0.5);
-                    float progress = (jack.prevLiftProgress + (jack.liftProgress - jack.prevLiftProgress) * partialTicks) / (float) JackTileEntity.MAX_LIFT_PROGRESS;
-                    matrixStack.translate(0, 0.5 * progress, 0);
+                    matrices.translate(0, 1 * 0.0625, 0);
+                    matrices.translate(0.5, 0.5, 0.5);
+                    float progress = (entity.prevLiftProgress + (entity.liftProgress - entity.prevLiftProgress) * delta) / (float) JackTileEntity.MAX_LIFT_PROGRESS;
+                    matrices.translate(0, 0.5 * progress, 0);
 
                     VehicleEntity vehicle = (VehicleEntity) passenger;
-                    Vector3d heldOffset = vehicle.getProperties().getHeldOffset().yRot(passenger.yRot * 0.017453292F);
-                    matrixStack.translate(-heldOffset.z * 0.0625, -heldOffset.y * 0.0625, -heldOffset.x * 0.0625);
-                    matrixStack.mulPose(Axis.POSITIVE_Y.rotationDegrees(-passenger.yRot));
+                    Vec3 heldOffset = vehicle.getProperties().getHeldOffset().yRot(passenger.getYRot() * 0.017453292F);
+                    matrices.translate(-heldOffset.z * 0.0625, -heldOffset.y * 0.0625, -heldOffset.x * 0.0625);
+                    matrices.mulPose(Axis.POSITIVE_Y.rotationDegrees(-passenger.getYRot()));
 
                     AbstractVehicleRenderer wrapper = VehicleRenderRegistry.getRenderer(vehicle.getType());
                     if(wrapper != null)
                     {
-                        wrapper.setupTransformsAndRender(vehicle, matrixStack, renderTypeBuffer, partialTicks, light);
+                        wrapper.setupTransformsAndRender(vehicle, matrices, buffers, delta, light);
                     }
                 }
             }
         }
-        matrixStack.popPose();
+        matrices.popPose();
 
-        matrixStack.popPose();
+        matrices.popPose();
+    }
+
+    @Override
+    public int getViewDistance()
+    {
+        return 65535;
     }
 }

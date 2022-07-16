@@ -1,9 +1,9 @@
 package com.mrcrayfish.vehicle.client.handler;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import com.mrcrayfish.obfuscate.client.event.PlayerModelEvent;
-import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
+import com.mrcrayfish.framework.common.data.SyncedEntityData;
 import com.mrcrayfish.vehicle.client.render.AbstractVehicleRenderer;
 import com.mrcrayfish.vehicle.client.render.VehicleRenderRegistry;
 import com.mrcrayfish.vehicle.common.Seat;
@@ -11,14 +11,15 @@ import com.mrcrayfish.vehicle.entity.LandVehicleEntity;
 import com.mrcrayfish.vehicle.entity.VehicleEntity;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.init.ModDataKeys;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.model.PlayerModel;
-import net.minecraft.client.settings.PointOfView;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 /**
@@ -31,22 +32,21 @@ public class PlayerModelHandler
      */
     @SubscribeEvent
     @SuppressWarnings("unchecked")
-    public void onPreRender(PlayerModelEvent.Render.Pre event)
+    public void onPreRender(RenderPlayerEvent.Pre event)
     {
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         Entity ridingEntity = player.getVehicle();
-        if(ridingEntity instanceof VehicleEntity)
+        if(ridingEntity instanceof VehicleEntity vehicle)
         {
-            VehicleEntity vehicle = (VehicleEntity) ridingEntity;
-            this.applyPassengerTransformations(vehicle, player, event.getMatrixStack(), event.getBuilder(), event.getPartialTicks());
-            this.applyWheelieTransformations(vehicle, player, event.getMatrixStack(), event.getPartialTicks());
+            this.applyPassengerTransformations(vehicle, player, event.getPoseStack(), event.getMultiBufferSource(), event.getPartialTick());
+            this.applyWheelieTransformations(vehicle, player, event.getPoseStack(), event.getPartialTick());
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void applyPassengerTransformations(VehicleEntity vehicle, PlayerEntity player, MatrixStack matrixStack, IVertexBuilder builder, float partialTicks)
+    private void applyPassengerTransformations(VehicleEntity vehicle, Player player, PoseStack matrixStack, MultiBufferSource builder, float partialTicks)
     {
-        AbstractVehicleRenderer<VehicleEntity> render = (AbstractVehicleRenderer<VehicleEntity>) VehicleRenderRegistry.getRenderer((EntityType<? extends VehicleEntity>) vehicle.getType());
+        AbstractVehicleRenderer<VehicleEntity> render = (AbstractVehicleRenderer<VehicleEntity>) VehicleRenderRegistry.getRenderer(vehicle.getType());
         if(render != null)
         {
             render.applyPlayerRender(vehicle, player, partialTicks, matrixStack, builder);
@@ -61,7 +61,7 @@ public class PlayerModelHandler
      * @param matrixStack  the current matrix stack
      * @param partialTicks the current partial ticks
      */
-    private void applyWheelieTransformations(VehicleEntity vehicle, PlayerEntity player, MatrixStack matrixStack, float partialTicks)
+    private void applyWheelieTransformations(VehicleEntity vehicle, Player player, PoseStack matrixStack, float partialTicks)
     {
         if(!(vehicle instanceof LandVehicleEntity))
             return;
@@ -76,7 +76,7 @@ public class PlayerModelHandler
 
         VehicleProperties properties = landVehicle.getProperties();
         Seat seat = properties.getSeats().get(seatIndex);
-        Vector3d seatVec = seat.getPosition().add(0, properties.getAxleOffset() + properties.getWheelOffset(), 0).scale(properties.getBodyTransform().getScale()).scale(0.0625);
+        Vec3 seatVec = seat.getPosition().add(0, properties.getAxleOffset() + properties.getWheelOffset(), 0).scale(properties.getBodyTransform().getScale()).scale(0.0625);
         double vehicleScale = properties.getBodyTransform().getScale();
         double playerScale = 32.0 / 30.0;
         double offsetX = -(seatVec.x * playerScale);
@@ -89,21 +89,21 @@ public class PlayerModelHandler
     }
 
     @SubscribeEvent
-    public void onSetupAngles(PlayerModelEvent.SetupAngles.Post event)
+    public void onSetupAngles(RenderPlayerEvent.Post event)
     {
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
 
-        if(player.equals(Minecraft.getInstance().player) && Minecraft.getInstance().options.getCameraType() == PointOfView.FIRST_PERSON)
+        if(player.equals(Minecraft.getInstance().player) && Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON)
             return;
 
-        if(SyncedPlayerData.instance().get(player, ModDataKeys.GAS_PUMP).isPresent())
+        if(SyncedEntityData.instance().get(player, ModDataKeys.GAS_PUMP).isPresent())
         {
-            FuelingHandler.applyFuelingPose(player, event.getModelPlayer());
+            FuelingHandler.applyFuelingPose(player, event.getRenderer().getModel());
             return;
         }
 
-        SprayCanHandler.applySprayCanPose(player, event.getModelPlayer());
-        this.applyPassengerPose(player, event.getModelPlayer(), event.getPartialTicks());
+        SprayCanHandler.applySprayCanPose(player, event.getRenderer().getModel());
+        this.applyPassengerPose(player, event.getRenderer().getModel(), event.getPartialTick());
     }
 
     /**
@@ -114,15 +114,14 @@ public class PlayerModelHandler
      * @param model the model of the player
      * @param partialTicks the current partial ticks
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void applyPassengerPose(PlayerEntity player, PlayerModel model, float partialTicks)
+    @SuppressWarnings("unchecked")
+    private void applyPassengerPose(Player player, PlayerModel<AbstractClientPlayer> model, float partialTicks)
     {
         Entity ridingEntity = player.getVehicle();
-        if(!(ridingEntity instanceof VehicleEntity))
+        if(!(ridingEntity instanceof VehicleEntity vehicle))
             return;
 
-        VehicleEntity vehicle = (VehicleEntity) ridingEntity;
-        AbstractVehicleRenderer<VehicleEntity> render = (AbstractVehicleRenderer<VehicleEntity>) VehicleRenderRegistry.getRenderer((EntityType<? extends VehicleEntity>) vehicle.getType());
+        AbstractVehicleRenderer<VehicleEntity> render = (AbstractVehicleRenderer<VehicleEntity>) VehicleRenderRegistry.getRenderer(vehicle.getType());
         if(render != null)
         {
             render.applyPlayerModel(vehicle, player, model, partialTicks);

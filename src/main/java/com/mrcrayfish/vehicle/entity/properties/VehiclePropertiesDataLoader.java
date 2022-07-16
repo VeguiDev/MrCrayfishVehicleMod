@@ -6,12 +6,12 @@ import com.google.gson.GsonBuilder;
 import com.mrcrayfish.vehicle.Reference;
 import com.mrcrayfish.vehicle.VehicleMod;
 import com.mrcrayfish.vehicle.common.cosmetic.CosmeticProperties;
-import net.minecraft.client.resources.ReloadListener;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResource;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -26,7 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(modid = Reference.MOD_ID)
-public class VehiclePropertiesDataLoader extends ReloadListener<Map<ResourceLocation, VehicleProperties>>
+public class VehiclePropertiesDataLoader extends SimplePreparableReloadListener<Map<ResourceLocation, VehicleProperties>>
 {
     private static final VehiclePropertiesDataLoader instance = new VehiclePropertiesDataLoader();
 
@@ -39,20 +39,18 @@ public class VehiclePropertiesDataLoader extends ReloadListener<Map<ResourceLoca
     private final Map<ResourceLocation, VehicleProperties> vehicleProperties = new HashMap<>();
 
     @Override
-    protected Map<ResourceLocation, VehicleProperties> prepare(IResourceManager manager, IProfiler profiler)
+    protected Map<ResourceLocation, VehicleProperties> prepare(ResourceManager manager, ProfilerFiller profiler)
     {
         Map<ResourceLocation, VehicleProperties> propertiesMap = new HashMap<>();
         manager.listResources(PROPERTIES_DIRECTORY, location -> location.endsWith(FILE_SUFFIX))
                 .stream()
                 .filter(location -> VehicleProperties.DEFAULT_VEHICLE_PROPERTIES.containsKey(format(location, PROPERTIES_DIRECTORY)))
                 .forEach(location -> {
-                    try
+                    try(Resource resource = manager.getResource(location))
                     {
-                        IResource resource = manager.getResource(location);
                         InputStream stream = resource.getInputStream();
                         VehicleProperties properties = loadPropertiesFromStream(stream);
                         propertiesMap.put(format(location, PROPERTIES_DIRECTORY), properties);
-                        stream.close();
                     }
                     catch(IOException e)
                     {
@@ -92,7 +90,7 @@ public class VehiclePropertiesDataLoader extends ReloadListener<Map<ResourceLoca
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, VehicleProperties> propertiesMap, IResourceManager manager, IProfiler profiler)
+    protected void apply(Map<ResourceLocation, VehicleProperties> propertiesMap, ResourceManager manager, ProfilerFiller profiler)
     {
         this.vehicleProperties.clear();
         this.vehicleProperties.putAll(propertiesMap);
@@ -128,7 +126,7 @@ public class VehiclePropertiesDataLoader extends ReloadListener<Map<ResourceLoca
         return instance;
     }
 
-    public void writeVehicleProperties(PacketBuffer buffer)
+    public void writeVehicleProperties(FriendlyByteBuf buffer)
     {
         buffer.writeVarInt(this.vehicleProperties.size());
 
@@ -144,7 +142,7 @@ public class VehiclePropertiesDataLoader extends ReloadListener<Map<ResourceLoca
         }
     }
 
-    public static ImmutableMap<ResourceLocation, VehicleProperties> readVehicleProperties(PacketBuffer buffer)
+    public static ImmutableMap<ResourceLocation, VehicleProperties> readVehicleProperties(FriendlyByteBuf buffer)
     {
         int size = buffer.readVarInt();
 
@@ -166,7 +164,7 @@ public class VehiclePropertiesDataLoader extends ReloadListener<Map<ResourceLoca
         return ImmutableMap.of();
     }
 
-    private static void writeCosmeticModelLocations(PacketBuffer buffer, VehicleProperties properties)
+    private static void writeCosmeticModelLocations(FriendlyByteBuf buffer, VehicleProperties properties)
     {
         buffer.writeInt(properties.getCosmetics().size());
         properties.getCosmetics().forEach((cosmeticId, cosmeticProperties) ->
@@ -184,7 +182,7 @@ public class VehiclePropertiesDataLoader extends ReloadListener<Map<ResourceLoca
         });
     }
 
-    private static void readCosmeticModelLocations(PacketBuffer buffer, VehicleProperties properties)
+    private static void readCosmeticModelLocations(FriendlyByteBuf buffer, VehicleProperties properties)
     {
         int cosmeticsLength = buffer.readInt();
 

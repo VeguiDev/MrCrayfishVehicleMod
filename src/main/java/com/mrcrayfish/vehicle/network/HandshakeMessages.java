@@ -1,12 +1,15 @@
 package com.mrcrayfish.vehicle.network;
 
 import com.google.common.collect.ImmutableMap;
+import com.mrcrayfish.framework.api.network.HandshakeMessage;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.entity.properties.VehiclePropertiesDataLoader;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 /**
  * Author: MrCrayfish
@@ -34,37 +37,55 @@ public class HandshakeMessages
         }
     }
 
-    static class C2SAcknowledge extends LoginIndexedMessage
+    static class C2SAcknowledge extends HandshakeMessage<C2SAcknowledge>
     {
-        void encode(PacketBuffer buf) {}
+        @Override
+        public void encode(C2SAcknowledge c2SAcknowledge, FriendlyByteBuf friendlyByteBuf)
+        {
 
-        static C2SAcknowledge decode(PacketBuffer buf)
+        }
+
+        @Override
+        public C2SAcknowledge decode(FriendlyByteBuf friendlyByteBuf)
         {
             return new C2SAcknowledge();
         }
+
+        @Override
+        public void handle(C2SAcknowledge msg, Supplier<NetworkEvent.Context> supplier)
+        {
+            supplier.get().enqueueWork(() -> HandshakeHandler.handleAcknowledge(msg, supplier));
+        }
     }
 
-    public static class S2CVehicleProperties extends LoginIndexedMessage
+    public static class S2CVehicleProperties extends HandshakeMessage<S2CVehicleProperties>
     {
         private ImmutableMap<ResourceLocation, VehicleProperties> propertiesMap;
 
         public S2CVehicleProperties() {}
+        public ImmutableMap<ResourceLocation, VehicleProperties> getPropertiesMap()
+        {
+            return this.propertiesMap;
+        }
 
-        void encode(PacketBuffer buffer)
+        @Override
+        public void encode(S2CVehicleProperties s2CVehicleProperties, FriendlyByteBuf buffer)
         {
             VehiclePropertiesDataLoader.get().writeVehicleProperties(buffer);
         }
 
-        static S2CVehicleProperties decode(PacketBuffer buffer)
+        @Override
+        public S2CVehicleProperties decode(FriendlyByteBuf buffer)
         {
             S2CVehicleProperties message = new S2CVehicleProperties();
             message.propertiesMap = VehiclePropertiesDataLoader.readVehicleProperties(buffer);
             return message;
         }
 
-        public ImmutableMap<ResourceLocation, VehicleProperties> getPropertiesMap()
+        @Override
+        public void handle(S2CVehicleProperties msg, Supplier<NetworkEvent.Context> supplier)
         {
-            return this.propertiesMap;
+            HandshakeHandler.handleVehicleProperties(msg, supplier);
         }
     }
 }

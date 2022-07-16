@@ -19,10 +19,11 @@ import com.mrcrayfish.vehicle.network.PacketHandler;
 import com.mrcrayfish.vehicle.network.message.MessageCycleSeats;
 import com.mrcrayfish.vehicle.network.message.MessageHitchTrailer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.settings.IKeyConflictContext;
@@ -74,7 +75,7 @@ public class ControllerHandler
 
         if(event.getState())
         {
-            PlayerEntity player = Minecraft.getInstance().player;
+            Player player = Minecraft.getInstance().player;
             if(player == null)
                 return;
 
@@ -97,8 +98,8 @@ public class ControllerHandler
             }
             else if(button == RESET_CAMERA.getButton())
             {
-                player.yRot = player.getVehicle().yRot;
-                player.xRot = 15F;
+                player.setYRot(player.getVehicle().getYRot());
+                player.setXRot(15F);
                 event.setCanceled(true);
             }
             else if(button == CYCLE_SEATS.getButton())
@@ -116,7 +117,7 @@ public class ControllerHandler
         if(mc.screen != null)
             return;
 
-        PlayerEntity player = mc.player;
+        Player player = mc.player;
         if(player == null)
             return;
 
@@ -127,59 +128,59 @@ public class ControllerHandler
             actionMap.remove(ButtonBindings.INVENTORY);
 
             VehicleEntity vehicle = (VehicleEntity) player.getVehicle();
-            actionMap.put(ButtonBindings.SNEAK, new Action("Exit Vehicle", Action.Side.LEFT));
+            actionMap.put(ButtonBindings.SNEAK, new Action(new TextComponent("Exit Vehicle"), Action.Side.LEFT));
 
             if(vehicle.getProperties().getSeats().size() > 1)
             {
-                actionMap.put(CYCLE_SEATS, new Action("Cycle Seats", Action.Side.LEFT));
+                actionMap.put(CYCLE_SEATS, new Action(new TextComponent("Cycle Seats"), Action.Side.LEFT));
             }
 
             if(vehicle.canTowTrailers())
             {
-                actionMap.put(HITCH_TRAILER, new Action("Hitch Trailer", Action.Side.LEFT));
+                actionMap.put(HITCH_TRAILER, new Action(new TextComponent("Hitch Trailer"), Action.Side.LEFT));
             }
 
             if(event.getVisibility() == ActionVisibility.ALL)
             {
-                actionMap.put(RESET_CAMERA, new Action("Reset Camera", Action.Side.LEFT));
-                actionMap.put(ACCELERATE, new Action("Accelerate", Action.Side.RIGHT));
+                actionMap.put(RESET_CAMERA, new Action(new TextComponent("Reset Camera"), Action.Side.LEFT));
+                actionMap.put(ACCELERATE, new Action(new TextComponent("Accelerate"), Action.Side.RIGHT));
 
                 if(vehicle instanceof PoweredVehicleEntity)
                 {
                     if(((PoweredVehicleEntity) vehicle).getSpeed() > 0.05F)
                     {
-                        actionMap.put(REVERSE, new Action("Brake", Action.Side.RIGHT));
+                        actionMap.put(REVERSE, new Action(new TextComponent("Brake"), Action.Side.RIGHT));
                     }
                     else
                     {
-                        actionMap.put(REVERSE, new Action("Reverse", Action.Side.RIGHT));
+                        actionMap.put(REVERSE, new Action(new TextComponent("Reverse"), Action.Side.RIGHT));
                     }
 
                     if(((PoweredVehicleEntity) vehicle).hasHorn())
                     {
-                        actionMap.put(HORN, new Action("Horn", Action.Side.RIGHT));
+                        actionMap.put(HORN, new Action(new TextComponent("Horn"), Action.Side.RIGHT));
                     }
                 }
             }
 
             if(vehicle instanceof LandVehicleEntity)
             {
-                actionMap.put(HANDBRAKE, new Action("Handbrake", Action.Side.RIGHT));
+                actionMap.put(HANDBRAKE, new Action(new TextComponent("Handbrake"), Action.Side.RIGHT));
             }
             else if(vehicle instanceof HelicopterEntity)
             {
-                actionMap.put(ASCEND, new Action("Ascend", Action.Side.RIGHT));
-                actionMap.put(DESCEND, new Action("Descend", Action.Side.RIGHT));
+                actionMap.put(ASCEND, new Action(new TextComponent("Ascend"), Action.Side.RIGHT));
+                actionMap.put(DESCEND, new Action(new TextComponent("Descend"), Action.Side.RIGHT));
             }
         }
         else if(player.getVehicle() == null)
         {
-            if(mc.hitResult != null && mc.hitResult.getType() == RayTraceResult.Type.ENTITY)
+            if(mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.ENTITY)
             {
-                Entity entity = ((EntityRayTraceResult) mc.hitResult).getEntity();
+                Entity entity = ((EntityHitResult) mc.hitResult).getEntity();
                 if(entity instanceof VehicleEntity)
                 {
-                    actionMap.put(ButtonBindings.USE_ITEM, new Action("Ride Vehicle", Action.Side.RIGHT));
+                    actionMap.put(ButtonBindings.USE_ITEM, new Action(new TextComponent("Ride Vehicle"), Action.Side.RIGHT));
                 }
             }
         }
@@ -188,7 +189,7 @@ public class ControllerHandler
     @SubscribeEvent
     public void onRenderPlayerPreview(RenderPlayerPreviewEvent event)
     {
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if(player.getVehicle() instanceof VehicleEntity)
         {
             event.setCanceled(true);

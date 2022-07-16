@@ -21,7 +21,9 @@
       "conditions": {
         "items": [
           {
-            "item": "vehicle:iron_large_engine"
+            "items": [
+              "vehicle:iron_large_engine"
+            ]
           }
         ]
       }

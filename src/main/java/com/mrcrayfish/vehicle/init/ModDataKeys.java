@@ -1,11 +1,14 @@
 package com.mrcrayfish.vehicle.init;
 
-import com.mrcrayfish.obfuscate.common.data.Serializers;
-import com.mrcrayfish.obfuscate.common.data.SyncedDataKey;
-import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
+import com.mrcrayfish.framework.api.data.sync.Serializers;
+import com.mrcrayfish.framework.api.data.sync.SyncedClassKey;
+import com.mrcrayfish.framework.api.data.sync.SyncedDataKey;
+import com.mrcrayfish.framework.common.data.SyncedEntityData;
 import com.mrcrayfish.vehicle.Reference;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Optional;
 
@@ -14,21 +17,27 @@ import java.util.Optional;
  */
 public class ModDataKeys
 {
-    public static final SyncedDataKey<Integer> TRAILER = SyncedDataKey.builder(Serializers.INTEGER)
+    public static final SyncedDataKey<Player, Integer> TRAILER = SyncedDataKey.builder(SyncedClassKey.PLAYER, Serializers.INTEGER)
             .id(new ResourceLocation(Reference.MOD_ID, "trailer"))
             .defaultValueSupplier(() -> -1)
             .resetOnDeath()
             .build();
 
-    public static final SyncedDataKey<Optional<BlockPos>> GAS_PUMP = SyncedDataKey.builder(com.mrcrayfish.vehicle.common.data.Serializers.OPTIONAL_BLOCK_POS)
+    public static final SyncedDataKey<Player, Optional<BlockPos>> GAS_PUMP = SyncedDataKey.builder(SyncedClassKey.PLAYER, com.mrcrayfish.vehicle.common.data.Serializers.OPTIONAL_BLOCK_POS)
             .id(new ResourceLocation(Reference.MOD_ID, "gas_pump"))
             .defaultValueSupplier(Optional::empty)
             .resetOnDeath()
             .build();
 
+    public static final SyncedDataKey<Player, CompoundTag> HELD_VEHICLE = SyncedDataKey.builder(SyncedClassKey.PLAYER, Serializers.TAG_COMPOUND)
+            .id(new ResourceLocation(Reference.MOD_ID, "held_vehicle"))
+            .defaultValueSupplier(CompoundTag::new)
+            .build();
+
     public static void register()
     {
-        SyncedPlayerData.instance().registerKey(TRAILER);
-        SyncedPlayerData.instance().registerKey(GAS_PUMP);
+        SyncedEntityData.instance().registerDataKey(TRAILER);
+        SyncedEntityData.instance().registerDataKey(GAS_PUMP);
+        SyncedEntityData.instance().registerDataKey(HELD_VEHICLE);
     }
 }

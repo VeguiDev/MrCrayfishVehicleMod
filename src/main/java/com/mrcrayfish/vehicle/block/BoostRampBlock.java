@@ -4,29 +4,28 @@ import com.mrcrayfish.vehicle.entity.PoweredVehicleEntity;
 import com.mrcrayfish.vehicle.init.ModSounds;
 import com.mrcrayfish.vehicle.tileentity.BoostTileEntity;
 import com.mrcrayfish.vehicle.util.StateHelper;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 
 /**
  * Author: MrCrayfish
  */
-public class BoostRampBlock extends RotatedObjectBlock
+public class BoostRampBlock extends RotatedObjectBlock implements EntityBlock
 {
     public static final BooleanProperty STACKED = BooleanProperty.create("stacked");
     public static final BooleanProperty LEFT = BooleanProperty.create("left");
@@ -56,11 +55,11 @@ public class BoostRampBlock extends RotatedObjectBlock
 
     public BoostRampBlock()
     {
-        super(AbstractBlock.Properties.of(Material.STONE).strength(1.0F));
+        super(Properties.of(Material.STONE).strength(1.0F));
     }
 
     @Override
-    public void entityInside(BlockState state, World world, BlockPos pos, Entity entity)
+    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity)
     {
         if(entity instanceof PoweredVehicleEntity && entity.getControllingPassenger() != null)
         {
@@ -68,7 +67,7 @@ public class BoostRampBlock extends RotatedObjectBlock
             if(facing == entity.getDirection())
             {
                 float speedMultiplier = 0.0F;
-                TileEntity tileEntity = world.getBlockEntity(pos);
+                BlockEntity tileEntity = level.getBlockEntity(pos);
                 if(tileEntity instanceof BoostTileEntity)
                 {
                     speedMultiplier = ((BoostTileEntity) tileEntity).getSpeedMultiplier();
@@ -77,31 +76,33 @@ public class BoostRampBlock extends RotatedObjectBlock
                 PoweredVehicleEntity poweredVehicle = (PoweredVehicleEntity) entity;
                 if(!poweredVehicle.isBoosting())
                 {
-                    world.playSound(null, pos, ModSounds.BLOCK_BOOST_PAD_BOOST.get(), SoundCategory.BLOCKS, 2.0F, 0.5F);
+                    level.playSound(null, pos, ModSounds.BLOCK_BOOST_PAD_BOOST.get(), SoundSource.BLOCKS, 2.0F, 0.5F);
                 }
                 poweredVehicle.setBoosting(true);
                 poweredVehicle.setLaunching(2);
                 //poweredVehicle.currentSpeed = poweredVehicle.getActualMaxSpeed();
                 poweredVehicle.setSpeedMultiplier(speedMultiplier);
-                Vector3d motion = poweredVehicle.getDeltaMovement();
+                Vec3 motion = poweredVehicle.getDeltaMovement();
                 //poweredVehicle.setDeltaMovement(new Vector3d(motion.x, (poweredVehicle.currentSpeed * 0.5) / 20F + 0.1, motion.z));
             }
         }
     }
 
+
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbourState, IWorld world, BlockPos pos, BlockPos neighbourPos)
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbourState, LevelAccessor world, BlockPos pos, BlockPos neighbourPos)
     {
         return this.getRampState(state, world, pos, state.getValue(DIRECTION));
     }
 
+    @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context)
+    public BlockState getStateForPlacement(BlockPlaceContext ctx)
     {
-        return this.getRampState(this.defaultBlockState(), context.getLevel(), context.getClickedPos(), context.getHorizontalDirection());
+        return this.getRampState(this.defaultBlockState(), ctx.getLevel(), ctx.getClickedPos(), ctx.getHorizontalDirection());
     }
 
-    private BlockState getRampState(BlockState state, IWorld world, BlockPos pos, Direction facing)
+    private BlockState getRampState(BlockState state, LevelAccessor world, BlockPos pos, Direction facing)
     {
         state = state.setValue(LEFT, false);
         state = state.setValue(RIGHT, false);
@@ -123,24 +124,16 @@ public class BoostRampBlock extends RotatedObjectBlock
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
-    {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(STACKED);
         builder.add(LEFT);
         builder.add(RIGHT);
     }
 
-    @Override
-    public boolean hasTileEntity(BlockState state)
-    {
-        return true;
-    }
-
     @Nullable
     @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world)
-    {
-        return new BoostTileEntity(1.0F);
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new BoostTileEntity(pos, state, 1.0F);
     }
 }

@@ -2,20 +2,20 @@ package com.mrcrayfish.vehicle.item;
 
 import com.mrcrayfish.vehicle.Config;
 import com.mrcrayfish.vehicle.util.RenderUtil;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -31,7 +31,7 @@ public class SprayCanItem extends Item implements IDyeable
     }
 
     @Override
-    public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items)
+    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items)
     {
         if (this.allowdedIn(group))
         {
@@ -42,39 +42,38 @@ public class SprayCanItem extends Item implements IDyeable
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag)
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltips, TooltipFlag flag)
     {
         if(Screen.hasShiftDown())
         {
-            tooltip.addAll(RenderUtil.lines(new TranslationTextComponent(this.getDescriptionId() + ".info"), 150));
+            tooltips.addAll(RenderUtil.lines(new TranslatableComponent(this.getDescriptionId() + ".info"), 150));
         }
         else
         {
             if(this.hasColor(stack))
             {
-                tooltip.add(new StringTextComponent(String.format("#%06X", this.getColor(stack))).withStyle(TextFormatting.BLUE));
+                tooltips.add(new TextComponent(String.format("#%06X", this.getColor(stack))).withStyle(ChatFormatting.BLUE));
             }
             else
             {
-                tooltip.add(new TranslationTextComponent(this.getDescriptionId() + ".empty").withStyle(TextFormatting.RED));
+                tooltips.add(new TranslatableComponent(this.getDescriptionId() + ".empty").withStyle(ChatFormatting.RED));
             }
-            tooltip.add(new TranslationTextComponent("vehicle.info_help").withStyle(TextFormatting.YELLOW));
+            tooltips.add(new TranslatableComponent("vehicle.info_help").withStyle(ChatFormatting.YELLOW));
         }
     }
 
-    public static CompoundNBT getStackTag(ItemStack stack)
+    public static CompoundTag getStackTag(ItemStack stack)
     {
         if (stack.getTag() == null)
         {
-            stack.setTag(new CompoundNBT());
+            stack.setTag(new CompoundTag());
         }
-        if (stack.getItem() instanceof SprayCanItem)
+        if (stack.getItem() instanceof SprayCanItem sprayCan)
         {
-            SprayCanItem sprayCan = (SprayCanItem) stack.getItem();
-            CompoundNBT compound = stack.getTag();
+            CompoundTag compound = stack.getTag();
             if (compound != null)
             {
-                if (!compound.contains("RemainingSprays", Constants.NBT.TAG_INT))
+                if (!compound.contains("RemainingSprays", IntTag.TAG_INT))
                 {
                     compound.putInt("RemainingSprays", sprayCan.getCapacity(stack));
                 }
@@ -84,10 +83,10 @@ public class SprayCanItem extends Item implements IDyeable
     }
 
     @Override
-    public boolean showDurabilityBar(ItemStack stack)
+    public boolean isBarVisible(ItemStack stack)
     {
-        CompoundNBT compound = stack.getTag();
-        if (compound != null && compound.contains("RemainingSprays", Constants.NBT.TAG_INT))
+        CompoundTag compound = stack.getTag();
+        if (compound != null && compound.contains("RemainingSprays", IntTag.TAG_INT))
         {
             int remainingSprays = compound.getInt("RemainingSprays");
             return this.hasColor(stack) && remainingSprays < this.getCapacity(stack);
@@ -96,20 +95,20 @@ public class SprayCanItem extends Item implements IDyeable
     }
 
     @Override
-    public double getDurabilityForDisplay(ItemStack stack)
+    public int getBarWidth(ItemStack stack)
     {
-        CompoundNBT compound = stack.getTag();
-        if (compound != null && compound.contains("RemainingSprays", Constants.NBT.TAG_INT))
+        CompoundTag compound = stack.getTag();
+        if (compound != null && compound.contains("RemainingSprays", IntTag.TAG_INT))
         {
-            return MathHelper.clamp(1.0 - (compound.getInt("RemainingSprays") / (double) this.getCapacity(stack)), 0.0, 1.0);
+            return (int) Mth.clamp(1.0 - (compound.getInt("RemainingSprays") / (double) this.getCapacity(stack)), 0.0, 1.0);
         }
-        return 0.0;
+        return 0;
     }
 
     public float getRemainingSprays(ItemStack stack)
     {
-        CompoundNBT compound = stack.getTag();
-        if (compound != null && compound.contains("RemainingSprays", Constants.NBT.TAG_INT))
+        CompoundTag compound = stack.getTag();
+        if (compound != null && compound.contains("RemainingSprays", IntTag.TAG_INT))
         {
             return compound.getInt("RemainingSprays") / (float) this.getCapacity(stack);
         }
@@ -118,8 +117,8 @@ public class SprayCanItem extends Item implements IDyeable
 
     public int getCapacity(ItemStack stack)
     {
-        CompoundNBT compound = stack.getTag();
-        if (compound != null && compound.contains("Capacity", Constants.NBT.TAG_INT))
+        CompoundTag compound = stack.getTag();
+        if (compound != null && compound.contains("Capacity", IntTag.TAG_INT))
         {
             return compound.getInt("Capacity");
         }
@@ -128,7 +127,7 @@ public class SprayCanItem extends Item implements IDyeable
 
     public void refill(ItemStack stack)
     {
-        CompoundNBT compound = getStackTag(stack);
+        CompoundTag compound = getStackTag(stack);
         compound.putInt("RemainingSprays", this.getCapacity(stack));
     }
 }

@@ -1,13 +1,14 @@
 package com.mrcrayfish.vehicle.network.message;
 
+import com.mrcrayfish.framework.api.network.PlayMessage;
 import com.mrcrayfish.vehicle.network.play.ServerPlayHandler;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class MessageHandbrake implements IMessage<MessageHandbrake>
+public class MessageHandbrake extends PlayMessage<MessageHandbrake>
 {
 	private boolean handbrake;
 
@@ -19,13 +20,13 @@ public class MessageHandbrake implements IMessage<MessageHandbrake>
 	}
 
 	@Override
-	public void encode(MessageHandbrake message, PacketBuffer buffer)
+	public void encode(MessageHandbrake message, FriendlyByteBuf buffer)
 	{
 		buffer.writeBoolean(message.handbrake);
 	}
 
 	@Override
-	public MessageHandbrake decode(PacketBuffer buffer)
+	public MessageHandbrake decode(FriendlyByteBuf buffer)
 	{
 		return new MessageHandbrake(buffer.readBoolean());
 	}
@@ -35,7 +36,7 @@ public class MessageHandbrake implements IMessage<MessageHandbrake>
 	{
 		supplier.get().enqueueWork(() ->
 		{
-			ServerPlayerEntity player = supplier.get().getSender();
+			ServerPlayer player = supplier.get().getSender();
 			if(player != null)
 			{
 				ServerPlayHandler.handleHandbrakeMessage(player, message);

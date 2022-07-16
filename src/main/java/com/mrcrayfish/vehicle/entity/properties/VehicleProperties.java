@@ -15,17 +15,18 @@ import com.mrcrayfish.vehicle.entity.VehicleEntity;
 import com.mrcrayfish.vehicle.entity.Wheel;
 import com.mrcrayfish.vehicle.network.HandshakeMessages;
 import com.mrcrayfish.vehicle.util.ExtraJSONUtils;
-import net.minecraft.entity.EntityType;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.glfw.GLFW;
 
@@ -56,10 +57,10 @@ public class VehicleProperties
 
     public static final float DEFAULT_MAX_HEALTH = 100F;
     public static final float DEFAULT_AXLE_OFFSET = 0F;
-    public static final Vector3d DEFAULT_HELD_OFFSET = Vector3d.ZERO;
+    public static final Vec3 DEFAULT_HELD_OFFSET = Vec3.ZERO;
     public static final boolean DEFAULT_CAN_TOW_TRAILERS = false;
-    public static final Vector3d DEFAULT_TOW_BAR_OFFSET = Vector3d.ZERO;
-    public static final Vector3d DEFAULT_TRAILER_OFFSET = Vector3d.ZERO;
+    public static final Vec3 DEFAULT_TOW_BAR_OFFSET = Vec3.ZERO;
+    public static final Vec3 DEFAULT_TRAILER_OFFSET = Vec3.ZERO;
     public static final boolean DEFAULT_CAN_CHANGE_WHEELS = false;
     public static final boolean DEFAULT_IMMUNE_TO_FALL_DAMAGE = false;
     public static final boolean DEFAULT_CAN_PLAYER_CARRY = true;
@@ -71,10 +72,10 @@ public class VehicleProperties
     private final float maxHealth;
     private final float axleOffset;
     private final float wheelOffset;
-    private final Vector3d heldOffset;
+    private final Vec3 heldOffset;
     private final boolean canTowTrailers;
-    private final Vector3d towBarOffset;
-    private final Vector3d trailerOffset;
+    private final Vec3 towBarOffset;
+    private final Vec3 trailerOffset;
     private final boolean canChangeWheels;
     private final boolean immuneToFallDamage;
     private final boolean canPlayerCarry;
@@ -88,7 +89,7 @@ public class VehicleProperties
     private final ImmutableMap<ResourceLocation, ExtendedProperties> extended;
     private final ImmutableMap<ResourceLocation, CosmeticProperties> cosmetics;
 
-    private VehicleProperties(float maxHealth, float axleOffset, float wheelOffset, Vector3d heldOffset, boolean canTowTrailers, Vector3d towBarOffset, Vector3d trailerOffset, boolean canChangeWheels, boolean immuneToFallDamage, boolean canPlayerCarry, boolean canFitInTrailer, List<Wheel> wheels, Transform bodyTransform, Transform displayTransform, List<Seat> seats, boolean canBePainted, CameraProperties camera, Map<ResourceLocation, ExtendedProperties> extended, Map<ResourceLocation, CosmeticProperties> cosmetics)
+    private VehicleProperties(float maxHealth, float axleOffset, float wheelOffset, Vec3 heldOffset, boolean canTowTrailers, Vec3 towBarOffset, Vec3 trailerOffset, boolean canChangeWheels, boolean immuneToFallDamage, boolean canPlayerCarry, boolean canFitInTrailer, List<Wheel> wheels, Transform bodyTransform, Transform displayTransform, List<Seat> seats, boolean canBePainted, CameraProperties camera, Map<ResourceLocation, ExtendedProperties> extended, Map<ResourceLocation, CosmeticProperties> cosmetics)
     {
         this.maxHealth = maxHealth;
         this.axleOffset = axleOffset;
@@ -126,7 +127,7 @@ public class VehicleProperties
         return this.wheelOffset;
     }
 
-    public Vector3d getHeldOffset()
+    public Vec3 getHeldOffset()
     {
         return this.heldOffset;
     }
@@ -136,12 +137,12 @@ public class VehicleProperties
         return this.canTowTrailers;
     }
 
-    public Vector3d getTowBarOffset()
+    public Vec3 getTowBarOffset()
     {
         return this.towBarOffset;
     }
 
-    public Vector3d getTrailerOffset()
+    public Vec3 getTrailerOffset()
     {
         return this.trailerOffset;
     }
@@ -228,15 +229,16 @@ public class VehicleProperties
 
     public static void loadDefaultProperties()
     {
-        for(EntityType<? extends VehicleEntity> entityType : VehicleRegistry.getRegisteredVehicleTypes())
+        for(ResourceLocation location : VehicleRegistry.getRegisteredVehicles())
         {
-            DEFAULT_VEHICLE_PROPERTIES.computeIfAbsent(entityType.getRegistryName(), VehicleProperties::loadDefaultProperties);
+            System.out.println("Loading default " + location);
+            DEFAULT_VEHICLE_PROPERTIES.computeIfAbsent(location, VehicleProperties::loadDefaultProperties);
         }
     }
 
     private static VehicleProperties loadDefaultProperties(ResourceLocation id)
     {
-        String resource = String.format("/data/%s/vehicles/properties/%s.json", id.getNamespace(), id.getPath());
+        String resource = String.format("data/%s/vehicles/properties/%s.json", id.getNamespace(), id.getPath());
         try(InputStream is = VehicleProperties.class.getResourceAsStream(resource))
         {
             Objects.requireNonNull(is, "");
@@ -258,7 +260,7 @@ public class VehicleProperties
 
     private static void loadDefaultCosmetics(ResourceLocation id, VehicleProperties properties)
     {
-        String resource = String.format("/data/%s/vehicles/cosmetics/%s.json", id.getNamespace(), id.getPath());
+        String resource = String.format("data/%s/vehicles/cosmetics/%s.json", id.getNamespace(), id.getPath());
         try(InputStream is = VehicleProperties.class.getResourceAsStream(resource))
         {
             Objects.requireNonNull(is, "");
@@ -333,7 +335,11 @@ public class VehicleProperties
         return true;
     }
 
-
+    @SubscribeEvent
+    public static void onClientDisconnect(ClientPlayerNetworkEvent.LoggedOutEvent event)
+    {
+        NETWORK_VEHICLE_PROPERTIES.clear();
+    }
 
     /**
      * Registers vehicle properties providers to be used as a way to refresh properties while in
@@ -398,18 +404,18 @@ public class VehicleProperties
         @Override
         public VehicleProperties deserialize(JsonElement element, Type type, JsonDeserializationContext context) throws JsonParseException
         {
-            JsonObject object = JSONUtils.convertToJsonObject(element, "vehicle property");
+            JsonObject object = GsonHelper.convertToJsonObject(element, "vehicle property");
             VehicleProperties.Builder builder = VehicleProperties.builder();
-            builder.setCanBePainted(JSONUtils.getAsBoolean(object, "canBePainted", DEFAULT_CAN_BE_PAINTED));
-            builder.setCanChangeWheels(JSONUtils.getAsBoolean(object, "canChangeWheels", DEFAULT_CAN_CHANGE_WHEELS));
-            builder.setImmuneToFallDamage(JSONUtils.getAsBoolean(object, "immuneToFallDamage", DEFAULT_IMMUNE_TO_FALL_DAMAGE));
-            builder.setCanPlayerCarry(JSONUtils.getAsBoolean(object, "canPlayerCarry", DEFAULT_CAN_PLAYER_CARRY));
-            builder.setCanFitInTrailer(JSONUtils.getAsBoolean(object, "canFitInTrailer", DEFAULT_CAN_FIT_IN_TRAILER));
-            builder.setAxleOffset(JSONUtils.getAsFloat(object, "offsetToGround", DEFAULT_AXLE_OFFSET));
-            builder.setHeldOffset(ExtraJSONUtils.getAsVector3d(object, "heldOffset", DEFAULT_HELD_OFFSET));
-            builder.setTrailerOffset(ExtraJSONUtils.getAsVector3d(object, "trailerOffset", DEFAULT_TRAILER_OFFSET));
-            builder.setCanTowTrailers(JSONUtils.getAsBoolean(object, "canTowTrailers", DEFAULT_CAN_TOW_TRAILERS));
-            builder.setTowBarOffset(ExtraJSONUtils.getAsVector3d(object, "towBarOffset", DEFAULT_TOW_BAR_OFFSET));
+            builder.setCanBePainted(GsonHelper.getAsBoolean(object, "canBePainted", DEFAULT_CAN_BE_PAINTED));
+            builder.setCanChangeWheels(GsonHelper.getAsBoolean(object, "canChangeWheels", DEFAULT_CAN_CHANGE_WHEELS));
+            builder.setImmuneToFallDamage(GsonHelper.getAsBoolean(object, "immuneToFallDamage", DEFAULT_IMMUNE_TO_FALL_DAMAGE));
+            builder.setCanPlayerCarry(GsonHelper.getAsBoolean(object, "canPlayerCarry", DEFAULT_CAN_PLAYER_CARRY));
+            builder.setCanFitInTrailer(GsonHelper.getAsBoolean(object, "canFitInTrailer", DEFAULT_CAN_FIT_IN_TRAILER));
+            builder.setAxleOffset(GsonHelper.getAsFloat(object, "offsetToGround", DEFAULT_AXLE_OFFSET));
+            builder.setHeldOffset(ExtraJSONUtils.getAsVec3(object, "heldOffset", DEFAULT_HELD_OFFSET));
+            builder.setTrailerOffset(ExtraJSONUtils.getAsVec3(object, "trailerOffset", DEFAULT_TRAILER_OFFSET));
+            builder.setCanTowTrailers(GsonHelper.getAsBoolean(object, "canTowTrailers", DEFAULT_CAN_TOW_TRAILERS));
+            builder.setTowBarOffset(ExtraJSONUtils.getAsVec3(object, "towBarOffset", DEFAULT_TOW_BAR_OFFSET));
             builder.setDisplayTransform(ExtraJSONUtils.getAsTransform(object, "displayTransform", DEFAULT_DISPLAY_TRANSFORM));
             builder.setBodyTransform(ExtraJSONUtils.getAsTransform(object, "bodyTransform", DEFAULT_BODY_TRANSFORM));
 
@@ -425,7 +431,7 @@ public class VehicleProperties
         {
             if(object.has("wheels"))
             {
-                JsonArray wheelArray = JSONUtils.getAsJsonArray(object, "wheels");
+                JsonArray wheelArray = GsonHelper.getAsJsonArray(object, "wheels");
                 for(JsonElement wheelElement : wheelArray)
                 {
                     JsonObject wheelObject = wheelElement.getAsJsonObject();
@@ -451,7 +457,7 @@ public class VehicleProperties
         {
             if(object.has("seats"))
             {
-                JsonArray jsonArray = JSONUtils.getAsJsonArray(object, "seats");
+                JsonArray jsonArray = GsonHelper.getAsJsonArray(object, "seats");
                 for(JsonElement element : jsonArray)
                 {
                     JsonObject seatObject = element.getAsJsonObject();
@@ -477,7 +483,7 @@ public class VehicleProperties
         {
             if(object.has("camera"))
             {
-                JsonObject cameraObject = JSONUtils.getAsJsonObject(object, "camera", new JsonObject());
+                JsonObject cameraObject = GsonHelper.getAsJsonObject(object, "camera", new JsonObject());
                 builder.setCamera(CameraProperties.fromJsonObject(cameraObject));
             }
         }
@@ -496,7 +502,7 @@ public class VehicleProperties
 
         private void readExtended(VehicleProperties.Builder builder, JsonObject object)
         {
-            JsonObject extended = JSONUtils.getAsJsonObject(object, "extended", new JsonObject());
+            JsonObject extended = GsonHelper.getAsJsonObject(object, "extended", new JsonObject());
             extended.entrySet().stream().filter(entry -> entry.getValue().isJsonObject()).forEach(entry -> {
                 ResourceLocation id = ResourceLocation.tryParse(entry.getKey());
                 JsonObject content = entry.getValue().getAsJsonObject();
@@ -520,7 +526,7 @@ public class VehicleProperties
 
         private void readCosmetics(VehicleProperties.Builder builder, JsonObject object)
         {
-            JsonArray cosmetics = JSONUtils.getAsJsonArray(object, "cosmetics", new JsonArray());
+            JsonArray cosmetics = GsonHelper.getAsJsonArray(object, "cosmetics", new JsonArray());
             if(cosmetics != null)
             {
                 for(int idx = 0; idx < cosmetics.size(); idx++)
@@ -560,10 +566,10 @@ public class VehicleProperties
     {
         private float maxHealth = DEFAULT_MAX_HEALTH;
         private float axleOffset = DEFAULT_AXLE_OFFSET;
-        private Vector3d heldOffset = DEFAULT_HELD_OFFSET;
+        private Vec3 heldOffset = DEFAULT_HELD_OFFSET;
         private boolean canTowTrailers = DEFAULT_CAN_TOW_TRAILERS;
-        private Vector3d towBarOffset = DEFAULT_TOW_BAR_OFFSET;
-        private Vector3d trailerOffset = DEFAULT_TRAILER_OFFSET;
+        private Vec3 towBarOffset = DEFAULT_TOW_BAR_OFFSET;
+        private Vec3 trailerOffset = DEFAULT_TRAILER_OFFSET;
         private boolean canChangeWheels = DEFAULT_CAN_CHANGE_WHEELS;
         private boolean immuneToFallDamage = DEFAULT_IMMUNE_TO_FALL_DAMAGE;
         private boolean canPlayerCarry = DEFAULT_CAN_PLAYER_CARRY;
@@ -591,11 +597,11 @@ public class VehicleProperties
 
         public Builder setHeldOffset(double x, double y, double z)
         {
-            this.heldOffset = new Vector3d(x, y, z);
+            this.heldOffset = new Vec3(x, y, z);
             return this;
         }
 
-        public Builder setHeldOffset(Vector3d vec)
+        public Builder setHeldOffset(Vec3 vec)
         {
             this.heldOffset = vec;
             return this;
@@ -603,7 +609,7 @@ public class VehicleProperties
 
         public Builder setTowBarPosition(double x, double y, double z)
         {
-            this.towBarOffset = new Vector3d(x, y, z);
+            this.towBarOffset = new Vec3(x, y, z);
             return this;
         }
 
@@ -613,7 +619,7 @@ public class VehicleProperties
             return this;
         }
 
-        public Builder setTowBarOffset(Vector3d vec)
+        public Builder setTowBarOffset(Vec3 vec)
         {
             this.towBarOffset = vec;
             return this;
@@ -621,11 +627,11 @@ public class VehicleProperties
 
         public Builder setTrailerOffset(double x, double y, double z)
         {
-            this.trailerOffset = new Vector3d(x, y, z);
+            this.trailerOffset = new Vec3(x, y, z);
             return this;
         }
 
-        public Builder setTrailerOffset(Vector3d vec)
+        public Builder setTrailerOffset(Vec3 vec)
         {
             this.trailerOffset = vec;
             return this;
@@ -746,7 +752,7 @@ public class VehicleProperties
                 double xScale = wheel.getScale().x != 0.0 ? wheel.getScale().x : scale;
                 double yScale = wheel.getScale().y != 0.0 ? wheel.getScale().y : scale;
                 double zScale = wheel.getScale().z != 0.0 ? wheel.getScale().z : scale;
-                Vector3d newScale = new Vector3d(xScale, yScale, zScale);
+                Vec3 newScale = new Vec3(xScale, yScale, zScale);
                 return wheel.rescale(newScale);
             }).collect(Collectors.toList());
         }

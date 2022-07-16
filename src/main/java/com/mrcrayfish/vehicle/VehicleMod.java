@@ -5,8 +5,9 @@ import com.mrcrayfish.vehicle.client.model.ComponentManager;
 import com.mrcrayfish.vehicle.client.model.VehicleModels;
 import com.mrcrayfish.vehicle.common.CommonEvents;
 import com.mrcrayfish.vehicle.common.FluidNetworkHandler;
+import com.mrcrayfish.vehicle.common.VehicleRegistry;
 import com.mrcrayfish.vehicle.common.entity.HeldVehicleDataHandler;
-import com.mrcrayfish.vehicle.crafting.RecipeType;
+import com.mrcrayfish.vehicle.crafting.RecipeTypes;
 import com.mrcrayfish.vehicle.crafting.WorkstationIngredient;
 import com.mrcrayfish.vehicle.datagen.LootTableGen;
 import com.mrcrayfish.vehicle.datagen.RecipeGen;
@@ -20,11 +21,10 @@ import com.mrcrayfish.vehicle.entity.properties.PoweredProperties;
 import com.mrcrayfish.vehicle.entity.properties.TrailerProperties;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.init.*;
-import com.mrcrayfish.vehicle.network.PacketHandler;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.crafting.CraftingHelper;
@@ -35,8 +35,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,7 +47,7 @@ import org.apache.logging.log4j.Logger;
 public class VehicleMod
 {
     public static final Logger LOGGER = LogManager.getLogger(Reference.MOD_ID);
-    public static final ItemGroup CREATIVE_TAB = new ItemGroup(Reference.MOD_ID)
+    public static final CreativeModeTab CREATIVE_TAB = new CreativeModeTab(Reference.MOD_ID)
     {
         @Override
         public ItemStack makeIcon()
@@ -85,26 +85,10 @@ public class VehicleMod
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ComponentManager.registerLoader(VehicleModels.LOADER));
     }
 
-    /**
-     * Get the method name for a depth in call stack. <br />
-     * Utility function
-     * @param depth depth in the call stack (0 means current method, 1 means call method, ...)
-     * @return method name
-     */
-    public static String getMethodName(final int depth)
-    {
-        final StackTraceElement[] ste = Thread.currentThread().getStackTrace();
-
-        //System. out.println(ste[ste.length-depth].getClassName()+"#"+ste[ste.length-depth].getMethodName());
-        // return ste[ste.length - depth].getMethodName();  //Wrong, fails for depth = 0
-        return ste[ste.length - 1 - depth].getMethodName(); //Thank you Tom Tresansky
-    }
-
     private void onCommonSetup(FMLCommonSetupEvent event)
     {
-        RecipeType.init();
+        RecipeTypes.init();
         VehicleProperties.loadDefaultProperties();
-        PacketHandler.registerPlayMessage();
         HeldVehicleDataHandler.register();
         ModDataKeys.register();
         ModLootFunctions.init();

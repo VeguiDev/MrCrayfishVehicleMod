@@ -1,7 +1,7 @@
 package com.mrcrayfish.vehicle.client.util;
 
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Quaternion;
+import com.mojang.math.Quaternion;
+import net.minecraft.util.Mth;
 
 public class MathUtil
 {
@@ -36,9 +36,9 @@ public class MathUtil
         if((1.0F - dot) > 0.1F)
         {
             float theta = (float) Math.acos(dot);
-            float invSinTheta = 1.0F / MathHelper.sin(theta);
-            scale0 = MathHelper.sin((1.0F - t) * theta) * invSinTheta;
-            scale1 = MathHelper.sin((t * theta)) * invSinTheta;
+            float invSinTheta = 1.0F / Mth.sin(theta);
+            scale0 = Mth.sin((1.0F - t) * theta) * invSinTheta;
+            scale1 = Mth.sin((t * theta)) * invSinTheta;
         }
 
         // Calculate new quaternion. Interpolation is linear unless above calculations are run.

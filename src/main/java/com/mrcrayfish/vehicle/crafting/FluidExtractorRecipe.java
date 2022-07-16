@@ -3,17 +3,17 @@ package com.mrcrayfish.vehicle.crafting;
 import com.mrcrayfish.vehicle.init.ModRecipeSerializers;
 import com.mrcrayfish.vehicle.tileentity.FluidExtractorTileEntity;
 import com.mrcrayfish.vehicle.util.InventoryUtil;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 
 /**
  * Author: MrCrayfish
  */
-public class FluidExtractorRecipe implements IRecipe<FluidExtractorTileEntity>
+public class FluidExtractorRecipe implements Recipe<FluidExtractorTileEntity>
 {
     private ResourceLocation id;
     private ItemStack ingredient;
@@ -37,7 +37,7 @@ public class FluidExtractorRecipe implements IRecipe<FluidExtractorTileEntity>
     }
 
     @Override
-    public boolean matches(FluidExtractorTileEntity fluidExtractor, World worldIn)
+    public boolean matches(FluidExtractorTileEntity fluidExtractor, Level p_44003_)
     {
         ItemStack source = fluidExtractor.getItem(FluidExtractorTileEntity.SLOT_FLUID_SOURCE);
         return InventoryUtil.areItemStacksEqualIgnoreCount(source, this.ingredient);
@@ -68,14 +68,14 @@ public class FluidExtractorRecipe implements IRecipe<FluidExtractorTileEntity>
     }
 
     @Override
-    public IRecipeSerializer<?> getSerializer()
+    public RecipeSerializer<?> getSerializer()
     {
         return ModRecipeSerializers.FLUID_EXTRACTOR.get();
     }
 
     @Override
-    public IRecipeType<?> getType()
+    public RecipeType<?> getType()
     {
-        return RecipeType.FLUID_EXTRACTOR;
+        return RecipeTypes.FLUID_EXTRACTOR;
     }
 }

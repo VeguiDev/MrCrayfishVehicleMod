@@ -1,8 +1,14 @@
 package com.mrcrayfish.vehicle.client.screen;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.pipeline.MainTarget;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
 import com.mrcrayfish.vehicle.client.render.AbstractVehicleRenderer;
 import com.mrcrayfish.vehicle.client.render.Axis;
 import com.mrcrayfish.vehicle.client.render.CachedVehicle;
@@ -11,27 +17,17 @@ import com.mrcrayfish.vehicle.entity.EngineType;
 import com.mrcrayfish.vehicle.entity.properties.PoweredProperties;
 import com.mrcrayfish.vehicle.inventory.container.EditVehicleContainer;
 import com.mrcrayfish.vehicle.util.CommonUtils;
-import net.minecraft.client.MainWindow;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.shader.Framebuffer;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Inventory;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,15 +35,15 @@ import java.util.Collections;
 /**
  * Author: MrCrayfish
  */
-public class EditVehicleScreen extends ContainerScreen<EditVehicleContainer>
+public class EditVehicleScreen extends AbstractContainerScreen<EditVehicleContainer>
 {
     private static final ResourceLocation GUI_TEXTURES = new ResourceLocation("vehicle:textures/gui/edit_vehicle.png");
 
-    private final PlayerInventory playerInventory;
-    private final IInventory vehicleInventory;
+    private final Inventory playerInventory;
+    private final Container vehicleInventory;
     private final CachedVehicle cachedVehicle;
 
-    private Framebuffer framebuffer;
+    private RenderTarget framebuffer;
     private boolean showHelp = true;
     private int windowZoom = 10;
     private int windowX, windowY;
@@ -56,7 +52,7 @@ public class EditVehicleScreen extends ContainerScreen<EditVehicleContainer>
     private int mouseGrabbedButton;
     private int mouseClickedX, mouseClickedY;
 
-    public EditVehicleScreen(EditVehicleContainer container, PlayerInventory playerInventory, ITextComponent title)
+    public EditVehicleScreen(EditVehicleContainer container, Inventory playerInventory, Component title)
     {
         super(container, playerInventory, title);
         this.playerInventory = playerInventory;
@@ -66,11 +62,11 @@ public class EditVehicleScreen extends ContainerScreen<EditVehicleContainer>
     }
 
     @Override
-    protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY)
+    protected void renderBg(PoseStack matrixStack, float partialTicks, int mouseX, int mouseY)
     {
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         Minecraft minecraft = Minecraft.getInstance();
-        minecraft.getTextureManager().bind(GUI_TEXTURES);
+        minecraft.getTextureManager().bindForSetup(GUI_TEXTURES);
         int left = (this.width - this.imageWidth) / 2;
         int top = (this.height - this.imageHeight) / 2;
         this.blit(matrixStack, left, top, 0, 0, this.imageWidth, this.imageHeight);
@@ -106,21 +102,20 @@ public class EditVehicleScreen extends ContainerScreen<EditVehicleContainer>
             int startY = top + 17;
             RenderSystem.disableCull();
             Matrix4f pose = matrixStack.last().pose();
-            BufferBuilder builder = Tessellator.getInstance().getBuilder();
-            builder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+            Tesselator tesselator = Tesselator.getInstance();
+            BufferBuilder builder = tesselator.getBuilder();
+            builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
             builder.vertex(pose, startX, startY, this.getBlitOffset()).uv(0, 1).endVertex();
             builder.vertex(pose, startX, startY + 70, this.getBlitOffset()).uv(0, 0).endVertex();
             builder.vertex(pose, startX + 142, startY + 70, this.getBlitOffset()).uv(1, 0).endVertex();
             builder.vertex(pose, startX + 142, startY, this.getBlitOffset()).uv(1, 1).endVertex();
-            builder.end();
-            RenderSystem.enableAlphaTest();
-            WorldVertexBufferUploader.end(builder);
+            tesselator.end();
         }
     }
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    protected void renderLabels(MatrixStack matrixStack, int mouseX, int mouseY)
+    protected void renderLabels(PoseStack matrixStack, int mouseX, int mouseY)
     {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.font.draw(matrixStack, this.title.getString(), 8, 6, 4210752);
@@ -128,70 +123,64 @@ public class EditVehicleScreen extends ContainerScreen<EditVehicleContainer>
 
         if(this.showHelp)
         {
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-            minecraft.font.draw(matrixStack, I18n.get("container.edit_vehicle.window_help"), 56, 38, 0xFFFFFF);
-            RenderSystem.popMatrix();
+            matrixStack.pushPose();
+            {
+                matrixStack.scale(0.5F, 0.5F, 0.5F);
+                minecraft.font.draw(matrixStack, I18n.get("container.edit_vehicle.window_help"), 56, 38, 0xFFFFFF);
+            }
+            matrixStack.popPose();
         }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void renderVehicleToBuffer(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    private void renderVehicleToBuffer(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks)
     {
-        RenderSystem.matrixMode(GL11.GL_PROJECTION);
-        RenderSystem.pushMatrix();
-        RenderSystem.loadIdentity();
-        Matrix4f projectionMatrix = Matrix4f.perspective(30, 142.0F / 70.0F, 0.5F, 200.0F);
-        RenderSystem.multMatrix(projectionMatrix);
-        RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-        RenderSystem.pushMatrix();
-        RenderSystem.loadIdentity();
-        RenderHelper.setupLevel(matrixStack.last().pose());
-
-        AbstractVehicleRenderer renderer = this.cachedVehicle.getRenderer();
-        if(renderer != null)
+        matrixStack.pushPose();
         {
-            this.bindFrameBuffer();
+            Lighting.setupLevel(matrixStack.last().pose());
 
-            matrixStack.pushPose();
-            MatrixStack.Entry last = matrixStack.last();
-            last.pose().setIdentity();
-            last.normal().setIdentity();
-            matrixStack.translate(0, -20, -150);
-            matrixStack.translate(this.windowX + (this.mouseGrabbed && this.mouseGrabbedButton == 0 ? mouseX - this.mouseClickedX : 0), 0, 0);
-            matrixStack.translate(0, this.windowY - (this.mouseGrabbed && this.mouseGrabbedButton == 0 ? mouseY - this.mouseClickedY : 0), 0);
+            AbstractVehicleRenderer renderer = this.cachedVehicle.getRenderer();
+            if(renderer != null)
+            {
+                this.bindFrameBuffer();
 
-            Quaternion quaternion = Axis.POSITIVE_X.rotationDegrees(20F);
-            quaternion.mul(Axis.NEGATIVE_X.rotationDegrees(this.windowRotationY - (this.mouseGrabbed && this.mouseGrabbedButton == 1 ? mouseY - this.mouseClickedY : 0)));
-            quaternion.mul(Axis.POSITIVE_Y.rotationDegrees(this.windowRotationX + (this.mouseGrabbed && this.mouseGrabbedButton == 1 ? mouseX - this.mouseClickedX : 0)));
-            quaternion.mul(Axis.POSITIVE_Y.rotationDegrees(45F));
-            matrixStack.mulPose(quaternion);
+                matrixStack.pushPose();
+                PoseStack.Pose last = matrixStack.last();
+                last.pose().setIdentity();
+                last.normal().setIdentity();
+                matrixStack.translate(0, -20, -150);
+                matrixStack.translate(this.windowX + (this.mouseGrabbed && this.mouseGrabbedButton == 0 ? mouseX - this.mouseClickedX : 0), 0, 0);
+                matrixStack.translate(0, this.windowY - (this.mouseGrabbed && this.mouseGrabbedButton == 0 ? mouseY - this.mouseClickedY : 0), 0);
 
-            matrixStack.scale(this.windowZoom / 10F, this.windowZoom / 10F, this.windowZoom / 10F);
-            matrixStack.scale(22F, 22F, 22F);
+                Quaternion quaternion = Axis.POSITIVE_X.rotationDegrees(20F);
+                quaternion.mul(Axis.NEGATIVE_X.rotationDegrees(this.windowRotationY - (this.mouseGrabbed && this.mouseGrabbedButton == 1 ? mouseY - this.mouseClickedY : 0)));
+                quaternion.mul(Axis.POSITIVE_Y.rotationDegrees(this.windowRotationX + (this.mouseGrabbed && this.mouseGrabbedButton == 1 ? mouseX - this.mouseClickedX : 0)));
+                quaternion.mul(Axis.POSITIVE_Y.rotationDegrees(45F));
+                matrixStack.mulPose(quaternion);
 
-            Transform position = this.cachedVehicle.getProperties().getDisplayTransform();
-            matrixStack.scale((float) position.getScale(), (float) position.getScale(), (float) position.getScale());
-            matrixStack.mulPose(Axis.POSITIVE_X.rotationDegrees((float) position.getRotX()));
-            matrixStack.mulPose(Axis.POSITIVE_Y.rotationDegrees((float) position.getRotY()));
-            matrixStack.mulPose(Axis.POSITIVE_Z.rotationDegrees((float) position.getRotZ()));
-            matrixStack.translate(position.getX(), position.getY(), position.getZ());
+                matrixStack.scale(this.windowZoom / 10F, this.windowZoom / 10F, this.windowZoom / 10F);
+                matrixStack.scale(22F, 22F, 22F);
 
-            IRenderTypeBuffer.Impl renderTypeBuffer = Minecraft.getInstance().renderBuffers().bufferSource();
-            renderer.setupTransformsAndRender(this.menu.getVehicle(), matrixStack, renderTypeBuffer, Minecraft.getInstance().getFrameTime(), 15728880);
-            renderTypeBuffer.endBatch();
+                Transform position = this.cachedVehicle.getProperties().getDisplayTransform();
+                matrixStack.scale((float) position.getScale(), (float) position.getScale(), (float) position.getScale());
+                matrixStack.mulPose(Axis.POSITIVE_X.rotationDegrees((float) position.getRotX()));
+                matrixStack.mulPose(Axis.POSITIVE_Y.rotationDegrees((float) position.getRotY()));
+                matrixStack.mulPose(Axis.POSITIVE_Z.rotationDegrees((float) position.getRotZ()));
+                matrixStack.translate(position.getX(), position.getY(), position.getZ());
 
-            matrixStack.popPose();
+                MultiBufferSource.BufferSource renderTypeBuffer = Minecraft.getInstance().renderBuffers().bufferSource();
+                renderer.setupTransformsAndRender(this.menu.getVehicle(), matrixStack, renderTypeBuffer, Minecraft.getInstance().getFrameTime(), 15728880);
+                renderTypeBuffer.endBatch();
 
-            this.unbindFrameBuffer();
+                matrixStack.popPose();
+
+                this.unbindFrameBuffer();
+            }
         }
+        matrixStack.popPose();
 
-        RenderSystem.matrixMode(GL11.GL_PROJECTION);
-        RenderSystem.popMatrix();
-        RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-        RenderSystem.popMatrix();
-        RenderHelper.setupFor3DItems();
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        Lighting.setupFor3DItems();
+        RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
     }
 
     @Override
@@ -258,7 +247,7 @@ public class EditVehicleScreen extends ContainerScreen<EditVehicleContainer>
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks)
     {
         this.renderVehicleToBuffer(matrixStack, mouseX, mouseY, partialTicks);
         this.renderBackground(matrixStack);
@@ -275,11 +264,11 @@ public class EditVehicleScreen extends ContainerScreen<EditVehicleContainer>
             {
                 if(this.cachedVehicle.getProperties().getExtended(PoweredProperties.class).getEngineType() != EngineType.NONE)
                 {
-                    this.renderTooltip(matrixStack, Lists.transform(Collections.singletonList(new StringTextComponent("Engine")), ITextComponent::getVisualOrderText), mouseX, mouseY); //TODO localise
+                    this.renderTooltip(matrixStack, Lists.transform(Collections.singletonList(new TextComponent("Engine")), Component::getVisualOrderText), mouseX, mouseY); //TODO localise
                 }
                 else
                 {
-                    this.renderTooltip(matrixStack, Lists.transform(Arrays.asList(new StringTextComponent("Engine"), new StringTextComponent(TextFormatting.GRAY + "Not applicable")), ITextComponent::getVisualOrderText), mouseX, mouseY); //TODO localise
+                    this.renderTooltip(matrixStack, Lists.transform(Arrays.asList(new TextComponent("Engine"), new TextComponent(ChatFormatting.GRAY + "Not applicable")), Component::getVisualOrderText), mouseX, mouseY); //TODO localise
                 }
             }
         }
@@ -290,11 +279,11 @@ public class EditVehicleScreen extends ContainerScreen<EditVehicleContainer>
             {
                 if(this.cachedVehicle.getProperties().canChangeWheels())
                 {
-                    this.renderTooltip(matrixStack, Lists.transform(Collections.singletonList(new StringTextComponent("Wheels")), ITextComponent::getVisualOrderText), mouseX, mouseY);
+                    this.renderTooltip(matrixStack, Lists.transform(Collections.singletonList(new TextComponent("Wheels")), Component::getVisualOrderText), mouseX, mouseY);
                 }
                 else
                 {
-                    this.renderTooltip(matrixStack, Lists.transform(Arrays.asList(new StringTextComponent("Wheels"), new StringTextComponent(TextFormatting.GRAY + "Not applicable")), ITextComponent::getVisualOrderText), mouseX, mouseY);
+                    this.renderTooltip(matrixStack, Lists.transform(Arrays.asList(new TextComponent("Wheels"), new TextComponent(ChatFormatting.GRAY + "Not applicable")), Component::getVisualOrderText), mouseX, mouseY);
                 }
             }
         }
@@ -303,12 +292,12 @@ public class EditVehicleScreen extends ContainerScreen<EditVehicleContainer>
     private void bindFrameBuffer()
     {
         Minecraft minecraft = Minecraft.getInstance();
-        MainWindow window = minecraft.getWindow();
+        Window window = minecraft.getWindow();
         int windowWidth = (int) (142 * window.getGuiScale());
         int windowHeight = (int) (70 * window.getGuiScale());
         if(this.framebuffer == null)
         {
-            this.framebuffer = new Framebuffer(windowWidth, windowHeight, true, Minecraft.ON_OSX);
+            this.framebuffer = new MainTarget(windowWidth, windowHeight);
             this.framebuffer.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
         }
         else if(this.framebuffer.width != windowWidth || this.framebuffer.height != windowHeight)

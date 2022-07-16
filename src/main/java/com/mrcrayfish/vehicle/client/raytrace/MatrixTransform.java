@@ -1,8 +1,8 @@
 package com.mrcrayfish.vehicle.client.raytrace;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Quaternion;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
 
 /**
  * Matrix transformation that corresponds to one of the three supported GL operations that might be performed on a rendered item part
@@ -50,7 +50,7 @@ public abstract class MatrixTransform
         @Override
         public void transform(Matrix4f matrix)
         {
-            MatrixStack matrixStack = new MatrixStack();
+            PoseStack matrixStack = new PoseStack();
             matrixStack.translate(this.x, this.y, this.z);
             matrix.multiply(matrixStack.last().pose());
         }
@@ -68,7 +68,7 @@ public abstract class MatrixTransform
         @Override
         public void transform(Matrix4f matrix)
         {
-            MatrixStack matrixStack = new MatrixStack();
+            PoseStack matrixStack = new PoseStack();
             matrixStack.mulPose(this.quaternion);
             matrix.multiply(matrixStack.last().pose());
         }
@@ -95,7 +95,7 @@ public abstract class MatrixTransform
         @Override
         public void transform(Matrix4f matrix)
         {
-            MatrixStack matrixStack = new MatrixStack();
+            PoseStack matrixStack = new PoseStack();
             matrixStack.scale(this.x, this.y, this.z);
             matrix.multiply(matrixStack.last().pose());
         }

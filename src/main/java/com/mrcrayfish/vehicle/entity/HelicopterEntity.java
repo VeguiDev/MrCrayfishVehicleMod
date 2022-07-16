@@ -6,18 +6,19 @@ import com.mrcrayfish.vehicle.network.PacketHandler;
 import com.mrcrayfish.vehicle.network.datasync.VehicleDataValue;
 import com.mrcrayfish.vehicle.network.message.MessageHelicopterInput;
 import com.mrcrayfish.vehicle.util.CommonUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -26,15 +27,15 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  */
 public abstract class HelicopterEntity extends PoweredVehicleEntity
 {
-    protected static final DataParameter<Float> LIFT = EntityDataManager.defineId(HelicopterEntity.class, DataSerializers.FLOAT);
-    protected static final DataParameter<Float> FORWARD_INPUT = EntityDataManager.defineId(HelicopterEntity.class, DataSerializers.FLOAT);
-    protected static final DataParameter<Float> SIDE_INPUT = EntityDataManager.defineId(HelicopterEntity.class, DataSerializers.FLOAT);
+    protected static final EntityDataAccessor<Float> LIFT = SynchedEntityData.defineId(HelicopterEntity.class, EntityDataSerializers.FLOAT);
+    protected static final EntityDataAccessor<Float> FORWARD_INPUT = SynchedEntityData.defineId(HelicopterEntity.class, EntityDataSerializers.FLOAT);
+    protected static final EntityDataAccessor<Float> SIDE_INPUT = SynchedEntityData.defineId(HelicopterEntity.class, EntityDataSerializers.FLOAT);
 
     protected final VehicleDataValue<Float> lift = new VehicleDataValue<>(this, LIFT);
     protected final VehicleDataValue<Float> forwardInput = new VehicleDataValue<>(this, FORWARD_INPUT);
     protected final VehicleDataValue<Float> sideInput = new VehicleDataValue<>(this, SIDE_INPUT);
 
-    protected Vector3d velocity = Vector3d.ZERO;
+    protected Vec3 velocity = Vec3.ZERO;
     protected float bladeSpeed;
 
     @OnlyIn(Dist.CLIENT)
@@ -48,7 +49,7 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
     protected float joystickForward;
     protected float prevJoystickForward;
 
-    protected HelicopterEntity(EntityType<?> entityType, World worldIn)
+    protected HelicopterEntity(EntityType<?> entityType, Level worldIn)
     {
         super(entityType, worldIn);
     }
@@ -65,13 +66,13 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
     @Override
     public void updateVehicleMotion()
     {
-        this.motion = Vector3d.ZERO;
+        this.motion = Vec3.ZERO;
 
         boolean operating = this.canDrive() && this.getControllingPassenger() != null;
         Entity entity = this.getControllingPassenger();
         if(entity != null && this.isFlying() && operating)
         {
-            float deltaYaw = entity.getYHeadRot() % 360.0F - this.yRot;
+            float deltaYaw = entity.getYHeadRot() % 360.0F - this.getYRot();
             while(deltaYaw < -180.0F)
             {
                 deltaYaw += 360.0F;
@@ -80,29 +81,29 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
             {
                 deltaYaw -= 360.0F;
             }
-            this.yRot += deltaYaw * this.getRotateStrength();
+            this.setYRot(this.getYRot() + (deltaYaw * this.getRotateStrength()));
         }
 
         this.updateBladeSpeed();
 
-        Vector3d heading = Vector3d.ZERO;
+        Vec3 heading = Vec3.ZERO;
         if(this.isFlying())
         {
             // Calculates the movement based on the input from the controlling passenger
             float enginePower = this.getEnginePower();
-            Vector3d input = this.getInput();
+            Vec3 input = this.getInput();
             if(operating && input.length() > 0)
             {
-                Vector3d movementForce = input.scale(enginePower).scale(0.05);
+                Vec3 movementForce = input.scale(enginePower).scale(0.05);
                 heading = heading.add(movementForce);
             }
 
             // Makes the helicopter slowly fall due to it tilting during travel
-            Vector3d downForce = new Vector3d(0, -1.5F * (this.velocity.multiply(1, 0, 1).scale(20).length() / enginePower), 0).scale(0.05);
+            Vec3 downForce = new Vec3(0, -1.5F * (this.velocity.multiply(1, 0, 1).scale(20).length() / enginePower), 0).scale(0.05);
             heading = heading.add(downForce);
 
             // Adds a slight drag to the helicopter as it travels through the air
-            Vector3d dragForce = this.velocity.scale(this.velocity.length()).scale(-this.getDrag());
+            Vec3 dragForce = this.velocity.scale(this.velocity.length()).scale(-this.getDrag());
             heading = heading.add(dragForce);
         }
         else
@@ -123,7 +124,7 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
         this.velocity = CommonUtils.lerp(this.velocity, heading, this.getMovementStrength());
         this.motion = this.motion.add(this.velocity);
 
-        this.xRot = this.getPitch();
+        this.setXRot(this.getPitch());
 
         // Makes the helicopter fall if it's not being operated by a pilot
         if(!operating)
@@ -140,25 +141,25 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
         this.prevJoystickStrafe = this.joystickStrafe;
         this.prevJoystickForward = this.joystickForward;
 
-        this.joystickStrafe = MathHelper.lerp(0.25F, this.joystickStrafe, this.getSideInput());
-        this.joystickForward = MathHelper.lerp(0.25F, this.joystickForward, this.getForwardInput());
+        this.joystickStrafe = Mth.lerp(0.25F, this.joystickStrafe, this.getSideInput());
+        this.joystickForward = Mth.lerp(0.25F, this.joystickForward, this.getForwardInput());
     }
 
     private float getPitch()
     {
-        return -(float) new Vector3d(-this.motion.x, 0, this.motion.z).scale(this.getMaxLeanAngle()).yRot((float) Math.toRadians(-(this.yRot + 90))).x;
+        return -(float) new Vec3(-this.motion.x, 0, this.motion.z).scale(this.getMaxLeanAngle()).yRot((float) Math.toRadians(-(this.getYRot() + 90))).x;
     }
 
-    protected Vector3d getInput()
+    protected Vec3 getInput()
     {
         if(this.getControllingPassenger() != null)
         {
-            double strafe = MathHelper.clamp(this.getSideInput(), -1.0F, 1.0F);
-            double forward = MathHelper.clamp(this.getForwardInput(), -1.0F, 1.0F);
-            Vector3d input = new Vector3d(strafe, 0, forward).yRot((float) Math.toRadians(-this.yRot));
+            double strafe = Mth.clamp(this.getSideInput(), -1.0F, 1.0F);
+            double forward = Mth.clamp(this.getForwardInput(), -1.0F, 1.0F);
+            Vec3 input = new Vec3(strafe, 0, forward).yRot((float) Math.toRadians(-this.getYRot()));
             return input.length() > 1.0 ? input.normalize() : input;
         }
-        return Vector3d.ZERO;
+        return Vec3.ZERO;
     }
 
     protected void updateBladeSpeed()
@@ -219,9 +220,9 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
         LivingEntity entity = (LivingEntity) this.getControllingPassenger();
         if(entity != null)
         {
-            if(entity instanceof PlayerEntity)
+            if(entity instanceof Player)
             {
-                if(((PlayerEntity) entity).isLocalPlayer())
+                if(((Player) entity).isLocalPlayer())
                 {
                     float lift = VehicleHelper.getLift();
                     this.setLift(lift);
@@ -239,7 +240,7 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
         if(this.isFlying())
         {
             double leanAngle = this.getMaxLeanAngle();
-            Vector3d rotation = new Vector3d(-this.motion.x, 0, this.motion.z).scale(leanAngle).yRot((float) Math.toRadians(-(this.yRot + 90)));
+            Vec3 rotation = new Vec3(-this.motion.x, 0, this.motion.z).scale(leanAngle).yRot((float) Math.toRadians(-(this.getYRot() + 90)));
             this.bodyRotationPitch = -(float) rotation.x;
             this.bodyRotationRoll = (float) rotation.z;
         }
@@ -248,15 +249,15 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
             this.bodyRotationPitch *= 0.5;
             this.bodyRotationRoll *= 0.5;
         }
-        this.bodyRotationYaw = this.yRot;
+        this.bodyRotationYaw = this.getYRot();
     }
 
     @Override
     protected void updateEngineSound()
     {
-        float normal = MathHelper.clamp(this.bladeSpeed / 200F, 0.0F, 1.25F) * 0.6F;
+        float normal = Mth.clamp(this.bladeSpeed / 200F, 0.0F, 1.25F) * 0.6F;
         normal += (this.motion.scale(20).length() / this.getEnginePower()) * 0.4F;
-        this.enginePitch = this.getMinEnginePitch() + (this.getMaxEnginePitch() - this.getMinEnginePitch()) * MathHelper.clamp(normal, 0.0F, 1.0F);
+        this.enginePitch = this.getMinEnginePitch() + (this.getMaxEnginePitch() - this.getMinEnginePitch()) * Mth.clamp(normal, 0.0F, 1.0F);
         this.engineVolume = this.getControllingPassenger() != null && this.isEnginePowered() ? 0.2F + 0.8F * (this.bladeSpeed / 80F) : 0.001F;
     }
 
@@ -278,10 +279,10 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
     /*
      * Overridden to prevent players from taking fall damage when landing a plane
      */
+
     @Override
-    public boolean causeFallDamage(float distance, float damageMultiplier)
-    {
-        return false;
+    public boolean causeFallDamage(float p_146828_, float distance, DamageSource p_146830_) {
+        return super.causeFallDamage(p_146828_, distance, p_146830_);
     }
 
     public float getLift()
@@ -363,7 +364,7 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
     }
 
     @Override
-    public void writeSpawnData(PacketBuffer buffer)
+    public void writeSpawnData(FriendlyByteBuf buffer)
     {
         super.writeSpawnData(buffer);
         buffer.writeFloat(this.bladeSpeed);
@@ -373,31 +374,31 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
     }
 
     @Override
-    public void readSpawnData(PacketBuffer buffer)
+    public void readSpawnData(FriendlyByteBuf buffer)
     {
         super.readSpawnData(buffer);
         this.bladeSpeed = buffer.readFloat();
-        this.velocity = new Vector3d(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
+        this.velocity = new Vec3(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundNBT compound)
+    protected void addAdditionalSaveData(CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
-        compound.putFloat("BladeSpeed", this.bladeSpeed);
-        CompoundNBT velocity = new CompoundNBT();
-        velocity.putDouble("X", this.velocity.x);
-        velocity.putDouble("Y", this.velocity.y);
-        velocity.putDouble("Z", this.velocity.z);
-        compound.put("Velocity", velocity);
+        compound.putFloat("bladeSpeed", this.bladeSpeed);
+        CompoundTag velocity = new CompoundTag();
+        velocity.putDouble("x", this.velocity.x);
+        velocity.putDouble("y", this.velocity.y);
+        velocity.putDouble("z", this.velocity.z);
+        compound.put("velocity", velocity);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundNBT compound)
+    protected void readAdditionalSaveData(CompoundTag compound)
     {
         super.readAdditionalSaveData(compound);
-        this.bladeSpeed = compound.getFloat("BladeSpeed");
-        CompoundNBT velocity = compound.getCompound("Velocity");
-        this.velocity = new Vector3d(velocity.getDouble("X"), velocity.getDouble("Y"), velocity.getDouble("Z"));
+        this.bladeSpeed = compound.getFloat("bladeSpeed");
+        CompoundTag velocity = compound.getCompound("velocity");
+        this.velocity = new Vec3(velocity.getDouble("x"), velocity.getDouble("y"), velocity.getDouble("z"));
     }
 }

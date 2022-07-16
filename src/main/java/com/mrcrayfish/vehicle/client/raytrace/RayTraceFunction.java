@@ -1,6 +1,6 @@
 package com.mrcrayfish.vehicle.client.raytrace;
 
-import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
+import com.mrcrayfish.framework.common.data.SyncedEntityData;
 import com.mrcrayfish.vehicle.Config;
 import com.mrcrayfish.vehicle.client.handler.ControllerHandler;
 import com.mrcrayfish.vehicle.entity.PoweredVehicleEntity;
@@ -10,12 +10,12 @@ import com.mrcrayfish.vehicle.network.PacketHandler;
 import com.mrcrayfish.vehicle.network.message.MessageFuelVehicle;
 import com.mrcrayfish.vehicle.tileentity.GasPumpTankTileEntity;
 import com.mrcrayfish.vehicle.tileentity.GasPumpTileEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
@@ -30,7 +30,7 @@ import java.util.Optional;
 public interface RayTraceFunction
 {
     @Nullable
-    Hand apply(EntityRayTracer rayTracer, VehicleRayTraceResult result, PlayerEntity player);
+    InteractionHand apply(EntityRayTracer rayTracer, VehicleRayTraceResult result, Player player);
 
     /**
      * Checks if fuel can be transferred from a jerry can to a powered vehicle, and sends a packet to do so every other tick, if it can
@@ -47,10 +47,10 @@ public interface RayTraceFunction
         if(!poweredVehicle.requiresEnergy() || poweredVehicle.getCurrentEnergy() >= poweredVehicle.getEnergyCapacity())
             return null;
 
-        gasPump: if(SyncedPlayerData.instance().get(player, ModDataKeys.GAS_PUMP).isPresent() && ControllerHandler.isRightClicking())
+        gasPump: if(SyncedEntityData.instance().get(player, ModDataKeys.GAS_PUMP).isPresent() && ControllerHandler.isRightClicking())
         {
-            BlockPos pos = SyncedPlayerData.instance().get(player, ModDataKeys.GAS_PUMP).get();
-            TileEntity tileEntity = player.level.getBlockEntity(pos);
+            BlockPos pos = SyncedEntityData.instance().get(player, ModDataKeys.GAS_PUMP).get();
+            BlockEntity tileEntity = player.level.getBlockEntity(pos);
             if(!(tileEntity instanceof GasPumpTileEntity))
                 break gasPump;
 
@@ -66,12 +66,12 @@ public interface RayTraceFunction
 
             if(rayTracer.getContinuousInteractionTickCounter() % 2 == 0)
             {
-                PacketHandler.getPlayChannel().sendToServer(new MessageFuelVehicle(result.getEntity().getId(), Hand.MAIN_HAND));
+                PacketHandler.getPlayChannel().sendToServer(new MessageFuelVehicle(result.getEntity().getId(), InteractionHand.MAIN_HAND));
             }
-            return Hand.MAIN_HAND;
+            return InteractionHand.MAIN_HAND;
         }
 
-        for(Hand hand : Hand.values())
+        for(InteractionHand hand : InteractionHand.values())
         {
             ItemStack stack = player.getItemInHand(hand);
             if(stack.isEmpty() || !(stack.getItem() instanceof JerryCanItem) || !ControllerHandler.isRightClicking())

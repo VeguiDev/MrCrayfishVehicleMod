@@ -1,39 +1,40 @@
 package com.mrcrayfish.vehicle.network.message;
 
+import com.mrcrayfish.framework.api.network.PlayMessage;
 import com.mrcrayfish.vehicle.network.play.ServerPlayHandler;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Hand;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class MessageFuelVehicle implements IMessage<MessageFuelVehicle>
+public class MessageFuelVehicle extends PlayMessage<MessageFuelVehicle>
 {
     protected int entityId;
-    private Hand hand;
+    private InteractionHand hand;
 
     public MessageFuelVehicle()
     {
     }
 
-    public MessageFuelVehicle(int entityId, Hand hand)
+    public MessageFuelVehicle(int entityId, InteractionHand hand)
     {
         this.entityId = entityId;
         this.hand = hand;
     }
 
     @Override
-    public void encode(MessageFuelVehicle message, PacketBuffer buffer)
+    public void encode(MessageFuelVehicle message, FriendlyByteBuf buffer)
     {
         buffer.writeInt(message.entityId);
         buffer.writeEnum(message.hand);
     }
 
     @Override
-    public MessageFuelVehicle decode(PacketBuffer buffer)
+    public MessageFuelVehicle decode(FriendlyByteBuf buffer)
     {
-        return new MessageFuelVehicle(buffer.readInt(), buffer.readEnum(Hand.class));
+        return new MessageFuelVehicle(buffer.readInt(), buffer.readEnum(InteractionHand.class));
     }
 
     @Override
@@ -41,7 +42,7 @@ public class MessageFuelVehicle implements IMessage<MessageFuelVehicle>
     {
         supplier.get().enqueueWork(() ->
         {
-            ServerPlayerEntity player = supplier.get().getSender();
+            ServerPlayer player = supplier.get().getSender();
             if(player != null)
             {
                 ServerPlayHandler.handleFuelVehicleMessage(player, message);
@@ -55,7 +56,7 @@ public class MessageFuelVehicle implements IMessage<MessageFuelVehicle>
         return this.entityId;
     }
 
-    public Hand getHand()
+    public InteractionHand getHand()
     {
         return this.hand;
     }

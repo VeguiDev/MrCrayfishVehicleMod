@@ -1,12 +1,8 @@
 package com.mrcrayfish.vehicle.client.particle;
 
-import net.minecraft.client.particle.IAnimatedSprite;
-import net.minecraft.client.particle.IParticleFactory;
-import net.minecraft.client.particle.IParticleRenderType;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.SpriteTexturedParticle;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.particles.BasicParticleType;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.*;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -15,9 +11,9 @@ import javax.annotation.Nullable;
 /**
  * Author: MrCrayfish
  */
-public class DustParticle extends SpriteTexturedParticle
+public class DustParticle extends TextureSheetParticle
 {
-    public DustParticle(ClientWorld world, double x, double y, double z, double xd, double yd, double zd)
+    public DustParticle(ClientLevel world, double x, double y, double z, double xd, double yd, double zd)
     {
         super(world, x, y, z);
         this.lifetime = 50 + this.random.nextInt(20);
@@ -49,26 +45,26 @@ public class DustParticle extends SpriteTexturedParticle
     }
 
     @Override
-    public IParticleRenderType getRenderType()
+    public ParticleRenderType getRenderType()
     {
-        return IParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static class Factory implements IParticleFactory<BasicParticleType>
+    public static class Factory implements ParticleProvider<SimpleParticleType>
     {
-        private final IAnimatedSprite spriteSet;
+        private final SpriteSet spriteSet;
 
-        public Factory(IAnimatedSprite spriteSet)
+        public Factory(SpriteSet spriteSet)
         {
             this.spriteSet = spriteSet;
         }
 
         @Nullable
         @Override
-        public Particle createParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double xd, double yd, double zd)
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xd, double yd, double zd)
         {
-            DustParticle particle = new DustParticle(world, x, y, z, xd, yd, zd);
+            DustParticle particle = new DustParticle(level, x, y, z, xd, yd, zd);
             particle.pickSprite(this.spriteSet);
             return particle;
         }

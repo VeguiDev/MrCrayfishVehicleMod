@@ -1,6 +1,7 @@
 package com.mrcrayfish.vehicle.client.render.vehicle;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import com.mrcrayfish.vehicle.client.model.VehicleModels;
 import com.mrcrayfish.vehicle.client.raytrace.MatrixTransform;
 import com.mrcrayfish.vehicle.client.raytrace.RayTraceTransforms;
@@ -11,11 +12,11 @@ import com.mrcrayfish.vehicle.entity.properties.PoweredProperties;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.entity.vehicle.LawnMowerEntity;
 import com.mrcrayfish.vehicle.init.ModEntities;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.model.PlayerModel;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
 
@@ -30,7 +31,7 @@ public class LawnMowerRenderer extends AbstractLandVehicleRenderer<LawnMowerEnti
     }
 
     @Override
-    protected void render(@Nullable LawnMowerEntity vehicle, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, float partialTicks, int light)
+    protected void render(@Nullable LawnMowerEntity vehicle, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, float partialTicks, int light)
     {
         //Body
         this.renderDamagedPart(vehicle, VehicleModels.LAWN_MOWER_BODY, matrixStack, renderTypeBuffer, light, partialTicks);
@@ -53,7 +54,7 @@ public class LawnMowerRenderer extends AbstractLandVehicleRenderer<LawnMowerEnti
     }
 
     @Override
-    public void applyPlayerModel(LawnMowerEntity entity, PlayerEntity player, PlayerModel model, float partialTicks)
+    public void applyPlayerModel(LawnMowerEntity entity, Player player, PlayerModel<AbstractClientPlayer> model, float partialTicks)
     {
         float wheelAngle = this.wheelAngleProperty.get(entity, partialTicks);
         float maxSteeringAngle = this.vehiclePropertiesProperty.get(entity).getExtended(PoweredProperties.class).getMaxSteeringAngle();

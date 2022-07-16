@@ -1,6 +1,7 @@
 package com.mrcrayfish.vehicle.client.render.vehicle;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import com.mrcrayfish.vehicle.client.model.VehicleModels;
 import com.mrcrayfish.vehicle.client.raytrace.MatrixTransform;
 import com.mrcrayfish.vehicle.client.raytrace.RayTraceTransforms;
@@ -10,11 +11,11 @@ import com.mrcrayfish.vehicle.client.render.Axis;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.entity.vehicle.SofacopterEntity;
 import com.mrcrayfish.vehicle.init.ModEntities;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.model.PlayerModel;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
 
@@ -29,7 +30,7 @@ public class SofaHelicopterRenderer extends AbstractHelicopterRenderer<Sofacopte
     }
 
     @Override
-    protected void render(@Nullable SofacopterEntity vehicle, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, float partialTicks, int light)
+    protected void render(@Nullable SofacopterEntity vehicle, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, float partialTicks, int light)
     {
         matrixStack.pushPose();
         //this.renderDamagedPart(vehicle, VehicleModels.RED_SOFA.getModel(), matrixStack, renderTypeBuffer, light);
@@ -53,7 +54,7 @@ public class SofaHelicopterRenderer extends AbstractHelicopterRenderer<Sofacopte
     }
 
     @Override
-    public void applyPlayerModel(SofacopterEntity entity, PlayerEntity player, PlayerModel model, float partialTicks)
+    public void applyPlayerModel(SofacopterEntity entity, Player player, PlayerModel<AbstractClientPlayer> model, float partialTicks)
     {
         model.rightArm.xRot = (float) Math.toRadians(-55F);
         model.rightArm.yRot = (float) Math.toRadians(25F);

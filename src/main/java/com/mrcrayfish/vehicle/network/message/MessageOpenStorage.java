@@ -1,16 +1,17 @@
 package com.mrcrayfish.vehicle.network.message;
 
+import com.mrcrayfish.framework.api.network.PlayMessage;
 import com.mrcrayfish.vehicle.network.play.ServerPlayHandler;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 /**
  * Author: MrCrayfish
  */
-public class MessageOpenStorage implements IMessage<MessageOpenStorage>
+public class MessageOpenStorage extends PlayMessage<MessageOpenStorage>
 {
     private int entityId;
     private String key;
@@ -24,14 +25,14 @@ public class MessageOpenStorage implements IMessage<MessageOpenStorage>
     }
 
     @Override
-    public void encode(MessageOpenStorage message, PacketBuffer buffer)
+    public void encode(MessageOpenStorage message, FriendlyByteBuf buffer)
     {
         buffer.writeInt(message.entityId);
         buffer.writeUtf(message.key);
     }
 
     @Override
-    public MessageOpenStorage decode(PacketBuffer buffer)
+    public MessageOpenStorage decode(FriendlyByteBuf buffer)
     {
         return new MessageOpenStorage(buffer.readInt(), buffer.readUtf());
     }
@@ -41,7 +42,7 @@ public class MessageOpenStorage implements IMessage<MessageOpenStorage>
     {
         supplier.get().enqueueWork(() ->
         {
-            ServerPlayerEntity player = supplier.get().getSender();
+            ServerPlayer player = supplier.get().getSender();
             if(player != null)
             {
                 ServerPlayHandler.handleOpenStorageMessage(player, message);

@@ -1,15 +1,17 @@
 package com.mrcrayfish.vehicle.util;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 /**
  * Author: MrCrayfish
@@ -21,9 +23,9 @@ public class TileEntityUtil
      *
      * @param tileEntity the tile entity to update
      */
-    public static void sendUpdatePacket(TileEntity tileEntity)
+    public static void sendUpdatePacket(BlockEntity tileEntity)
     {
-        SUpdateTileEntityPacket packet = tileEntity.getUpdatePacket();
+        Packet<ClientGamePacketListener> packet = tileEntity.getUpdatePacket();
         if(packet != null)
         {
             sendUpdatePacket(tileEntity.getLevel(), tileEntity.getBlockPos(), packet);
@@ -35,10 +37,9 @@ public class TileEntityUtil
      *
      * @param tileEntity the tile entity to update
      */
-    public static void sendUpdatePacket(TileEntity tileEntity, CompoundNBT compound)
+    public static void sendUpdatePacket(BlockEntity tileEntity, CompoundTag compound)
     {
-        SUpdateTileEntityPacket packet = new SUpdateTileEntityPacket(tileEntity.getBlockPos(), 0, compound);
-        sendUpdatePacket(tileEntity.getLevel(), tileEntity.getBlockPos(), packet);
+        sendUpdatePacket(tileEntity.getLevel(), tileEntity.getBlockPos(), ClientboundBlockEntityDataPacket.create(tileEntity, (ent) -> compound));
     }
 
     /**
@@ -49,7 +50,7 @@ public class TileEntityUtil
      * @param tileEntity the tile entity to update
      * @param player the player to send the update to
      */
-    public static void sendUpdatePacket(TileEntity tileEntity, ServerPlayerEntity player)
+    public static void sendUpdatePacket(BlockEntity tileEntity, ServerPlayer player)
     {
         sendUpdatePacket(tileEntity, tileEntity.getUpdateTag(), player);
     }
@@ -63,18 +64,17 @@ public class TileEntityUtil
      * @param compound the update tag to send
      * @param player the player to send the update to
      */
-    public static void sendUpdatePacket(TileEntity tileEntity, CompoundNBT compound, ServerPlayerEntity player)
+    public static void sendUpdatePacket(BlockEntity tileEntity, CompoundTag compound, ServerPlayer player)
     {
-        SUpdateTileEntityPacket packet = new SUpdateTileEntityPacket(tileEntity.getBlockPos(), 0, compound);
+        ClientboundBlockEntityDataPacket packet = ClientboundBlockEntityDataPacket.create(tileEntity, (ent) -> compound);
         player.connection.send(packet);
     }
 
-    private static void sendUpdatePacket(World world, BlockPos pos, SUpdateTileEntityPacket packet)
+    private static void sendUpdatePacket(Level world, BlockPos pos, Packet<ClientGamePacketListener> packet)
     {
-        if(world instanceof ServerWorld)
+        if(world instanceof ServerLevel server)
         {
-            ServerWorld server = (ServerWorld) world;
-            Stream<ServerPlayerEntity> players = server.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false);
+            List<ServerPlayer> players = server.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false);
             players.forEach(player -> player.connection.send(packet));
         }
     }

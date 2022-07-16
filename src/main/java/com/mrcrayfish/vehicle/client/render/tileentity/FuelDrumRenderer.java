@@ -1,62 +1,75 @@
 package com.mrcrayfish.vehicle.client.render.tileentity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Matrix4f;
 import com.mrcrayfish.vehicle.tileentity.FuelDrumTileEntity;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderState;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
-import org.lwjgl.opengl.GL11;
 
 /**
  * Author: MrCrayfish
  */
-public class FuelDrumRenderer extends TileEntityRenderer<FuelDrumTileEntity>
+public class FuelDrumRenderer implements BlockEntityRenderer<FuelDrumTileEntity>
 {
-    public static final RenderType LABEL_BACKGROUND = RenderType.create("vehicle:fuel_drum_label_background", DefaultVertexFormats.POSITION_COLOR, GL11.GL_QUADS, 256, RenderType.State.builder().createCompositeState(false));
-    public static final RenderType LABEL_FLUID = RenderType.create("vehicle:fuel_drum_label_fluid", DefaultVertexFormats.POSITION_TEX, GL11.GL_QUADS, 256, RenderType.State.builder().setTextureState(new RenderState.TextureState(PlayerContainer.BLOCK_ATLAS, false, true)).createCompositeState(false));
+    public static final RenderType LABEL_BACKGROUND = RenderType.create("vehicle:fuel_drum_label_background",
+            DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, 256, false, false, RenderType.CompositeState.builder().createCompositeState(false));
 
-    public FuelDrumRenderer(TileEntityRendererDispatcher dispatcher)
+    public static final RenderType LABEL_FLUID = RenderType.create("vehicle:fuel_drum_label_fluid",
+            DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS, 256, false, false, RenderType.CompositeState.builder()
+                    .setTextureState(RenderStateShard.MultiTextureStateShard.builder()
+                            .add(InventoryMenu.BLOCK_ATLAS, false, true)
+                            .build())
+                    .createCompositeState(false));
+
+    private final Font font;
+    private final Camera camera;
+    private final HitResult cameraHitResult;
+
+    public FuelDrumRenderer(BlockEntityRendererProvider.Context ctx)
     {
-        super(dispatcher);
+        this.font = ctx.getFont();
+        this.camera = ctx.getBlockEntityRenderDispatcher().camera;
+        this.cameraHitResult = ctx.getBlockEntityRenderDispatcher().cameraHitResult;
     }
 
     @Override
-    public void render(FuelDrumTileEntity fuelDrumTileEntity, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int lightTexture, int overlayTexture)
+    public void render(FuelDrumTileEntity entity, float delta, PoseStack matrices, MultiBufferSource buffers, int light, int overlay)
     {
         if(Minecraft.getInstance().player.isCrouching())
         {
-            if(fuelDrumTileEntity.hasFluid() && this.renderer.cameraHitResult != null && this.renderer.cameraHitResult.getType() == RayTraceResult.Type.BLOCK)
+            if(entity.hasFluid() && this.cameraHitResult != null && this.cameraHitResult.getType() == HitResult.Type.BLOCK)
             {
-                BlockRayTraceResult result = (BlockRayTraceResult) this.renderer.cameraHitResult;
-                if(result.getBlockPos().equals(fuelDrumTileEntity.getBlockPos()))
+                BlockHitResult result = (BlockHitResult) this.cameraHitResult;
+                if(result.getBlockPos().equals(entity.getBlockPos()))
                 {
-                    this.drawFluidLabel(this.renderer.font, fuelDrumTileEntity.getFluidTank(), matrixStack, renderTypeBuffer);
+                    this.drawFluidLabel(this.font, entity.getFluidTank(), matrices, buffers);
                 }
             }
         }
     }
 
-    private void drawFluidLabel(FontRenderer fontRendererIn, FluidTank tank, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer)
+    private void drawFluidLabel(Font fontRendererIn, FluidTank tank, PoseStack matrixStack, MultiBufferSource renderTypeBuffer)
     {
         if(tank.getFluid().isEmpty())
             return;
 
         FluidStack stack = tank.getFluid();
-        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(AtlasTexture.LOCATION_BLOCKS).apply(tank.getFluid().getFluid().getAttributes().getStillTexture());
+        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(tank.getFluid().getFluid().getAttributes().getStillTexture());
         if(sprite != null)
         {
             float level = tank.getFluidAmount() / (float) tank.getCapacity();
@@ -67,10 +80,10 @@ public class FuelDrumRenderer extends TileEntityRenderer<FuelDrumTileEntity>
 
             matrixStack.pushPose();
             matrixStack.translate(0.5, 1.25, 0.5);
-            matrixStack.mulPose(this.renderer.camera.rotation());
+            matrixStack.mulPose(this.camera.rotation());
             matrixStack.scale(-0.025F, -0.025F, 0.025F);
 
-            IVertexBuilder backgroundBuilder = renderTypeBuffer.getBuffer(LABEL_BACKGROUND);
+            VertexConsumer backgroundBuilder = renderTypeBuffer.getBuffer(LABEL_BACKGROUND);
 
             /* Background */
             Matrix4f matrix = matrixStack.last().pose();
@@ -94,7 +107,7 @@ public class FuelDrumRenderer extends TileEntityRenderer<FuelDrumTileEntity>
             float maxV = minV + (sprite.getV1() - minV) * 4 * 0.0625F;
 
             /* Fluid Texture */
-            IVertexBuilder fluidBuilder = renderTypeBuffer.getBuffer(LABEL_FLUID);
+            VertexConsumer fluidBuilder = renderTypeBuffer.getBuffer(LABEL_FLUID);
             fluidBuilder.vertex(matrix, -offsetWidth, -1.0F, 0.0F).uv(minU, maxV).endVertex();
             fluidBuilder.vertex(matrix, -offsetWidth, 4.0F, 0.0F).uv(minU, minV).endVertex();
             fluidBuilder.vertex(matrix, -offsetWidth + fuelWidth, 4.0F, 0.0F).uv(maxU, minV).endVertex();

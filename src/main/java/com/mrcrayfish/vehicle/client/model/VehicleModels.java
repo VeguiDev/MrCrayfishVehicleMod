@@ -1,7 +1,7 @@
 package com.mrcrayfish.vehicle.client.model;
 
 import com.mrcrayfish.vehicle.Reference;
-import net.minecraft.client.renderer.model.ModelResourceLocation;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 
 public class VehicleModels
 {

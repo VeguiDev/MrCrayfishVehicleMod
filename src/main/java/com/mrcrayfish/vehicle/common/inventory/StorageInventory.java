@@ -1,12 +1,12 @@
 package com.mrcrayfish.vehicle.common.inventory;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
@@ -15,13 +15,13 @@ import java.util.function.Predicate;
 /**
  * Author: MrCrayfish
  */
-public class StorageInventory extends Inventory
+public class StorageInventory extends SimpleContainer
 {
     private final WeakReference<Entity> entityRef;
-    private final ITextComponent displayName;
+    private final Component displayName;
     private final Predicate<ItemStack> itemPredicate;
 
-    public StorageInventory(Entity entity, ITextComponent displayName, int rows)
+    public StorageInventory(Entity entity, Component displayName, int rows)
     {
         super(rows * 9);
         this.entityRef = new WeakReference<>(entity);
@@ -29,7 +29,7 @@ public class StorageInventory extends Inventory
         this.itemPredicate = stack -> true;
     }
 
-    public StorageInventory(Entity entity, ITextComponent displayName, int rows, Predicate<ItemStack> itemPredicate)
+    public StorageInventory(Entity entity, Component displayName, int rows, Predicate<ItemStack> itemPredicate)
     {
         super(rows * 9);
         this.entityRef = new WeakReference<>(entity);
@@ -43,7 +43,7 @@ public class StorageInventory extends Inventory
         return this.entityRef.get();
     }
 
-    public ITextComponent getDisplayName()
+    public Component getDisplayName()
     {
         return this.displayName;
     }
@@ -53,15 +53,15 @@ public class StorageInventory extends Inventory
         return this.itemPredicate.test(stack);
     }
 
-    public ListNBT createTag()
+    public ListTag createTag()
     {
-        ListNBT tagList = new ListNBT();
+        ListTag tagList = new ListTag();
         for(int i = 0; i < this.getContainerSize(); i++)
         {
             ItemStack stack = this.getItem(i);
             if(!stack.isEmpty())
             {
-                CompoundNBT slotTag = new CompoundNBT();
+                CompoundTag slotTag = new CompoundTag();
                 slotTag.putByte("Slot", (byte) i);
                 stack.save(slotTag);
                 tagList.add(slotTag);
@@ -71,12 +71,12 @@ public class StorageInventory extends Inventory
     }
 
     @Override
-    public void fromTag(ListNBT tagList)
+    public void fromTag(ListTag tagList)
     {
         this.clearContent();
         for(int i = 0; i < tagList.size(); i++)
         {
-            CompoundNBT slotTag = tagList.getCompound(i);
+            CompoundTag slotTag = tagList.getCompound(i);
             byte slot = slotTag.getByte("Slot");
             if(slot >= 0 && slot < this.getContainerSize())
             {
@@ -86,7 +86,7 @@ public class StorageInventory extends Inventory
     }
 
     @Override
-    public boolean stillValid(PlayerEntity player)
+    public boolean stillValid(Player player)
     {
         Entity entity = this.entityRef.get();
         return entity != null && entity.isAlive();

@@ -13,22 +13,23 @@ import com.mrcrayfish.vehicle.init.ModSounds;
 import com.mrcrayfish.vehicle.init.ModTileEntities;
 import com.mrcrayfish.vehicle.item.EngineItem;
 import com.mrcrayfish.vehicle.util.CommonUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
@@ -38,7 +39,7 @@ import java.util.UUID;
 /**
  * Author: MrCrayfish
  */
-public class VehicleCrateTileEntity extends TileEntitySynced implements ITickableTileEntity
+public class VehicleCrateTileEntity extends TileEntitySynced
 {
     private static final Random RAND = new Random();
 
@@ -53,9 +54,19 @@ public class VehicleCrateTileEntity extends TileEntitySynced implements ITickabl
     @OnlyIn(Dist.CLIENT)
     private Entity entity;
 
-    public VehicleCrateTileEntity()
+    public VehicleCrateTileEntity(BlockPos pos, BlockState state)
     {
-        super(ModTileEntities.VEHICLE_CRATE.get());
+        super(ModTileEntities.VEHICLE_CRATE.get(), pos, state);
+    }
+
+    public static void onServerTick(Level level, BlockPos pos, BlockState state, VehicleCrateTileEntity entity)
+    {
+        entity.onServerTick();
+    }
+
+    public static void onClientTick(Level level, BlockPos pos, BlockState state, VehicleCrateTileEntity entity)
+    {
+        entity.onClientTick();
     }
 
     public void setEntityId(ResourceLocation entityId)
@@ -95,12 +106,54 @@ public class VehicleCrateTileEntity extends TileEntitySynced implements ITickabl
         return (E) entity;
     }
 
-    @Override
-    public void tick()
+    protected void onServerTick()
     {
         if(this.opened)
         {
             this.timer += 5;
+
+            if(this.timer > 250)
+            {
+                BlockState state = this.level.getBlockState(this.worldPosition);
+                Direction facing = state.getValue(VehicleCrateBlock.DIRECTION);
+                EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(this.entityId);
+                if(entityType != null)
+                {
+                    Entity entity = entityType.create(this.level);
+                    if(entity != null)
+                    {
+                        if(entity instanceof VehicleEntity)
+                        {
+                            VehicleEntity vehicleEntity = (VehicleEntity) entity;
+                            vehicleEntity.setColor(this.color);
+                            if(!this.wheelStack.isEmpty())
+                            {
+                                vehicleEntity.setWheelStack(this.wheelStack);
+                            }
+                        }
+                        if(this.opener != null && entity instanceof PoweredVehicleEntity)
+                        {
+                            PoweredVehicleEntity poweredVehicle = (PoweredVehicleEntity) entity;
+                            poweredVehicle.setOwner(this.opener);
+                            if(!this.engineStack.isEmpty())
+                            {
+                                poweredVehicle.setEngineStack(this.engineStack);
+                            }
+                        }
+                        entity.absMoveTo(this.worldPosition.getX() + 0.5, this.worldPosition.getY(), this.worldPosition.getZ() + 0.5, facing.get2DDataValue() * 90F + 180F, 0F);
+                        entity.setYHeadRot(facing.get2DDataValue() * 90F + 180F);
+                        this.level.addFreshEntity(entity);
+                    }
+                    this.level.setBlockAndUpdate(this.worldPosition, Blocks.AIR.defaultBlockState());
+                }
+            }
+        }
+    }
+
+    protected void onClientTick()
+    {
+        if(this.opened)
+        {
             if(this.level != null && this.level.isClientSide())
             {
                 if(this.entityId != null && this.entity == null)
@@ -112,7 +165,7 @@ public class VehicleCrateTileEntity extends TileEntitySynced implements ITickabl
                         if(this.entity != null)
                         {
                             VehicleHelper.playSound(SoundEvents.ITEM_BREAK, this.worldPosition, 1.0F, 0.5F);
-                            List<EntityDataManager.DataEntry<?>> entryList = this.entity.getEntityData().getAll();
+                            List<SynchedEntityData.DataItem<?>> entryList = this.entity.getEntityData().getAll();
                             if(entryList != null)
                             {
                                 entryList.forEach(dataEntry -> this.entity.onSyncedDataUpdated(dataEntry.getAccessor()));
@@ -156,57 +209,23 @@ public class VehicleCrateTileEntity extends TileEntitySynced implements ITickabl
                     this.level.addParticle(ParticleTypes.EXPLOSION_EMITTER, false, this.worldPosition.getX() + 0.5, this.worldPosition.getY() + 0.5, this.worldPosition.getZ() + 0.5, 0, 0, 0);
                 }
             }
-            if(!this.level.isClientSide && this.timer > 250)
-            {
-                BlockState state = this.level.getBlockState(this.worldPosition);
-                Direction facing = state.getValue(VehicleCrateBlock.DIRECTION);
-                EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(this.entityId);
-                if(entityType != null)
-                {
-                    Entity entity = entityType.create(this.level);
-                    if(entity != null)
-                    {
-                        if(entity instanceof VehicleEntity)
-                        {
-                            VehicleEntity vehicleEntity = (VehicleEntity) entity;
-                            vehicleEntity.setColor(this.color);
-                            if(!this.wheelStack.isEmpty())
-                            {
-                                vehicleEntity.setWheelStack(this.wheelStack);
-                            }
-                        }
-                        if(this.opener != null && entity instanceof PoweredVehicleEntity)
-                        {
-                            PoweredVehicleEntity poweredVehicle = (PoweredVehicleEntity) entity;
-                            poweredVehicle.setOwner(this.opener);
-                            if(!this.engineStack.isEmpty())
-                            {
-                                poweredVehicle.setEngineStack(this.engineStack);
-                            }
-                        }
-                        entity.absMoveTo(this.worldPosition.getX() + 0.5, this.worldPosition.getY(), this.worldPosition.getZ() + 0.5, facing.get2DDataValue() * 90F + 180F, 0F);
-                        entity.setYHeadRot(facing.get2DDataValue() * 90F + 180F);
-                        this.level.addFreshEntity(entity);
-                    }
-                    this.level.setBlockAndUpdate(this.worldPosition, Blocks.AIR.defaultBlockState());
-                }
-            }
         }
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT compound)
+    public void load(CompoundTag compound)
     {
-        super.load(state, compound);
-        if(compound.contains("Vehicle", Constants.NBT.TAG_STRING))
+        super.load(compound);
+
+        if(compound.contains("Vehicle", Tag.TAG_STRING))
         {
             this.entityId = new ResourceLocation(compound.getString("Vehicle"));
         }
-        if(compound.contains("Color", Constants.NBT.TAG_INT))
+        if(compound.contains("Color", Tag.TAG_INT))
         {
             this.color = compound.getInt("Color");
         }
-        if(compound.contains("EngineStack", Constants.NBT.TAG_COMPOUND))
+        if(compound.contains("EngineStack", Tag.TAG_COMPOUND))
         {
             this.engineStack = ItemStack.of(compound.getCompound("EngineStack"));
         }
@@ -216,7 +235,7 @@ public class VehicleCrateTileEntity extends TileEntitySynced implements ITickabl
             EngineItem engineItem = VehicleRegistry.getEngineItem(properties.getExtended(PoweredProperties.class).getEngineType(), EngineTier.IRON);
             this.engineStack = engineItem != null ? new ItemStack(engineItem) : ItemStack.EMPTY;
         }
-        if(compound.contains("WheelStack", Constants.NBT.TAG_COMPOUND))
+        if(compound.contains("WheelStack", Tag.TAG_COMPOUND))
         {
             this.wheelStack = ItemStack.of(compound.getCompound("WheelStack"));
         }
@@ -224,50 +243,48 @@ public class VehicleCrateTileEntity extends TileEntitySynced implements ITickabl
         {
             this.wheelStack = new ItemStack(ModItems.STANDARD_WHEEL.get());
         }
-        if(compound.contains("Opener", Constants.NBT.TAG_STRING))
+        if(compound.contains("Opener", Tag.TAG_STRING))
         {
             this.opener = compound.getUUID("Opener");
         }
-        if(compound.contains("Opened", Constants.NBT.TAG_BYTE))
+        if(compound.contains("Opened", Tag.TAG_BYTE))
         {
             this.opened = compound.getBoolean("Opened");
         }
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound)
+    protected void saveAdditional(CompoundTag compound)
     {
+        super.saveAdditional(compound);
+
         if(this.entityId != null)
         {
             compound.putString("Vehicle", this.entityId.toString());
         }
+
         if(this.opener != null)
         {
             compound.putUUID("Opener", this.opener);
         }
+
         if(!this.engineStack.isEmpty())
         {
             CommonUtils.writeItemStackToTag(compound, "EngineStack", this.engineStack);
         }
+
         if(!this.wheelStack.isEmpty())
         {
             CommonUtils.writeItemStackToTag(compound, "WheelStack", this.wheelStack);
         }
+
         compound.putInt("Color", this.color);
         compound.putBoolean("Opened", this.opened);
-        return super.save(compound);
     }
 
     @Override
-    public AxisAlignedBB getRenderBoundingBox()
+    public AABB getRenderBoundingBox()
     {
         return INFINITE_EXTENT_AABB;
-    }
-
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public double getViewDistance()
-    {
-        return 65536.0D;
     }
 }

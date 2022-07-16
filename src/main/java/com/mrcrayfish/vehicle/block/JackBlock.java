@@ -1,85 +1,94 @@
 package com.mrcrayfish.vehicle.block;
 
+import com.mrcrayfish.vehicle.init.ModTileEntities;
 import com.mrcrayfish.vehicle.tileentity.JackTileEntity;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 
 /**
  * Author: MrCrayfish
  */
-public class JackBlock extends RotatedObjectBlock
+public class JackBlock extends RotatedObjectBlock implements EntityBlock
 {
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
 
-    private static final VoxelShape SHAPE = Block.box(1, 0, 1, 15, 10, 15);
+    private static final VoxelShape SHAPE = box(1, 0, 1, 15, 10, 15);
 
     public JackBlock()
     {
-        super(AbstractBlock.Properties.of(Material.PISTON));
+        super(Properties.of(Material.PISTON));
         this.registerDefaultState(this.getStateDefinition().any().setValue(DIRECTION, Direction.NORTH).setValue(ENABLED, false));
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx)
     {
-        TileEntity tileEntity = worldIn.getBlockEntity(pos);
+        BlockEntity tileEntity = level.getBlockEntity(pos);
         if(tileEntity instanceof JackTileEntity)
         {
             JackTileEntity jack = (JackTileEntity) tileEntity;
-            return VoxelShapes.create(SHAPE.bounds().expandTowards(0, 0.5 * jack.getProgress(), 0));
+            return Shapes.create(SHAPE.bounds().expandTowards(0, 0.5 * jack.getProgress(), 0));
         }
         return SHAPE;
     }
 
+    @Nullable
     @Override
-    public boolean hasTileEntity(BlockState state)
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
     {
-        return true;
+        return new JackTileEntity(pos, state);
     }
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world)
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level p_153212_, BlockState p_153213_, BlockEntityType<T> type)
     {
-        return new JackTileEntity();
+        return createTickerHelper(type, ModTileEntities.JACK.get(), JackTileEntity::onServerTick);
+    }
+
+    @Nullable
+    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> p_152133_, BlockEntityType<E> p_152134_, BlockEntityTicker<? super E> p_152135_) {
+        return p_152134_ == p_152133_ ? (BlockEntityTicker<A>)p_152135_ : null;
     }
 
     @Override
-    public BlockRenderType getRenderShape(BlockState state)
+    public RenderShape getRenderShape(BlockState p_60550_)
     {
-        return BlockRenderType.ENTITYBLOCK_ANIMATED;
+        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
-    {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(ENABLED);
     }
 
     // Prevents the tile entity from being removed if the replacement block is the same
+
     @Override
-    public void onRemove(BlockState state, World world, BlockPos pos, BlockState replaceState, boolean what)
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState replaceState, boolean flag)
     {
         if(!state.is(replaceState.getBlock()))
         {
-            super.onRemove(state, world, pos, replaceState, what);
+            super.onRemove(state, level, pos, replaceState, flag);
         }
     }
 }

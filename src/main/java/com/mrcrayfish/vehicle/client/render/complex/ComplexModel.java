@@ -9,7 +9,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mrcrayfish.vehicle.client.model.IComplexModel;
 import com.mrcrayfish.vehicle.client.render.complex.transforms.Rotate;
 import com.mrcrayfish.vehicle.client.render.complex.transforms.Transform;
@@ -18,15 +18,15 @@ import com.mrcrayfish.vehicle.client.render.complex.value.Dynamic;
 import com.mrcrayfish.vehicle.client.render.complex.value.Static;
 import com.mrcrayfish.vehicle.entity.VehicleEntity;
 import com.mrcrayfish.vehicle.util.RenderUtil;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.IResource;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.ResourceLocationException;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.util.GsonHelper;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -58,7 +58,7 @@ public class ComplexModel
     private final ResourceLocation modelLocation;
     private final List<Transform> transforms;
     private final List<ComplexModel> children;
-    private IBakedModel cachedModel;
+    private BakedModel cachedModel;
 
     public ComplexModel(ResourceLocation modelLocation, List<Transform> transforms, List<ComplexModel> children)
     {
@@ -67,10 +67,10 @@ public class ComplexModel
         this.children = ImmutableList.copyOf(children);
     }
 
-    public void render(VehicleEntity entity, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, float partialTicks, int color, int light)
+    public void render(VehicleEntity entity, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, float partialTicks, int color, int light)
     {
         this.transforms.forEach(transform -> transform.apply(entity, matrixStack, partialTicks));
-        RenderUtil.renderColoredModel(this.getModel(), ItemCameraTransforms.TransformType.NONE, false, matrixStack, renderTypeBuffer, color, light, OverlayTexture.NO_OVERLAY);
+        RenderUtil.renderColoredModel(this.getModel(), ItemTransforms.TransformType.NONE, false, matrixStack, renderTypeBuffer, color, light, OverlayTexture.NO_OVERLAY);
         this.children.forEach(model -> {
             matrixStack.pushPose();
             model.render(entity, matrixStack, renderTypeBuffer, partialTicks, color, light);
@@ -78,7 +78,7 @@ public class ComplexModel
         });
     }
 
-    public final IBakedModel getModel()
+    public final BakedModel getModel()
     {
         if(this.cachedModel == null)
         {
@@ -103,25 +103,20 @@ public class ComplexModel
         public ComplexModel deserialize(JsonElement root, Type type, JsonDeserializationContext context) throws JsonParseException
         {
             JsonObject object = root.getAsJsonObject();
-            ResourceLocation location = new ResourceLocation(JSONUtils.getAsString(object, "model"));
+            ResourceLocation location = new ResourceLocation(GsonHelper.getAsString(object, "model"));
             List<Transform> transforms = Collections.emptyList();
             if(object.has("transforms") && object.get("transforms").isJsonArray())
             {
                 transforms = new ArrayList<>();
-                JsonArray transformArray = JSONUtils.getAsJsonArray(object, "transforms");
+                JsonArray transformArray = GsonHelper.getAsJsonArray(object, "transforms");
                 for(JsonElement e : transformArray)
                 {
                     if(!e.isJsonObject()) throw new JsonParseException("Transforms array can only contain objects");
                     JsonObject transformObj = e.getAsJsonObject();
-                    String transformType = JSONUtils.getAsString(transformObj, "type");
-                    switch(transformType)
-                    {
-                        case "translate":
-                            transforms.add(context.deserialize(transformObj, Translate.class));
-                            break;
-                        case "rotate":
-                            transforms.add(context.deserialize(transformObj, Rotate.class));
-                            break;
+                    String transformType = GsonHelper.getAsString(transformObj, "type");
+                    switch (transformType) {
+                        case "translate" -> transforms.add(context.deserialize(transformObj, Translate.class));
+                        case "rotate" -> transforms.add(context.deserialize(transformObj, Rotate.class));
                     }
                 }
             }
@@ -129,7 +124,7 @@ public class ComplexModel
             if(object.has("children") && object.get("children").isJsonArray())
             {
                 children = new ArrayList<>();
-                JsonArray childrenArray = JSONUtils.getAsJsonArray(object, "children");
+                JsonArray childrenArray = GsonHelper.getAsJsonArray(object, "children");
                 for(JsonElement e : childrenArray)
                 {
                     if(!e.isJsonObject()) throw new JsonParseException("Children array can only contain objects");
@@ -151,9 +146,11 @@ public class ComplexModel
             ResourceLocation complexLocation = new ResourceLocation(modelLocation.getNamespace(), "models/" + modelLocation.getPath() + ".complex");
             if(minecraft.getResourceManager().hasResource(complexLocation))
             {
-                IResource resource = minecraft.getResourceManager().getResource(complexLocation);
-                Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
-                return JSONUtils.fromJson(GSON, reader, ComplexModel.class);
+                try(Resource resource = minecraft.getResourceManager().getResource(complexLocation))
+                {
+                    Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
+                    return GsonHelper.fromJson(GSON, reader, ComplexModel.class);
+                }
             }
         }
         catch(JsonParseException | ResourceLocationException | IOException e)

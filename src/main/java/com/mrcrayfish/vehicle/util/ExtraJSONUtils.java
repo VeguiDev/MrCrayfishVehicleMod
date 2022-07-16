@@ -3,13 +3,13 @@ package com.mrcrayfish.vehicle.util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.mojang.math.Vector3f;
 import com.mrcrayfish.vehicle.common.VehicleRegistry;
 import com.mrcrayfish.vehicle.common.entity.Transform;
 import com.mrcrayfish.vehicle.entity.IEngineType;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.text.DecimalFormat;
@@ -45,14 +45,14 @@ public class ExtraJSONUtils
         if(!transform.equals(defaultValue) || VERBOSE_MODE)
         {
             JsonObject transformObject = new JsonObject();
-            write(transformObject, "translate", transform.getTranslate(), Vector3d.ZERO);
-            write(transformObject, "rotation", transform.getRotation(), Vector3d.ZERO);
+            write(transformObject, "translate", transform.getTranslate(), Vec3.ZERO);
+            write(transformObject, "rotation", transform.getRotation(), Vec3.ZERO);
             write(transformObject, "scale", transform.getScale(), 1.0);
             object.add(key, transformObject);
         }
     }
 
-    public static void write(JsonObject object, String key, Vector3d vec, Vector3d defaultValue)
+    public static void write(JsonObject object, String key, Vec3 vec, Vec3 defaultValue)
     {
         if(!vec.equals(defaultValue) || VERBOSE_MODE)
         {
@@ -88,21 +88,21 @@ public class ExtraJSONUtils
         }
     }
 
-    public static Vector3d getAsVector3d(JsonObject object, String memberName, Vector3d defaultValue)
+    public static Vec3 getAsVec3(JsonObject object, String memberName, Vec3 defaultValue)
     {
         if(object.has(memberName))
         {
-            JsonArray jsonArray = JSONUtils.getAsJsonArray(object, memberName);
+            JsonArray jsonArray = GsonHelper.getAsJsonArray(object, memberName);
             if(jsonArray.size() != 3)
             {
                 throw new JsonParseException("Expected 3 " + memberName + " values, found: " + jsonArray.size());
             }
             else
             {
-                double x = JSONUtils.convertToFloat(jsonArray.get(0), memberName + "[0]");
-                double y = JSONUtils.convertToFloat(jsonArray.get(1), memberName + "[1]");
-                double z = JSONUtils.convertToFloat(jsonArray.get(2), memberName + "[2]");
-                return new Vector3d(x, y, z);
+                double x = GsonHelper.convertToFloat(jsonArray.get(0), memberName + "[0]");
+                double y = GsonHelper.convertToFloat(jsonArray.get(1), memberName + "[1]");
+                double z = GsonHelper.convertToFloat(jsonArray.get(2), memberName + "[2]");
+                return new Vec3(x, y, z);
             }
         }
         return defaultValue;
@@ -113,13 +113,13 @@ public class ExtraJSONUtils
         if(!object.has(memberName))
             throw new JsonParseException("Missing member " + memberName);
 
-        JsonArray jsonArray = JSONUtils.getAsJsonArray(object, memberName);
+        JsonArray jsonArray = GsonHelper.getAsJsonArray(object, memberName);
         if(jsonArray.size() != 3)
             throw new JsonParseException("Expected 3 " + memberName + " values, found: " + jsonArray.size());
 
-        float x = JSONUtils.convertToFloat(jsonArray.get(0), memberName + "[0]");
-        float y = JSONUtils.convertToFloat(jsonArray.get(1), memberName + "[1]");
-        float z = JSONUtils.convertToFloat(jsonArray.get(2), memberName + "[2]");
+        float x = GsonHelper.convertToFloat(jsonArray.get(0), memberName + "[0]");
+        float y = GsonHelper.convertToFloat(jsonArray.get(1), memberName + "[1]");
+        float z = GsonHelper.convertToFloat(jsonArray.get(2), memberName + "[2]");
         return new Vector3f(x, y, z);
     }
 
@@ -128,9 +128,9 @@ public class ExtraJSONUtils
         if(object.has(key) && object.get(key).isJsonObject())
         {
             JsonObject transform = object.getAsJsonObject(key);
-            Vector3d translate = ExtraJSONUtils.getAsVector3d(transform, "translate", Vector3d.ZERO);
-            Vector3d rotation = ExtraJSONUtils.getAsVector3d(transform, "rotation", Vector3d.ZERO);
-            double scale = JSONUtils.getAsFloat(transform, "scale", 1.0F);
+            Vec3 translate = ExtraJSONUtils.getAsVec3(transform, "translate", Vec3.ZERO);
+            Vec3 rotation = ExtraJSONUtils.getAsVec3(transform, "rotation", Vec3.ZERO);
+            double scale = GsonHelper.getAsFloat(transform, "scale", 1.0F);
             return Transform.create(translate, rotation, scale);
         }
         return defaultValue;
@@ -138,7 +138,7 @@ public class ExtraJSONUtils
 
     public static IEngineType getAsEngineType(JsonObject object, String key, IEngineType defaultValue)
     {
-        String rawId = JSONUtils.getAsString(object, key, "");
+        String rawId = GsonHelper.getAsString(object, key, "");
         if(!rawId.isEmpty())
         {
             ResourceLocation id = new ResourceLocation(rawId);
@@ -152,7 +152,7 @@ public class ExtraJSONUtils
     {
         if(object.has(key) && object.get(key).isJsonPrimitive())
         {
-            return new ResourceLocation(JSONUtils.getAsString(object, key));
+            return new ResourceLocation(GsonHelper.getAsString(object, key));
         }
         return defaultValue;
     }
@@ -161,7 +161,7 @@ public class ExtraJSONUtils
     {
         if(object.has(key) && object.get(key).isJsonPrimitive())
         {
-            String enumString = JSONUtils.getAsString(object, key);
+            String enumString = GsonHelper.getAsString(object, key);
             return Stream.of(enumClass.getEnumConstants()).filter(side -> side.name().equalsIgnoreCase(enumString)).findFirst().orElse(defaultValue);
         }
         return defaultValue;

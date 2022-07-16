@@ -21,7 +21,9 @@
       "conditions": {
         "items": [
           {
-            "item": "vehicle:gold_electric_engine"
+            "items": [
+              "vehicle:gold_electric_engine"
+            ]
           }
         ]
       }

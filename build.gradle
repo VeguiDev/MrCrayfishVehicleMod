@@ -1,29 +1,20 @@
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-
-buildscript {
-    repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
-    }
+plugins {
+    id 'net.minecraftforge.gradle' version '5.1.+'
 }
-apply plugin: 'net.minecraftforge.gradle'
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
 apply plugin: 'maven-publish'
 
-version = "0.45.2-1.16.5"
+version = "0.45.3-1.18.2"
 group = "com.mrcrayfish"
 archivesBaseName = "vehicle-mod"
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 minecraft {
-    mappings channel: "official", version: "1.16.5"
+    mappings channel: "official", version: "1.18.2"
 
     runs {
         client {
@@ -74,20 +65,12 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.20'
+    minecraft 'net.minecraftforge:forge:1.18.2-40.1.54'
 
-    compile fg.deobf('curse.maven:obfuscate-289380:3336021')
-    compile fg.deobf('curse.maven:controllable-317269:3519536')
-    compile fg.deobf('curse.maven:configured-457570:3546348')
-    compile fg.deobf('curse.maven:catalogue-459701:3529457')
-}
-
-processResources {
-    doLast {
-        fileTree(dir: outputs.files.asPath, include: "**/*.json").each {
-            File file -> file.text = JsonOutput.toJson(new JsonSlurper().parse(file))
-        }
-    }
+    implementation fg.deobf('curse.maven:framework-549225:3723144')
+    implementation fg.deobf('curse.maven:controllable-317269:3707285')
+    implementation fg.deobf('curse.maven:configured-457570:3721946')
+    implementation fg.deobf('curse.maven:catalogue-459701:3803098')
 }
 
 jar {
@@ -104,20 +87,17 @@ jar {
     }
 }
 
-def reobfFile = file("$buildDir/reobfJar/output.jar")
-def reobfArtifact = artifacts.add('default', reobfFile) {
-    type 'jar'
-    builtBy 'reobfJar'
-}
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact reobfArtifact
+// Workaround as per https://youtrack.jetbrains.com/issue/IDEA-197469
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src/main/java"]
+        }
+        resources {
+            srcDirs = ["src/main/java", "src/main/resources"]
         }
     }
-    repositories {
-        maven {
-            url "file:///X:/localmaven/mcmods"
-        }
-    }
+
+    // at compile time, put resources in same directories as classes
+    main.output.resourcesDir = main.java.outputDir
 }

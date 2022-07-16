@@ -1,70 +1,53 @@
 package com.mrcrayfish.vehicle.util;
 
 import com.mrcrayfish.vehicle.block.RotatedObjectBlock;
-import net.minecraft.block.Block;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorldReader;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
 
 public class StateHelper
 {
-    public static Block getBlock(IWorldReader world, BlockPos pos, Direction facing, RelativeDirection dir)
+    public static Block getBlock(LevelAccessor world, BlockPos pos, Direction facing, RelativeDirection dir)
     {
         BlockPos target = getBlockPosRelativeTo(world, pos, facing, dir);
         return world.getBlockState(target).getBlock();
     }
 
-    public static RelativeDirection getRotation(IWorldReader world, BlockPos pos, Direction facing, RelativeDirection dir)
+    public static RelativeDirection getRotation(LevelAccessor world, BlockPos pos, Direction facing, RelativeDirection dir)
     {
         BlockPos target = getBlockPosRelativeTo(world, pos, facing, dir);
         Direction other = world.getBlockState(target).getValue(RotatedObjectBlock.DIRECTION);
         return getDirectionRelativeTo(facing, other);
     }
 
-    public static boolean isAirBlock(IWorldReader world, BlockPos pos, Direction facing, RelativeDirection dir)
+    public static boolean isAirBlock(LevelAccessor world, BlockPos pos, Direction facing, RelativeDirection dir)
     {
         BlockPos target = getBlockPosRelativeTo(world, pos, facing, dir);
         return world.getBlockState(target).isAir();
     }
 
-    private static BlockPos getBlockPosRelativeTo(IWorldReader world, BlockPos pos, Direction facing, RelativeDirection dir)
+    private static BlockPos getBlockPosRelativeTo(LevelAccessor world, BlockPos pos, Direction facing, RelativeDirection dir)
     {
-        switch(dir)
-        {
-            case LEFT:
-                return pos.relative(facing.getClockWise());
-            case RIGHT:
-                return pos.relative(facing.getCounterClockWise());
-            case UP:
-                return pos.relative(facing);
-            case DOWN:
-                return pos.relative(facing.getOpposite());
-            default:
-                return pos;
-        }
+        return switch (dir) {
+            case LEFT -> pos.relative(facing.getClockWise());
+            case RIGHT -> pos.relative(facing.getCounterClockWise());
+            case UP -> pos.relative(facing);
+            case DOWN -> pos.relative(facing.getOpposite());
+            default -> pos;
+        };
     }
 
     private static RelativeDirection getDirectionRelativeTo(Direction thisBlock, Direction otherBlock)
     {
         int num = thisBlock.get2DDataValue() - otherBlock.get2DDataValue();
-        switch(num)
-        {
-            case -3:
-                return RelativeDirection.LEFT;
-            case -2:
-                return RelativeDirection.UP;
-            case -1:
-                return RelativeDirection.RIGHT;
-            case 0:
-                return RelativeDirection.DOWN;
-            case 1:
-                return RelativeDirection.LEFT;
-            case 2:
-                return RelativeDirection.UP;
-            case 3:
-                return RelativeDirection.RIGHT;
-        }
-        return RelativeDirection.NONE;
+        return switch (num) {
+            case -3, 1 -> RelativeDirection.LEFT;
+            case -2, 2 -> RelativeDirection.UP;
+            case -1, 3 -> RelativeDirection.RIGHT;
+            case 0 -> RelativeDirection.DOWN;
+            default -> RelativeDirection.NONE;
+        };
     }
 
     public enum RelativeDirection

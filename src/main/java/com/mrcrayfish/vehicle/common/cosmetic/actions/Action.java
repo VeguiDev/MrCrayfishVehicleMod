@@ -1,11 +1,11 @@
 package com.mrcrayfish.vehicle.common.cosmetic.actions;
 
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mrcrayfish.vehicle.client.raytrace.MatrixTransform;
 import com.mrcrayfish.vehicle.entity.VehicleEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -25,7 +25,7 @@ public abstract class Action
      * @param vehicle the vehicle associated with this action
      * @param player the player interacting with the cosmetic
      */
-    public void onInteract(VehicleEntity vehicle, PlayerEntity player) {}
+    public void onInteract(VehicleEntity vehicle, Player player) {}
 
     /**
      * Called every time the vehicle ticks. This is called on both logical client and server.
@@ -41,9 +41,9 @@ public abstract class Action
      * @param sync if true, the returned compound tag is used for syncing to clients
      * @return a compound tag containing data from the action to save
      */
-    public CompoundNBT save(boolean sync)
+    public CompoundTag save(boolean sync)
     {
-        return new CompoundNBT();
+        return new CompoundTag();
     }
 
     /**
@@ -53,7 +53,7 @@ public abstract class Action
      * @param tag  a compound tag contain data for this action
      * @param sync if the compound tag is from a sync update
      */
-    public void load(CompoundNBT tag, boolean sync) {}
+    public void load(CompoundTag tag, boolean sync) {}
 
     public abstract void serialize(JsonObject object);
 
@@ -79,7 +79,7 @@ public abstract class Action
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void beforeRender(MatrixStack stack, VehicleEntity vehicle, float partialTicks) {}
+    public void beforeRender(PoseStack stack, VehicleEntity vehicle, float partialTicks) {}
 
     @OnlyIn(Dist.CLIENT)
     public void gatherTransforms(List<MatrixTransform> transforms) {}

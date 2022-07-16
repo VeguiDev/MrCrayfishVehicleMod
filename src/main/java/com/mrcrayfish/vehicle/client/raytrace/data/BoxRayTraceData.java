@@ -5,7 +5,7 @@ import com.mrcrayfish.vehicle.client.raytrace.ITriangleList;
 import com.mrcrayfish.vehicle.client.raytrace.RayTraceFunction;
 import com.mrcrayfish.vehicle.client.raytrace.Triangle;
 import com.mrcrayfish.vehicle.client.raytrace.TriangleList;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.phys.AABB;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -16,20 +16,20 @@ import java.util.List;
  */
 public class BoxRayTraceData extends RayTraceData
 {
-    private final AxisAlignedBB box;
+    private final AABB box;
 
-    public BoxRayTraceData(AxisAlignedBB box)
+    public BoxRayTraceData(AABB box)
     {
         this(box, null);
     }
 
-    public BoxRayTraceData(AxisAlignedBB box, @Nullable RayTraceFunction function)
+    public BoxRayTraceData(AABB box, @Nullable RayTraceFunction function)
     {
         super(function);
         this.box = box;
     }
 
-    public AxisAlignedBB getBox()
+    public AABB getBox()
     {
         return this.box;
     }

@@ -1,8 +1,8 @@
 package com.mrcrayfish.vehicle.client.raytrace.data;
 
+import com.mojang.math.Matrix4f;
 import com.mrcrayfish.vehicle.client.raytrace.ITriangleList;
 import com.mrcrayfish.vehicle.client.raytrace.RayTraceFunction;
-import net.minecraft.util.math.vector.Matrix4f;
 
 import javax.annotation.Nullable;
 

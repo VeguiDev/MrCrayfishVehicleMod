@@ -1,7 +1,9 @@
 package com.mrcrayfish.vehicle.client.render.tileentity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector4f;
 import com.mrcrayfish.vehicle.Config;
 import com.mrcrayfish.vehicle.block.GasPumpBlock;
 import com.mrcrayfish.vehicle.client.model.VehicleModels;
@@ -12,23 +14,21 @@ import com.mrcrayfish.vehicle.init.ModBlocks;
 import com.mrcrayfish.vehicle.tileentity.GasPumpTileEntity;
 import com.mrcrayfish.vehicle.util.CollisionHelper;
 import com.mrcrayfish.vehicle.util.RenderUtil;
-import net.minecraft.block.BlockState;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.client.settings.PointOfView;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.HandSide;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
@@ -36,17 +36,15 @@ import javax.annotation.Nullable;
 /**
  * Author: MrCrayfish
  */
-public class GasPumpRenderer extends TileEntityRenderer<GasPumpTileEntity>
+public class GasPumpRenderer implements BlockEntityRenderer<GasPumpTileEntity>
 {
-    public GasPumpRenderer(TileEntityRendererDispatcher dispatcher)
-    {
-        super(dispatcher);
-    }
+    public GasPumpRenderer(BlockEntityRendererProvider.Context ctx)
+    {}
 
     @Override
-    public void render(GasPumpTileEntity gasPump, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer renderTypeBuffer, int light, int overlay)
+    public void render(GasPumpTileEntity entity, float delta, PoseStack matrices, MultiBufferSource buffers, int light, int overlay)
     {
-        BlockState state = gasPump.getBlockState();
+        BlockState state = entity.getBlockState();
         if(state.getBlock() != ModBlocks.GAS_PUMP.get())
             return;
 
@@ -74,46 +72,52 @@ public class GasPumpRenderer extends TileEntityRenderer<GasPumpTileEntity>
 
         Vector3d fuelRot = Vector3d.fromPitchYaw((float) position.getRotX(), (float) position.getRotY());
         fuelRot = fuelRot.rotateYaw((float) Math.toRadians(-vehicle.rotationYaw)).normalize();*/
-       
-        matrixStack.pushPose();
 
-        if(gasPump.getFuelingEntity() != null)
+        matrices.pushPose();
+
+        if(entity.getFuelingEntity() != null)
         {
-            PlayerEntity player = gasPump.getFuelingEntity();
-            Vector3d nozzleVec = this.getNozzlePosition(player, gasPump.getBlockPos(), partialTicks);
-            Vector3d lookVec = this.getLookVector(player, partialTicks);
-            HermiteInterpolator.Point nozzlePoint = new HermiteInterpolator.Point(nozzleVec, new Vector3d(lookVec.x * 3, lookVec.y * 3, lookVec.z * 3));
-            gasPump.setCachedSpline(new HermiteInterpolator(new HermiteInterpolator.Point(new Vector3d(hoseStartPos[0], 0.6425, hoseStartPos[1]), new Vector3d(0, -5, 0)), nozzlePoint));
-            gasPump.setRecentlyUsed(true);
+            Player player = entity.getFuelingEntity();
+            Vec3 nozzleVec = this.getNozzlePosition(player, entity.getBlockPos(), delta);
+            Vec3 lookVec = this.getLookVector(player, delta);
+            HermiteInterpolator.Point nozzlePoint = new HermiteInterpolator.Point(nozzleVec, new Vec3(lookVec.x * 3, lookVec.y * 3, lookVec.z * 3));
+            entity.setCachedSpline(new HermiteInterpolator(new HermiteInterpolator.Point(new Vec3(hoseStartPos[0], 0.6425, hoseStartPos[1]), new Vec3(0, -5, 0)), nozzlePoint));
+            entity.setRecentlyUsed(true);
         }
-        else if(gasPump.getCachedSpline() == null || gasPump.isRecentlyUsed())
+        else if(entity.getCachedSpline() == null || entity.isRecentlyUsed())
         {
             double[] nozzlePos = CollisionHelper.fixRotation(facing, 0.345, 1.06, 0.345, 1.06);
-            HermiteInterpolator.Point nozzlePoint = new HermiteInterpolator.Point(new Vector3d(nozzlePos[0], 0.1, nozzlePos[1]), new Vector3d(0, 3, 0));
-            gasPump.setCachedSpline(new HermiteInterpolator(new HermiteInterpolator.Point(new Vector3d(hoseStartPos[0], 0.6425, hoseStartPos[1]), new Vector3d(0, -5, 0)), nozzlePoint));
-            gasPump.setRecentlyUsed(false);
+            HermiteInterpolator.Point nozzlePoint = new HermiteInterpolator.Point(new Vec3(nozzlePos[0], 0.1, nozzlePos[1]), new Vec3(0, 3, 0));
+            entity.setCachedSpline(new HermiteInterpolator(new HermiteInterpolator.Point(new Vec3(hoseStartPos[0], 0.6425, hoseStartPos[1]), new Vec3(0, -5, 0)), nozzlePoint));
+            entity.setRecentlyUsed(false);
         }
 
-        this.drawHose(gasPump.getCachedSpline(), matrixStack, renderTypeBuffer, light, this.getHoseColour(gasPump));
+        this.drawHose(entity.getCachedSpline(), matrices, buffers, light, this.getHoseColour(entity));
 
         // Renders the nozzle model on the gas pump if no one is using it
-        if(gasPump.getFuelingEntity() == null)
+        if(entity.getFuelingEntity() == null)
         {
-            matrixStack.pushPose();
+            matrices.pushPose();
             double[] nozzlePos = CollisionHelper.fixRotation(facing, 0.29, 1.06, 0.29, 1.06);
-            matrixStack.translate(nozzlePos[0], 0.5, nozzlePos[1]);
-            matrixStack.mulPose(Axis.POSITIVE_Y.rotationDegrees(facing.get2DDataValue() * -90F));
-            matrixStack.mulPose(Axis.POSITIVE_Y.rotationDegrees(180F));
-            matrixStack.mulPose(Axis.POSITIVE_X.rotationDegrees(90F));
-            matrixStack.scale(0.8F, 0.8F, 0.8F);
-            RenderUtil.renderColoredModel(VehicleModels.NOZZLE.getBaseModel(), ItemCameraTransforms.TransformType.NONE, false, matrixStack, renderTypeBuffer, -1, light, OverlayTexture.NO_OVERLAY);
-            matrixStack.popPose();
+            matrices.translate(nozzlePos[0], 0.5, nozzlePos[1]);
+            matrices.mulPose(Axis.POSITIVE_Y.rotationDegrees(facing.get2DDataValue() * -90F));
+            matrices.mulPose(Axis.POSITIVE_Y.rotationDegrees(180F));
+            matrices.mulPose(Axis.POSITIVE_X.rotationDegrees(90F));
+            matrices.scale(0.8F, 0.8F, 0.8F);
+            RenderUtil.renderColoredModel(VehicleModels.NOZZLE.getBaseModel(), ItemTransforms.TransformType.NONE, false, matrices, buffers, -1, light, OverlayTexture.NO_OVERLAY);
+            matrices.popPose();
         }
 
-        matrixStack.popPose();
+        matrices.popPose();
     }
 
-    private void drawHose(@Nullable HermiteInterpolator spline, MatrixStack matrixStack, IRenderTypeBuffer buffer, int light, Triple<Float, Float, Float> color)
+    @Override
+    public int getViewDistance()
+    {
+        return 65535;
+    }
+
+    private void drawHose(@Nullable HermiteInterpolator spline, PoseStack matrixStack, MultiBufferSource buffer, int light, Triple<Float, Float, Float> color)
     {
         if(spline == null)
             return;
@@ -125,7 +129,7 @@ public class GasPumpRenderer extends TileEntityRenderer<GasPumpTileEntity>
 
         matrixStack.pushPose();
 
-        IVertexBuilder builder = buffer.getBuffer(RenderType.leash());
+        VertexConsumer builder = buffer.getBuffer(RenderType.leash());
 
         int segments = Config.CLIENT.hoseSegments.get();
         for(int i = 0; i < spline.getSize() - 1; i++)
@@ -225,43 +229,43 @@ public class GasPumpRenderer extends TileEntityRenderer<GasPumpTileEntity>
         return Triple.of(red, green, blue);
     }
 
-    private void createVertex(IVertexBuilder buffer, Matrix4f parent, Matrix4f pos, float red, float green, float blue, int light)
+    private void createVertex(VertexConsumer buffer, Matrix4f parent, Matrix4f pos, float red, float green, float blue, int light)
     {
         Vector4f vec = new Vector4f(0.0F, 0.0F, 0.0F, 1.0F);
         vec.transform(pos);
         buffer.vertex(parent, vec.x(), vec.y(), vec.z()).color(red, green, blue, 1.0F).uv2(light).endVertex();
     }
 
-    private boolean isSlimModel(PlayerEntity player)
+    private boolean isSlimModel(Player player)
     {
-        if(player instanceof AbstractClientPlayerEntity)
+        if(player instanceof AbstractClientPlayer)
         {
-            String skinType = ((AbstractClientPlayerEntity) player).getModelName();
+            String skinType = ((AbstractClientPlayer) player).getModelName();
             return skinType.equals("slim");
         }
         return false;
     }
 
-    private float getPlayerBodyRotation(PlayerEntity player, float partialTicks)
+    private float getPlayerBodyRotation(Player player, float partialTicks)
     {
         return player.yBodyRotO + (player.yBodyRot - player.yBodyRotO) * partialTicks;
     }
 
-    private Vector3d getNozzlePosition(PlayerEntity player, BlockPos pos, float partialTicks)
+    private Vec3 getNozzlePosition(Player player, BlockPos pos, float partialTicks)
     {
         double playerX = (double) pos.getX() - (player.xo + (player.getX() - player.xo) * partialTicks);
         double playerY = (double) pos.getY() - (player.yo + (player.getY() - player.yo) * partialTicks);
         double playerZ = (double) pos.getZ() - (player.zo + (player.getZ() - player.zo) * partialTicks);
-        Vector3d playerVec = new Vector3d(-playerX, -playerY + 0.8, -playerZ);
+        Vec3 playerVec = new Vec3(-playerX, -playerY + 0.8, -playerZ);
 
         Minecraft minecraft = Minecraft.getInstance();
-        if(player.equals(minecraft.player) && minecraft.options.getCameraType() == PointOfView.FIRST_PERSON)
+        if(player.equals(minecraft.player) && minecraft.options.getCameraType() == CameraType.FIRST_PERSON)
         {
-            return playerVec.add(new Vector3d(-0.25, 0.5, -0.25).yRot(-player.yRot * 0.017453292F));
+            return playerVec.add(new Vec3(-0.25, 0.5, -0.25).yRot(-player.getYRot() * 0.017453292F));
         }
 
-        double handSide = player.getMainArm() == HandSide.RIGHT ? 1 : -1;
-        Vector3d nozzlePos = new Vector3d(-0.35 * handSide, -0.025, -0.025);
+        double handSide = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
+        Vec3 nozzlePos = new Vec3(-0.35 * handSide, -0.025, -0.025);
         if(this.isSlimModel(player))
         {
             nozzlePos = nozzlePos.add(0.03 * handSide, -0.03, 0.0);
@@ -272,15 +276,15 @@ public class GasPumpRenderer extends TileEntityRenderer<GasPumpTileEntity>
         return playerVec.add(nozzlePos);
     }
 
-    private Vector3d getLookVector(PlayerEntity player, float partialTicks)
+    private Vec3 getLookVector(Player player, float partialTicks)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        if(player.equals(minecraft.player) && minecraft.options.getCameraType() == PointOfView.FIRST_PERSON)
+        if(player.equals(minecraft.player) && minecraft.options.getCameraType() == CameraType.FIRST_PERSON)
         {
-            return Vector3d.directionFromRotation(0F, player.yRot);
+            return Vec3.directionFromRotation(0F, player.getYRot());
         }
 
         float bodyRotation = this.getPlayerBodyRotation(player, partialTicks);
-        return Vector3d.directionFromRotation(-20F, bodyRotation);
+        return Vec3.directionFromRotation(-20F, bodyRotation);
     }
 }

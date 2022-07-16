@@ -1,17 +1,18 @@
 package com.mrcrayfish.vehicle.network.message;
 
+import com.mrcrayfish.framework.api.network.PlayMessage;
 import com.mrcrayfish.vehicle.network.play.ServerPlayHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 /**
  * Author: MrCrayfish
  */
-public class MessagePickupVehicle implements IMessage<MessagePickupVehicle>
+public class MessagePickupVehicle extends PlayMessage<MessagePickupVehicle>
 {
     private int entityId;
 
@@ -30,13 +31,13 @@ public class MessagePickupVehicle implements IMessage<MessagePickupVehicle>
     }
 
     @Override
-    public void encode(MessagePickupVehicle message, PacketBuffer buffer)
+    public void encode(MessagePickupVehicle message, FriendlyByteBuf buffer)
     {
         buffer.writeInt(message.entityId);
     }
 
     @Override
-    public MessagePickupVehicle decode(PacketBuffer buffer)
+    public MessagePickupVehicle decode(FriendlyByteBuf buffer)
     {
         return new MessagePickupVehicle(buffer.readInt());
     }
@@ -46,7 +47,7 @@ public class MessagePickupVehicle implements IMessage<MessagePickupVehicle>
     {
         supplier.get().enqueueWork(() ->
         {
-            ServerPlayerEntity player = supplier.get().getSender();
+            ServerPlayer player = supplier.get().getSender();
             if(player != null)
             {
                 ServerPlayHandler.handlePickupVehicleMessage(player, message);

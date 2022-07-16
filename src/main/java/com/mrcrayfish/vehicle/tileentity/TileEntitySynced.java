@@ -1,19 +1,23 @@
 package com.mrcrayfish.vehicle.tileentity;
 
 import com.mrcrayfish.vehicle.util.TileEntityUtil;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 
-public class TileEntitySynced extends TileEntity
+public class TileEntitySynced extends BlockEntity
 {
-    public TileEntitySynced(TileEntityType<?> tileEntityTypeIn)
+    public TileEntitySynced(BlockEntityType<?> blockEntityType, BlockPos pos, BlockState state)
     {
-        super(tileEntityTypeIn);
+        super(blockEntityType, pos, state);
     }
 
     public void syncToClient()
@@ -23,21 +27,21 @@ public class TileEntitySynced extends TileEntity
     }
 
     @Override
-    public CompoundNBT getUpdateTag()
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
     {
-        return this.save(new CompoundNBT());
+        this.load(pkt.getTag());
     }
 
     @Nullable
     @Override
-    public SUpdateTileEntityPacket getUpdatePacket()
+    public Packet<ClientGamePacketListener> getUpdatePacket()
     {
-        return new SUpdateTileEntityPacket(this.getBlockPos(), 0, this.getUpdateTag());
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
-    public void onDataPacket(final NetworkManager net, final SUpdateTileEntityPacket pkt)
+    public CompoundTag getUpdateTag()
     {
-        this.load(null, pkt.getTag());
+        return this.saveWithId();
     }
 }

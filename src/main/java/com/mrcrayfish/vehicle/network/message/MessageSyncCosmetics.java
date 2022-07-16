@@ -1,10 +1,10 @@
 package com.mrcrayfish.vehicle.network.message;
 
+import com.mrcrayfish.framework.api.network.PlayMessage;
 import com.mrcrayfish.vehicle.network.play.ClientPlayHandler;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.NetworkEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 /**
  * Author: MrCrayfish
  */
-public class MessageSyncCosmetics implements IMessage<MessageSyncCosmetics>
+public class MessageSyncCosmetics extends PlayMessage<MessageSyncCosmetics>
 {
     private int entityId;
     private List<Pair<ResourceLocation, ResourceLocation>> dirtyEntries;
@@ -28,7 +28,7 @@ public class MessageSyncCosmetics implements IMessage<MessageSyncCosmetics>
     }
 
     @Override
-    public void encode(MessageSyncCosmetics message, PacketBuffer buffer)
+    public void encode(MessageSyncCosmetics message, FriendlyByteBuf buffer)
     {
         buffer.writeInt(message.entityId);
         buffer.writeInt(message.dirtyEntries.size());
@@ -40,7 +40,7 @@ public class MessageSyncCosmetics implements IMessage<MessageSyncCosmetics>
     }
 
     @Override
-    public MessageSyncCosmetics decode(PacketBuffer buffer)
+    public MessageSyncCosmetics decode(FriendlyByteBuf buffer)
     {
         int entityId = buffer.readInt();
         List<Pair<ResourceLocation, ResourceLocation>> dirtyEntries = new ArrayList<>();
@@ -57,10 +57,7 @@ public class MessageSyncCosmetics implements IMessage<MessageSyncCosmetics>
     @Override
     public void handle(MessageSyncCosmetics message, Supplier<NetworkEvent.Context> supplier)
     {
-        if(supplier.get().getDirection() == NetworkDirection.PLAY_TO_CLIENT)
-        {
-            IMessage.enqueueTask(supplier, () -> ClientPlayHandler.handleSyncCosmetics(message));
-        }
+        IMessage.enqueueTask(supplier, () -> ClientPlayHandler.handleSyncCosmetics(message));
     }
 
     public int getEntityId()

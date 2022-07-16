@@ -1,18 +1,19 @@
 package com.mrcrayfish.vehicle.client.screen.toolbar.widget;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.util.text.StringTextComponent;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.network.chat.TextComponent;
 
 /**
  * Author: MrCrayfish
  */
-public class Spacer extends Widget
+public class Spacer extends AbstractWidget
 {
     public Spacer(int widthIn)
     {
-        super(0, 0, widthIn, 20, StringTextComponent.EMPTY);
+        super(0, 0, widthIn, 20, TextComponent.EMPTY);
     }
 
     public static Spacer of(int width)
@@ -21,9 +22,9 @@ public class Spacer extends Widget
     }
 
     @Override
-    public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void renderButton(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks)
     {
-        AbstractGui.fill(matrixStack, this.x + this.width / 2, this.y, this.x + this.width / 2 + 1, this.y + this.height, 0xFF888888);
+        Gui.fill(matrixStack, this.x + this.width / 2, this.y, this.x + this.width / 2 + 1, this.y + this.height, 0xFF888888);
     }
 
     @Override
@@ -36,5 +37,10 @@ public class Spacer extends Widget
     public boolean mouseReleased(double mouseX, double mouseY, int button)
     {
         return false;
+    }
+
+    @Override
+    public void updateNarration(NarrationElementOutput output) {
+
     }
 }

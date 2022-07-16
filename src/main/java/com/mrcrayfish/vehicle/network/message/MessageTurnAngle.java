@@ -1,13 +1,14 @@
 package com.mrcrayfish.vehicle.network.message;
 
+import com.mrcrayfish.framework.api.network.PlayMessage;
 import com.mrcrayfish.vehicle.network.play.ServerPlayHandler;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class MessageTurnAngle implements IMessage<MessageTurnAngle>
+public class MessageTurnAngle extends PlayMessage<MessageTurnAngle>
 {
 	private float angle;
 
@@ -18,14 +19,19 @@ public class MessageTurnAngle implements IMessage<MessageTurnAngle>
 		this.angle = angle;
 	}
 
+	public float getAngle()
+	{
+		return this.angle;
+	}
+
 	@Override
-	public void encode(MessageTurnAngle message, PacketBuffer buffer)
+	public void encode(MessageTurnAngle message, FriendlyByteBuf buffer)
 	{
 		buffer.writeFloat(message.angle);
 	}
 
 	@Override
-	public MessageTurnAngle decode(PacketBuffer buffer)
+	public MessageTurnAngle decode(FriendlyByteBuf buffer)
 	{
 		return new MessageTurnAngle(buffer.readFloat());
 	}
@@ -35,17 +41,12 @@ public class MessageTurnAngle implements IMessage<MessageTurnAngle>
 	{
 		supplier.get().enqueueWork(() ->
 		{
-			ServerPlayerEntity player = supplier.get().getSender();
+			ServerPlayer player = supplier.get().getSender();
 			if(player != null)
 			{
 				ServerPlayHandler.handleTurnAngleMessage(player, message);
 			}
 		});
 		supplier.get().setPacketHandled(true);
-	}
-
-	public float getAngle()
-	{
-		return this.angle;
 	}
 }

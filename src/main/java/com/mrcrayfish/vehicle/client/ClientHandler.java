@@ -43,22 +43,21 @@ import com.mrcrayfish.vehicle.item.SprayCanItem;
 import com.mrcrayfish.vehicle.util.FluidUtils;
 import com.mrcrayfish.vehicle.util.VehicleUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.client.renderer.color.IItemColor;
-import net.minecraft.resources.IReloadableResourceManager;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.Unit;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -103,17 +102,11 @@ public class ClientHandler
         setupItemColors();
         setupInteractableVehicles();
 
-        IResourceManager manager = Minecraft.getInstance().getResourceManager();
-        if(manager instanceof IReloadableResourceManager)
-        {
-            ((IReloadableResourceManager) manager).registerReloadListener((stage, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor) -> {
-                return stage.wait(Unit.INSTANCE).thenRun(() -> {
-                    FluidUtils.clearCacheFluidColor();
-                    EntityRayTracer.instance().clearDataForReregistration();
-                    ComponentManager.clearCache();
-                });
-            });
-        }
+        ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener((ResourceManagerReloadListener) manager -> {
+            FluidUtils.clearCacheFluidColor();
+            EntityRayTracer.instance().clearDataForReregistration();
+            ComponentManager.clearCache();
+        });
     }
 
     private static void setupCustomBlockModels()
@@ -125,18 +118,18 @@ public class ClientHandler
 
     private static void setupRenderLayers()
     {
-        RenderTypeLookup.setRenderLayer(ModBlocks.WORKSTATION.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(ModBlocks.FLUID_EXTRACTOR.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(ModBlocks.GAS_PUMP.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(ModFluids.FUELIUM.get(), RenderType.translucent());
-        RenderTypeLookup.setRenderLayer(ModFluids.FLOWING_FUELIUM.get(), RenderType.translucent());
-        RenderTypeLookup.setRenderLayer(ModFluids.ENDER_SAP.get(), RenderType.translucent());
-        RenderTypeLookup.setRenderLayer(ModFluids.FLOWING_ENDER_SAP.get(), RenderType.translucent());
-        RenderTypeLookup.setRenderLayer(ModFluids.BLAZE_JUICE.get(), RenderType.translucent());
-        RenderTypeLookup.setRenderLayer(ModFluids.FLOWING_BLAZE_JUICE.get(), RenderType.translucent());
-        RenderTypeLookup.setRenderLayer(ModBlocks.FUEL_DRUM.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(ModBlocks.INDUSTRIAL_FUEL_DRUM.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(ModBlocks.TRAFFIC_CONE.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(ModBlocks.WORKSTATION.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(ModBlocks.FLUID_EXTRACTOR.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(ModBlocks.GAS_PUMP.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(ModFluids.FUELIUM.get(), RenderType.translucent());
+        ItemBlockRenderTypes.setRenderLayer(ModFluids.FLOWING_FUELIUM.get(), RenderType.translucent());
+        ItemBlockRenderTypes.setRenderLayer(ModFluids.ENDER_SAP.get(), RenderType.translucent());
+        ItemBlockRenderTypes.setRenderLayer(ModFluids.FLOWING_ENDER_SAP.get(), RenderType.translucent());
+        ItemBlockRenderTypes.setRenderLayer(ModFluids.BLAZE_JUICE.get(), RenderType.translucent());
+        ItemBlockRenderTypes.setRenderLayer(ModFluids.FLOWING_BLAZE_JUICE.get(), RenderType.translucent());
+        ItemBlockRenderTypes.setRenderLayer(ModBlocks.FUEL_DRUM.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(ModBlocks.INDUSTRIAL_FUEL_DRUM.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(ModBlocks.TRAFFIC_CONE.get(), RenderType.cutout());
     }
 
     private static void setupVehicleRenders()
@@ -169,35 +162,35 @@ public class ClientHandler
             VehicleUtil.registerVehicleRenderer(ModEntities.SOFACOPTER.get(), SofaHelicopterRenderer::new);
         }
 
-        RenderingRegistry.registerEntityRenderingHandler(ModEntities.JACK.get(), com.mrcrayfish.vehicle.client.render.JackRenderer::new);
+        EntityRenderers.register(ModEntities.JACK.get(), com.mrcrayfish.vehicle.client.render.JackRenderer::new);
     }
 
     private static void setupTileEntityRenderers()
     {
-        ClientRegistry.bindTileEntityRenderer(ModTileEntities.FLUID_EXTRACTOR.get(), FluidExtractorRenderer::new);
-        ClientRegistry.bindTileEntityRenderer(ModTileEntities.FUEL_DRUM.get(), FuelDrumRenderer::new);
-        ClientRegistry.bindTileEntityRenderer(ModTileEntities.INDUSTRIAL_FUEL_DRUM.get(), FuelDrumRenderer::new);
-        ClientRegistry.bindTileEntityRenderer(ModTileEntities.VEHICLE_CRATE.get(), VehicleCrateRenderer::new);
-        ClientRegistry.bindTileEntityRenderer(ModTileEntities.JACK.get(), com.mrcrayfish.vehicle.client.render.tileentity.JackRenderer::new);
-        ClientRegistry.bindTileEntityRenderer(ModTileEntities.GAS_PUMP.get(), GasPumpRenderer::new);
-        ClientRegistry.bindTileEntityRenderer(ModTileEntities.GAS_PUMP_TANK.get(), GasPumpTankRenderer::new);
-        ClientRegistry.bindTileEntityRenderer(ModTileEntities.FLUID_PUMP.get(), FluidPumpRenderer::new);
+        BlockEntityRenderers.register(ModTileEntities.FLUID_EXTRACTOR.get(), FluidExtractorRenderer::new);
+        BlockEntityRenderers.register(ModTileEntities.FUEL_DRUM.get(), FuelDrumRenderer::new);
+        BlockEntityRenderers.register(ModTileEntities.INDUSTRIAL_FUEL_DRUM.get(), FuelDrumRenderer::new);
+        BlockEntityRenderers.register(ModTileEntities.VEHICLE_CRATE.get(), VehicleCrateRenderer::new);
+        BlockEntityRenderers.register(ModTileEntities.JACK.get(), com.mrcrayfish.vehicle.client.render.tileentity.JackRenderer::new);
+        BlockEntityRenderers.register(ModTileEntities.GAS_PUMP.get(), GasPumpRenderer::new);
+        BlockEntityRenderers.register(ModTileEntities.GAS_PUMP_TANK.get(), GasPumpTankRenderer::new);
+        BlockEntityRenderers.register(ModTileEntities.FLUID_PUMP.get(), FluidPumpRenderer::new);
     }
 
     private static void setupScreenFactories()
     {
-        ScreenManager.register(ModContainers.FLUID_EXTRACTOR.get(), FluidExtractorScreen::new);
-        ScreenManager.register(ModContainers.FLUID_MIXER.get(), FluidMixerScreen::new);
-        ScreenManager.register(ModContainers.EDIT_VEHICLE.get(), EditVehicleScreen::new);
-        ScreenManager.register(ModContainers.WORKSTATION.get(), WorkstationScreen::new);
-        ScreenManager.register(ModContainers.STORAGE.get(), StorageScreen::new);
+        MenuScreens.register(ModContainers.FLUID_EXTRACTOR.get(), FluidExtractorScreen::new);
+        MenuScreens.register(ModContainers.FLUID_MIXER.get(), FluidMixerScreen::new);
+        MenuScreens.register(ModContainers.EDIT_VEHICLE.get(), EditVehicleScreen::new);
+        MenuScreens.register(ModContainers.WORKSTATION.get(), WorkstationScreen::new);
+        MenuScreens.register(ModContainers.STORAGE.get(), StorageScreen::new);
     }
 
     private static void setupItemColors()
     {
-        IItemColor color = (stack, index) ->
+        ItemColor color = (stack, index) ->
         {
-            if(index == 0 && stack.hasTag() && stack.getTag().contains("Color", Constants.NBT.TAG_INT))
+            if(index == 0 && stack.hasTag() && stack.getTag().contains("Color", Tag.TAG_INT))
             {
                 return stack.getTag().getInt("Color");
             }
@@ -227,7 +220,7 @@ public class ClientHandler
     @SubscribeEvent
     public static void registerParticleFactories(ParticleFactoryRegisterEvent event)
     {
-        ParticleManager manager = Minecraft.getInstance().particleEngine;
+        ParticleEngine manager = Minecraft.getInstance().particleEngine;
         manager.register(ModParticleTypes.TYRE_SMOKE.get(), TyreSmokeParticle.Factory::new);
         manager.register(ModParticleTypes.DUST.get(), DustParticle.Factory::new);
     }

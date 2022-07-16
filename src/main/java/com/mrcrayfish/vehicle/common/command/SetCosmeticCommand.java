@@ -4,13 +4,13 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mrcrayfish.vehicle.common.CosmeticTracker;
 import com.mrcrayfish.vehicle.entity.VehicleEntity;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.ResourceLocationArgument;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class SetCosmeticCommand
 {
-    public static void register(CommandDispatcher<CommandSource> dispatcher)
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher)
     {
         dispatcher.register(Commands.literal("setcosmetic")
             .requires(source -> source.hasPermission(2))
@@ -28,14 +28,14 @@ public class SetCosmeticCommand
                     .executes(SetCosmeticCommand::handle))));
     }
 
-    private static int handle(CommandContext<CommandSource> context)
+    private static int handle(CommandContext<CommandSourceStack> context)
     {
         Entity entity = context.getSource().getEntity();
-        if(!(entity instanceof PlayerEntity))
+        if(!(entity instanceof Player))
             return 1;
 
-        AxisAlignedBB box = entity.getBoundingBox().inflate(10, 10, 10);
-        List<VehicleEntity> vehicles = entity.level.getLoadedEntitiesOfClass(VehicleEntity.class, box);
+        AABB box = entity.getBoundingBox().inflate(10, 10, 10);
+        List<VehicleEntity> vehicles = entity.level.getEntitiesOfClass(VehicleEntity.class, box);
         if(vehicles.isEmpty())
             return 1;
 

@@ -5,24 +5,25 @@ import com.mrcrayfish.vehicle.entity.PoweredVehicleEntity;
 import com.mrcrayfish.vehicle.init.ModContainers;
 import com.mrcrayfish.vehicle.item.EngineItem;
 import com.mrcrayfish.vehicle.item.WheelItem;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Author: MrCrayfish
  */
-public class EditVehicleContainer extends Container
+public class EditVehicleContainer extends AbstractContainerMenu
 {
-    private final IInventory vehicleInventory;
+    private final Container vehicleInventory;
     private final PoweredVehicleEntity vehicle;
 
-    public EditVehicleContainer(int windowId, IInventory vehicleInventory, PoweredVehicleEntity vehicle, PlayerEntity player, PlayerInventory playerInventory)
+    public EditVehicleContainer(int windowId, SimpleContainer vehicleInventory, PoweredVehicleEntity vehicle, Player player, Container playerInventory)
     {
         super(ModContainers.EDIT_VEHICLE.get(), windowId);
+
         this.vehicleInventory = vehicleInventory;
         this.vehicle = vehicle;
 
@@ -72,7 +73,7 @@ public class EditVehicleContainer extends Container
         }
     }
 
-    public IInventory getVehicleInventory()
+    public Container getVehicleInventory()
     {
         return vehicleInventory;
     }
@@ -83,13 +84,7 @@ public class EditVehicleContainer extends Container
     }
 
     @Override
-    public boolean stillValid(PlayerEntity player)
-    {
-        return vehicleInventory.stillValid(player) && vehicle.isAlive() && vehicle.distanceTo(player) < 8.0F;
-    }
-
-    @Override
-    public ItemStack quickMoveStack(PlayerEntity playerIn, int index)
+    public ItemStack quickMoveStack(Player playerIn, int index)
     {
         ItemStack stack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
@@ -132,9 +127,15 @@ public class EditVehicleContainer extends Container
     }
 
     @Override
-    public void removed(PlayerEntity player)
+    public void removed(Player player)
     {
         super.removed(player);
-        vehicleInventory.stopOpen(player);
+        this.vehicleInventory.stopOpen(player);
+    }
+
+    @Override
+    public boolean stillValid(Player player)
+    {
+        return this.vehicleInventory.stillValid(player) && vehicle.isAlive() && vehicle.distanceTo(player) < 8.0F;
     }
 }

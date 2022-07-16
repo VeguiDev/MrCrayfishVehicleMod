@@ -1,16 +1,17 @@
 package com.mrcrayfish.vehicle.network.message;
 
+import com.mrcrayfish.framework.api.network.PlayMessage;
 import com.mrcrayfish.vehicle.network.play.ServerPlayHandler;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
 /**
  * Author: MrCrayfish
  */
-public class MessageAttachTrailer implements IMessage<MessageAttachTrailer>
+public class MessageAttachTrailer extends PlayMessage<MessageAttachTrailer>
 {
     private int trailerId;
 
@@ -22,13 +23,13 @@ public class MessageAttachTrailer implements IMessage<MessageAttachTrailer>
     }
 
     @Override
-    public void encode(MessageAttachTrailer message, PacketBuffer buffer)
+    public void encode(MessageAttachTrailer message, FriendlyByteBuf buffer)
     {
         buffer.writeInt(message.trailerId);
     }
 
     @Override
-    public MessageAttachTrailer decode(PacketBuffer buffer)
+    public MessageAttachTrailer decode(FriendlyByteBuf buffer)
     {
         return new MessageAttachTrailer(buffer.readInt());
     }
@@ -38,7 +39,7 @@ public class MessageAttachTrailer implements IMessage<MessageAttachTrailer>
     {
         supplier.get().enqueueWork(() ->
         {
-            ServerPlayerEntity player = supplier.get().getSender();
+            ServerPlayer player = supplier.get().getSender();
             if(player != null)
             {
                 ServerPlayHandler.handleAttachTrailerMessage(player, message);

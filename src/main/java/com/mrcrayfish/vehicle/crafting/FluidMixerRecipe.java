@@ -3,20 +3,20 @@ package com.mrcrayfish.vehicle.crafting;
 import com.mrcrayfish.vehicle.init.ModRecipeSerializers;
 import com.mrcrayfish.vehicle.tileentity.FluidMixerTileEntity;
 import com.mrcrayfish.vehicle.util.InventoryUtil;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
 
 import java.util.Objects;
 
 /**
  * Author: MrCrayfish
  */
-public class FluidMixerRecipe implements IRecipe<FluidMixerTileEntity>
+public class FluidMixerRecipe implements Recipe<FluidMixerTileEntity>
 {
     private ResourceLocation id;
     private FluidEntry[] inputs;
@@ -89,7 +89,7 @@ public class FluidMixerRecipe implements IRecipe<FluidMixerTileEntity>
     }
 
     @Override
-    public boolean matches(FluidMixerTileEntity fluidMixer, World worldIn)
+    public boolean matches(FluidMixerTileEntity fluidMixer, Level worldIn)
     {
         if(fluidMixer.getEnderSapTank().isEmpty() || fluidMixer.getBlazeTank().isEmpty())
             return false;
@@ -133,14 +133,14 @@ public class FluidMixerRecipe implements IRecipe<FluidMixerTileEntity>
     }
 
     @Override
-    public IRecipeSerializer<?> getSerializer()
+    public RecipeSerializer<?> getSerializer()
     {
         return ModRecipeSerializers.FLUID_MIXER.get();
     }
 
     @Override
-    public IRecipeType<?> getType()
+    public RecipeType<?> getType()
     {
-        return RecipeType.FLUID_MIXER;
+        return RecipeTypes.FLUID_MIXER;
     }
 }

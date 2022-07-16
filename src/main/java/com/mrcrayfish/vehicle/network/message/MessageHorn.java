@@ -1,13 +1,14 @@
 package com.mrcrayfish.vehicle.network.message;
 
+import com.mrcrayfish.framework.api.network.PlayMessage;
 import com.mrcrayfish.vehicle.network.play.ServerPlayHandler;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class MessageHorn implements IMessage<MessageHorn>
+public class MessageHorn extends PlayMessage<MessageHorn>
 {
 	private boolean horn;
 
@@ -19,13 +20,13 @@ public class MessageHorn implements IMessage<MessageHorn>
 	}
 
 	@Override
-	public void encode(MessageHorn message, PacketBuffer buffer)
+	public void encode(MessageHorn message, FriendlyByteBuf buffer)
 	{
 		buffer.writeBoolean(message.horn);
 	}
 
 	@Override
-	public MessageHorn decode(PacketBuffer buffer)
+	public MessageHorn decode(FriendlyByteBuf buffer)
 	{
 		return new MessageHorn(buffer.readBoolean());
 	}
@@ -35,7 +36,7 @@ public class MessageHorn implements IMessage<MessageHorn>
 	{
 		supplier.get().enqueueWork(() ->
 		{
-			ServerPlayerEntity player = supplier.get().getSender();
+			ServerPlayer player = supplier.get().getSender();
 			if(player != null)
 			{
 				ServerPlayHandler.handleHornMessage(player, message);
