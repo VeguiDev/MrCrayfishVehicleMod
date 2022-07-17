@@ -1,6 +1,5 @@
 package com.mrcrayfish.vehicle.block;
 
-import com.mrcrayfish.vehicle.init.ModBlocks;
 import com.mrcrayfish.vehicle.init.ModTileEntities;
 import com.mrcrayfish.vehicle.tileentity.FluidExtractorTileEntity;
 import com.mrcrayfish.vehicle.util.TileEntityUtil;

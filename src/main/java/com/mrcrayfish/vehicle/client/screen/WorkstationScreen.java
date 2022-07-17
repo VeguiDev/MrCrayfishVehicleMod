@@ -145,16 +145,14 @@ public class WorkstationScreen extends AbstractContainerScreen<WorkstationContai
             }
         }
 
-        if(cachedVehicle.getRenderer() instanceof AbstractPoweredRenderer)
+        if(cachedVehicle.getRenderer() instanceof AbstractPoweredRenderer<?> poweredRenderer)
         {
-            AbstractPoweredRenderer<?> poweredRenderer = (AbstractPoweredRenderer<?>) cachedVehicle.getRenderer();
             VehicleProperties properties = cachedVehicle.getProperties();
             if(properties.getExtended(PoweredProperties.class).getEngineType() != EngineType.NONE)
             {
                 ItemStack engine = this.workstation.getItem(1);
-                if(!engine.isEmpty() && engine.getItem() instanceof EngineItem)
+                if(!engine.isEmpty() && engine.getItem() instanceof EngineItem engineItem)
                 {
-                    EngineItem engineItem = (EngineItem) engine.getItem();
                     IEngineType engineType = engineItem.getEngineType();
                     if(properties.getExtended(PoweredProperties.class).getEngineType() == engineType)
                     {

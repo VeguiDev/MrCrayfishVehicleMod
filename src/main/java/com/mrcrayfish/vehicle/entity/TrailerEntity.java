@@ -106,9 +106,8 @@ public abstract class TrailerEntity extends VehicleEntity
     private void updatePullingMotion()
     {
         Vec3 towBar = this.pullingEntity.position();
-        if(this.pullingEntity instanceof VehicleEntity)
+        if(this.pullingEntity instanceof VehicleEntity vehicle)
         {
-            VehicleEntity vehicle = (VehicleEntity) this.pullingEntity;
             Vec3 towBarVec = vehicle.getProperties().getTowBarOffset();
             towBarVec = new Vec3(towBarVec.x, towBarVec.y, towBarVec.z).scale(0.0625);
             towBarVec = towBarVec.scale(vehicle.getProperties().getBodyTransform().getScale());

@@ -9,7 +9,6 @@ import com.mrcrayfish.vehicle.client.audio.MovingHornSound;
 import com.mrcrayfish.vehicle.client.handler.ControllerHandler;
 import com.mrcrayfish.vehicle.entity.HelicopterEntity;
 import com.mrcrayfish.vehicle.entity.PoweredVehicleEntity;
-import com.mrcrayfish.vehicle.init.ModBlocks;
 import com.mrcrayfish.vehicle.init.ModParticleTypes;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -27,7 +26,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -107,7 +105,7 @@ public class VehicleHelper
         if(vehicle.getControllingPassenger() != null)
         {
             Entity entity = vehicle.getControllingPassenger();
-            if(!(entity instanceof LivingEntity))
+            if(!(entity instanceof LivingEntity livingEntity))
                 return 0F;
 
             if(ClientHandler.isControllableLoaded())
@@ -121,7 +119,6 @@ public class VehicleHelper
                 }
             }
 
-            LivingEntity livingEntity = (LivingEntity) entity;
             float turnValue = Mth.clamp(livingEntity.xxa, -1.0F, 1.0F);
             float strengthModifier = livingEntity.xxa != 0 ? 0.05F : 0.2F;
             return steeringAngle + (vehicle.getMaxSteeringAngle() * turnValue - steeringAngle) * strengthModifier;

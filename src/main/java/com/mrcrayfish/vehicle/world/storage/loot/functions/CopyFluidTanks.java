@@ -52,9 +52,8 @@ public class CopyFluidTanks extends LootItemConditionalFunction
                         }
                     });
                 }
-                else if(tileEntity instanceof IFluidTankWriter)
+                else if(tileEntity instanceof IFluidTankWriter writer)
                 {
-                    IFluidTankWriter writer = (IFluidTankWriter) tileEntity;
                     if(!writer.areTanksEmpty())
                     {
                         writer.writeTanks(tileEntityTag);

@@ -16,7 +16,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -203,9 +202,8 @@ public class PumpTileEntity extends PipeTileEntity
                 if(state.getValue(FluidPipeBlock.CONNECTED_PIPES[direction.get3DDataValue()]))
                 {
                     BlockEntity selfTileEntity = this.level.getBlockEntity(pos);
-                    if(selfTileEntity instanceof PipeTileEntity)
+                    if(selfTileEntity instanceof PipeTileEntity pipeTileEntity)
                     {
-                        PipeTileEntity pipeTileEntity = (PipeTileEntity) selfTileEntity;
                         pipeTileEntity.addPump(this.worldPosition);
                         node.tileEntity = new WeakReference<>(pipeTileEntity);
                         FluidNetworkHandler.instance().addPipeForUpdate(pipeTileEntity);

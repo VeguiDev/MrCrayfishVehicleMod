@@ -122,12 +122,11 @@ public class ControllerHandler
             return;
 
         Map<ButtonBinding, Action> actionMap = event.getActions();
-        if(player.getVehicle() instanceof VehicleEntity)
+        if(player.getVehicle() instanceof VehicleEntity vehicle)
         {
             actionMap.remove(ButtonBindings.ATTACK);
             actionMap.remove(ButtonBindings.INVENTORY);
 
-            VehicleEntity vehicle = (VehicleEntity) player.getVehicle();
             actionMap.put(ButtonBindings.SNEAK, new Action(new TextComponent("Exit Vehicle"), Action.Side.LEFT));
 
             if(vehicle.getProperties().getSeats().size() > 1)

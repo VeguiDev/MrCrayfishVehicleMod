@@ -46,10 +46,9 @@ public class OverlayHandler
             return;
 
         Entity entity = player.getVehicle();
-        if(!(entity instanceof PoweredVehicleEntity))
+        if(!(entity instanceof PoweredVehicleEntity vehicle))
             return;
 
-        PoweredVehicleEntity vehicle = (PoweredVehicleEntity) entity;
         DecimalFormat format = new DecimalFormat("0.00");
         this.addStat("BPS", format.format(vehicle.getSpeed()));
 
@@ -61,9 +60,8 @@ public class OverlayHandler
 
         if(!FMLLoader.isProduction())
         {
-            if(vehicle instanceof LandVehicleEntity)
+            if(vehicle instanceof LandVehicleEntity landVehicle)
             {
-                LandVehicleEntity landVehicle = (LandVehicleEntity) vehicle;
                 String traction = format.format(landVehicle.getTraction());
                 this.addStat("Traction", traction);
 

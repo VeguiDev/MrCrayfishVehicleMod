@@ -87,9 +87,8 @@ public class FluidPumpBlock extends FluidPipeBlock implements EntityBlock
         if(!level.isClientSide())
         {
             PipeTileEntity tileEntity = getPipeTileEntity(level, pos);
-            if(tileEntity instanceof PumpTileEntity)
+            if(tileEntity instanceof PumpTileEntity pumpTileEntity)
             {
-                PumpTileEntity pumpTileEntity = (PumpTileEntity) tileEntity;
 
                 /*if(!FMLLoader.isProduction())
                 {
@@ -162,9 +161,8 @@ public class FluidPumpBlock extends FluidPipeBlock implements EntityBlock
     {
         boolean disabled = false;
         BlockEntity tileEntity = world.getBlockEntity(pos);
-        if(tileEntity instanceof PumpTileEntity)
+        if(tileEntity instanceof PumpTileEntity pump)
         {
-            PumpTileEntity pump = (PumpTileEntity) tileEntity;
             disabled = !pump.getPowerMode().test(pump);
         }
         state = state.setValue(DISABLED, disabled);

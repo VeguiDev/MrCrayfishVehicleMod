@@ -226,9 +226,8 @@ public class CommonEvents
                 {
                     BlockPos pos = event.getPos();
                     BlockEntity tileEntity = event.getWorld().getBlockEntity(pos);
-                    if(tileEntity instanceof JackTileEntity)
+                    if(tileEntity instanceof JackTileEntity jack)
                     {
-                        JackTileEntity jack = (JackTileEntity) tileEntity;
                         if(jack.getJack() == null)
                         {
                             CompoundTag tagCompound = HeldVehicleDataHandler.getHeldVehicle(player);
@@ -357,9 +356,8 @@ public class CommonEvents
     public void onPlayerDeath(LivingDeathEvent event)
     {
         Entity entity = event.getEntityLiving();
-        if(entity instanceof Player)
+        if(entity instanceof Player player)
         {
-            Player player = (Player) entity;
             this.dropVehicle(player);
         }
     }

@@ -40,10 +40,9 @@ public interface RayTraceFunction
     RayTraceFunction FUNCTION_FUELING = (rayTracer, result, player) ->
     {
         Entity entity = result.getEntity();
-        if(!(entity instanceof PoweredVehicleEntity))
+        if(!(entity instanceof PoweredVehicleEntity poweredVehicle))
             return null;
 
-        PoweredVehicleEntity poweredVehicle = (PoweredVehicleEntity) entity;
         if(!poweredVehicle.requiresEnergy() || poweredVehicle.getCurrentEnergy() >= poweredVehicle.getEnergyCapacity())
             return null;
 
@@ -55,10 +54,9 @@ public interface RayTraceFunction
                 break gasPump;
 
             tileEntity = player.level.getBlockEntity(pos.below());
-            if(!(tileEntity instanceof GasPumpTankTileEntity))
+            if(!(tileEntity instanceof GasPumpTankTileEntity gasPumpTank))
                 break gasPump;
 
-            GasPumpTankTileEntity gasPumpTank = (GasPumpTankTileEntity) tileEntity;
             FluidTank tank = gasPumpTank.getFluidTank();
             FluidStack stack = tank.getFluid();
             if(stack.isEmpty() || !Config.SERVER.validFuels.get().contains(stack.getFluid().getRegistryName().toString()))

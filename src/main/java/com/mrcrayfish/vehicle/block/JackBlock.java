@@ -42,9 +42,8 @@ public class JackBlock extends RotatedObjectBlock implements EntityBlock
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx)
     {
         BlockEntity tileEntity = level.getBlockEntity(pos);
-        if(tileEntity instanceof JackTileEntity)
+        if(tileEntity instanceof JackTileEntity jack)
         {
-            JackTileEntity jack = (JackTileEntity) tileEntity;
             return Shapes.create(SHAPE.bounds().expandTowards(0, 0.5 * jack.getProgress(), 0));
         }
         return SHAPE;

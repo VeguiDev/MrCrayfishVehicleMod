@@ -2,7 +2,6 @@ package com.mrcrayfish.vehicle.init;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mrcrayfish.vehicle.common.command.SetCosmeticCommand;
-import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

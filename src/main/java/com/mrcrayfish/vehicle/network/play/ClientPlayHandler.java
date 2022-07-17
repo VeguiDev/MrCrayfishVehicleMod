@@ -37,10 +37,9 @@ public class ClientPlayHandler
             return;
 
         Entity entity = world.getEntity(message.getEntityId());
-        if(!(entity instanceof IStorage))
+        if(!(entity instanceof IStorage storage))
             return;
 
-        IStorage storage = (IStorage) entity;
         String[] keys = message.getKeys();
         CompoundTag[] tags = message.getTags();
         for(int i = 0; i < keys.length; i++)
@@ -67,9 +66,8 @@ public class ClientPlayHandler
         LazyOptional<IFluidHandler> optional = entity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY);
         optional.ifPresent(handler ->
         {
-            if(handler instanceof FluidTank)
+            if(handler instanceof FluidTank tank)
             {
-                FluidTank tank = (FluidTank) handler;
                 tank.setFluid(message.getStack());
             }
         });
@@ -81,9 +79,8 @@ public class ClientPlayHandler
         if(player != null)
         {
             Entity entity = player.getCommandSenderWorld().getEntity(message.getEntityId());
-            if(entity instanceof VehicleEntity)
+            if(entity instanceof VehicleEntity vehicle)
             {
-                VehicleEntity vehicle = (VehicleEntity) entity;
                 int oldSeatIndex = vehicle.getSeatTracker().getSeatIndex(message.getUuid());
                 vehicle.getSeatTracker().setSeatIndex(message.getSeatIndex(), message.getUuid());
                 Entity passenger = vehicle.getPassengers().stream().filter(e -> e.getUUID().equals(message.getUuid())).findFirst().orElse(null);

@@ -78,9 +78,8 @@ public class EntityJack extends Entity implements IEntityAdditionalSpawnData
         }
 
         BlockEntity tileEntity = this.level.getBlockEntity(new BlockPos(this.initialX, this.initialY, this.initialZ));
-        if(tileEntity instanceof JackTileEntity)
+        if(tileEntity instanceof JackTileEntity jackTileEntity)
         {
-            JackTileEntity jackTileEntity = (JackTileEntity) tileEntity;
             this.setPos(this.initialX, this.initialY + 0.5 * (jackTileEntity.liftProgress / (double) JackTileEntity.MAX_LIFT_PROGRESS), this.initialZ);
         }
     }
@@ -109,9 +108,8 @@ public class EntityJack extends Entity implements IEntityAdditionalSpawnData
     @Override
     public void positionRider(Entity passenger)
     {
-        if(passenger instanceof VehicleEntity)
+        if(passenger instanceof VehicleEntity vehicle)
         {
-            VehicleEntity vehicle = (VehicleEntity) passenger;
             Vec3 heldOffset = vehicle.getProperties().getHeldOffset().yRot(passenger.getYRot() * 0.017453292F);
             vehicle.setPos(this.getX() - heldOffset.z * 0.0625, this.getY() - heldOffset.y * 0.0625 - 2 * 0.0625, this.getZ() - heldOffset.x * 0.0625);
         }

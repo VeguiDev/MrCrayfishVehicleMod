@@ -1,7 +1,6 @@
 package com.mrcrayfish.vehicle.client.handler;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import com.mrcrayfish.framework.common.data.SyncedEntityData;
 import com.mrcrayfish.vehicle.client.render.AbstractVehicleRenderer;
@@ -63,10 +62,9 @@ public class PlayerModelHandler
      */
     private void applyWheelieTransformations(VehicleEntity vehicle, Player player, PoseStack matrixStack, float partialTicks)
     {
-        if(!(vehicle instanceof LandVehicleEntity))
+        if(!(vehicle instanceof LandVehicleEntity landVehicle))
             return;
 
-        LandVehicleEntity landVehicle = (LandVehicleEntity) vehicle;
         if(!landVehicle.canWheelie())
             return;
 

@@ -169,10 +169,9 @@ public class CameraHandler
             return;
 
         LocalPlayer player = minecraft.player;
-        if(!(player.getVehicle() instanceof VehicleEntity))
+        if(!(player.getVehicle() instanceof VehicleEntity vehicle))
             return;
 
-        VehicleEntity vehicle = (VehicleEntity) player.getVehicle();
         this.cameraHelper.tick(vehicle, minecraft.options.getCameraType());
     }
 
@@ -192,11 +191,10 @@ public class CameraHandler
             return;
 
         LocalPlayer player = minecraft.player;
-        if(!(player.getVehicle() instanceof VehicleEntity))
+        if(!(player.getVehicle() instanceof VehicleEntity vehicle))
             return;
 
         CameraType pointOfView = minecraft.options.getCameraType();
-        VehicleEntity vehicle = (VehicleEntity) player.getVehicle();
         this.cameraHelper.setupVanillaCamera(info, pointOfView, vehicle, player, partialTicks);
     }
 

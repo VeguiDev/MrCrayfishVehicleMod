@@ -122,18 +122,16 @@ public class VehicleCrateTileEntity extends TileEntitySynced
                     Entity entity = entityType.create(this.level);
                     if(entity != null)
                     {
-                        if(entity instanceof VehicleEntity)
+                        if(entity instanceof VehicleEntity vehicleEntity)
                         {
-                            VehicleEntity vehicleEntity = (VehicleEntity) entity;
                             vehicleEntity.setColor(this.color);
                             if(!this.wheelStack.isEmpty())
                             {
                                 vehicleEntity.setWheelStack(this.wheelStack);
                             }
                         }
-                        if(this.opener != null && entity instanceof PoweredVehicleEntity)
+                        if(this.opener != null && entity instanceof PoweredVehicleEntity poweredVehicle)
                         {
-                            PoweredVehicleEntity poweredVehicle = (PoweredVehicleEntity) entity;
                             poweredVehicle.setOwner(this.opener);
                             if(!this.engineStack.isEmpty())
                             {
@@ -170,18 +168,16 @@ public class VehicleCrateTileEntity extends TileEntitySynced
                             {
                                 entryList.forEach(dataEntry -> this.entity.onSyncedDataUpdated(dataEntry.getAccessor()));
                             }
-                            if(this.entity instanceof VehicleEntity)
+                            if(this.entity instanceof VehicleEntity vehicleEntity)
                             {
-                                VehicleEntity vehicleEntity = (VehicleEntity) this.entity;
                                 vehicleEntity.setColor(this.color);
                                 if(!this.wheelStack.isEmpty())
                                 {
                                     vehicleEntity.setWheelStack(this.wheelStack);
                                 }
                             }
-                            if(this.entity instanceof PoweredVehicleEntity)
+                            if(this.entity instanceof PoweredVehicleEntity entityPoweredVehicle)
                             {
-                                PoweredVehicleEntity entityPoweredVehicle = (PoweredVehicleEntity) this.entity;
                                 if(this.engineStack != null)
                                 {
                                     entityPoweredVehicle.setEngineStack(this.engineStack);

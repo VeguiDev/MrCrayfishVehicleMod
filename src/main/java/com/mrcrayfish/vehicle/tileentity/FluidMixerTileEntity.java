@@ -73,28 +73,18 @@ public class FluidMixerTileEntity extends TileEntitySynced implements Container,
     {
         public int get(int index)
         {
-            switch(index)
-            {
-                case 0:
-                    return extractionProgress;
-                case 1:
-                    return remainingFuel;
-                case 2:
-                    return fuelMaxProgress;
-                case 3:
-                    return tankBlaze.getFluidAmount();
-                case 4:
-                    return tankEnderSap.getFluidAmount();
-                case 5:
-                    return tankFuelium.getFluidAmount();
-                case 6:
-                    return tankBlaze.getFluid().getFluid().getRegistryName().hashCode();
-                case 7:
-                    return tankEnderSap.getFluid().getFluid().getRegistryName().hashCode();
-                case 8:
-                    return tankFuelium.getFluid().getFluid().getRegistryName().hashCode();
-            }
-            return 0;
+            return switch (index) {
+                case 0 -> extractionProgress;
+                case 1 -> remainingFuel;
+                case 2 -> fuelMaxProgress;
+                case 3 -> tankBlaze.getFluidAmount();
+                case 4 -> tankEnderSap.getFluidAmount();
+                case 5 -> tankFuelium.getFluidAmount();
+                case 6 -> tankBlaze.getFluid().getFluid().getRegistryName().hashCode();
+                case 7 -> tankEnderSap.getFluid().getFluid().getRegistryName().hashCode();
+                case 8 -> tankFuelium.getFluid().getFluid().getRegistryName().hashCode();
+                default -> 0;
+            };
         }
 
         public void set(int index, int value)

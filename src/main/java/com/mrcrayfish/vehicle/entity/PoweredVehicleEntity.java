@@ -192,10 +192,9 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
                 return;
 
             tileEntity = this.level.getBlockEntity(pos.below());
-            if(!(tileEntity instanceof GasPumpTankTileEntity))
+            if(!(tileEntity instanceof GasPumpTankTileEntity gasPumpTank))
                 return;
 
-            GasPumpTankTileEntity gasPumpTank = (GasPumpTankTileEntity) tileEntity;
             FluidTank tank = gasPumpTank.getFluidTank();
             FluidStack stack = tank.getFluid();
             if(stack.isEmpty() || !Config.SERVER.validFuels.get().contains(stack.getFluid().getRegistryName().toString()))
@@ -214,10 +213,9 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
         }
 
         ItemStack stack = player.getItemInHand(hand);
-        if(!(stack.getItem() instanceof JerryCanItem))
+        if(!(stack.getItem() instanceof JerryCanItem jerryCan))
             return;
 
-        JerryCanItem jerryCan = (JerryCanItem) stack.getItem();
         Optional<IFluidHandlerItem> optional = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).resolve();
         if(!optional.isPresent())
             return;
@@ -880,9 +878,8 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
         if(!this.level.isClientSide())
         {
             ItemStack engine = this.vehicleInventory.getItem(0);
-            if(engine.getItem() instanceof EngineItem)
+            if(engine.getItem() instanceof EngineItem item)
             {
-                EngineItem item = (EngineItem) engine.getItem();
                 if(item.getEngineType() == this.getEngineType())
                 {
                     this.setEngineStack(engine.copy());

@@ -8,9 +8,11 @@ import com.mrcrayfish.vehicle.client.screen.toolbar.widget.IconButton;
 import com.mrcrayfish.vehicle.client.screen.toolbar.widget.Spacer;
 import com.mrcrayfish.vehicle.util.CommonUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -59,6 +61,8 @@ public abstract class AbstractToolbarScreen extends Screen
         int startX = (this.width - dimensions.getLeft()) / 2;
         int startY = (this.height - dimensions.getRight()) - dimensions.getRight() / 2;
         int offset = 0;
+
+        //noinspection ForLoopReplaceableByForEach
         for(int i = 0; i < widgets.size(); i++)
         {
             AbstractWidget widget = widgets.get(i);
@@ -137,6 +141,7 @@ public abstract class AbstractToolbarScreen extends Screen
         float vScale = 1.0F / 256.0F;
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder builder = tessellator.getBuilder();
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         builder.vertex(x, y + height, 0).uv(u * uScale, (v + textureHeight) * vScale).endVertex();
         builder.vertex(x + width, y + height, 0).uv((u + textureWidth) * uScale, (v + textureHeight) * vScale).endVertex();

@@ -63,8 +63,7 @@ public class FluidMixerRecipe implements Recipe<FluidMixerTileEntity>
     @Override
     public boolean equals(Object obj)
     {
-        if(!(obj instanceof FluidMixerRecipe)) return false;
-        FluidMixerRecipe other = (FluidMixerRecipe) obj;
+        if(!(obj instanceof FluidMixerRecipe other)) return false;
         int index = -1;
         for(int i = 0; i < 2; i++)
         {

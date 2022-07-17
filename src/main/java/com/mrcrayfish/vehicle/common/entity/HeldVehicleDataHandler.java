@@ -60,9 +60,8 @@ public class HeldVehicleDataHandler
     @SubscribeEvent
     public void onStartTracking(PlayerEvent.StartTracking event)
     {
-        if(event.getTarget() instanceof Player)
+        if(event.getTarget() instanceof Player player)
         {
-            Player player = (Player) event.getTarget();
             CompoundTag vehicleTag = getHeldVehicle(player);
             PacketHandler.getPlayChannel().send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) event.getPlayer()), new MessageSyncHeldVehicle(player.getId(), vehicleTag));
         }
@@ -72,9 +71,8 @@ public class HeldVehicleDataHandler
     public void onPlayerJoinWorld(EntityJoinWorldEvent event)
     {
         Entity entity = event.getEntity();
-        if(entity instanceof Player && !event.getWorld().isClientSide)
+        if(entity instanceof Player player && !event.getWorld().isClientSide)
         {
-            Player player = (Player) entity;
             CompoundTag vehicleTag = getHeldVehicle(player);
             PacketHandler.getPlayChannel().send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncHeldVehicle(player.getId(), vehicleTag));
         }

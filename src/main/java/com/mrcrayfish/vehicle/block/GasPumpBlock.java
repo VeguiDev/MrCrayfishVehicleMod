@@ -93,9 +93,8 @@ public class GasPumpBlock extends RotatedObjectBlock implements EntityBlock
         if(state.getValue(TOP))
         {
             BlockEntity tileEntity = level.getBlockEntity(pos);
-            if(tileEntity instanceof GasPumpTileEntity)
+            if(tileEntity instanceof GasPumpTileEntity gasPump)
             {
-                GasPumpTileEntity gasPump = (GasPumpTileEntity) tileEntity;
                 if(gasPump.getFuelingEntity() != null && gasPump.getFuelingEntity().getId() == player.getId())
                 {
                     gasPump.setFuelingEntity(null);

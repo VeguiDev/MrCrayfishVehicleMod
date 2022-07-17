@@ -11,6 +11,7 @@ import com.mrcrayfish.vehicle.entity.PoweredVehicleEntity;
 import com.mrcrayfish.vehicle.entity.VehicleEntity;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -73,9 +74,8 @@ public class EntityVehicleRenderer<T extends VehicleEntity> extends EntityRender
         if(!Config.CLIENT.renderDebugging.get())
             return;
 
-        if(entity instanceof PoweredVehicleEntity)
+        if(entity instanceof PoweredVehicleEntity poweredVehicle)
         {
-            PoweredVehicleEntity poweredVehicle = (PoweredVehicleEntity) entity;
             VehicleProperties properties = entity.getProperties();
             this.drawAxle(poweredVehicle.getFrontAxleOffset(), properties, stack);
             this.drawAxle(poweredVehicle.getRearAxleOffset(), properties, stack);
@@ -102,6 +102,7 @@ public class EntityVehicleRenderer<T extends VehicleEntity> extends EntityRender
         RenderSystem.disableTexture();
         RenderSystem.lineWidth(Math.max(2.0F, (float) Minecraft.getInstance().getWindow().getWidth() / 1920.0F * 2.0F));
         RenderSystem.enableDepthTest();
+        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);

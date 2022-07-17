@@ -67,20 +67,14 @@ public class FluidExtractorTileEntity extends TileFluidHandlerSynced implements 
     {
         public int get(int index)
         {
-            switch(index)
-            {
-                case 0:
-                    return extractionProgress;
-                case 1:
-                    return remainingFuel;
-                case 2:
-                    return fuelMaxProgress;
-                case 3:
-                    return tank.getFluid().getFluid().getRegistryName().hashCode();
-                case 4:
-                    return tank.getFluidAmount();
-            }
-            return 0;
+            return switch (index) {
+                case 0 -> extractionProgress;
+                case 1 -> remainingFuel;
+                case 2 -> fuelMaxProgress;
+                case 3 -> tank.getFluid().getFluid().getRegistryName().hashCode();
+                case 4 -> tank.getFluidAmount();
+                default -> 0;
+            };
         }
 
         public void set(int index, int value)

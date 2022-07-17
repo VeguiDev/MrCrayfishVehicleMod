@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -127,6 +128,7 @@ public class FluidUtils
     {
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
+        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         buffer.vertex(x, y + height, 0).uv(minU, maxV).endVertex();
         buffer.vertex(x + width, y + height, 0).uv(maxU, maxV).endVertex();
@@ -208,8 +210,15 @@ public class FluidUtils
 
         public FluidSides(Direction ... sides)
         {
-            Stream.of(Direction.values()).forEach(direction -> this.map.put(direction, false));
-            Stream.of(sides).forEach(direction -> this.map.put(direction, true));
+            for(Direction direction : Direction.values())
+            {
+                this.map.put(direction, false);
+            }
+
+            for(Direction side : sides)
+            {
+                this.map.put(side, true);
+            }
         }
 
         public boolean test(Direction direction)

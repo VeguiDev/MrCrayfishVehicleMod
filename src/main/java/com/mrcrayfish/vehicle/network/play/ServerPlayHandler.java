@@ -89,9 +89,8 @@ public class ServerPlayHandler
     public static void handleAttachTrailerMessage(ServerPlayer player, MessageAttachTrailer message)
     {
         Entity trailerEntity = player.level.getEntity(message.getTrailerId());
-        if(trailerEntity instanceof TrailerEntity)
+        if(trailerEntity instanceof TrailerEntity trailer)
         {
-            TrailerEntity trailer = (TrailerEntity) trailerEntity;
             if(player.getVehicle() == null)
             {
                 trailer.setPullingEntity(player);
@@ -103,10 +102,9 @@ public class ServerPlayHandler
     public static void handleCraftVehicleMessage(ServerPlayer player, MessageCraftVehicle message)
     {
         Level world = player.level;
-        if(!(player.containerMenu instanceof WorkstationContainer))
+        if(!(player.containerMenu instanceof WorkstationContainer workstation))
             return;
 
-        WorkstationContainer workstation = (WorkstationContainer) player.containerMenu;
         if(!workstation.getPos().equals(message.getPos()))
             return;
 
@@ -126,11 +124,10 @@ public class ServerPlayHandler
             return;
 
         Entity entity = entityType.create(world);
-        if(!(entity instanceof VehicleEntity))
+        if(!(entity instanceof VehicleEntity vehicle))
             return;
 
         IEngineType engineType = EngineType.NONE;
-        VehicleEntity vehicle = (VehicleEntity) entity;
         if(vehicle instanceof PoweredVehicleEntity)
         {
             PoweredVehicleEntity entityPoweredVehicle = (PoweredVehicleEntity) entity;
@@ -164,9 +161,8 @@ public class ServerPlayHandler
         if(vehicle.getProperties().canBePainted())
         {
             ItemStack workstationDyeStack = workstationTileEntity.getInventory().get(0);
-            if(workstationDyeStack.getItem() instanceof DyeItem)
+            if(workstationDyeStack.getItem() instanceof DyeItem dyeItem)
             {
-                DyeItem dyeItem = (DyeItem) workstationDyeStack.getItem();
                 color = dyeItem.getDyeColor().getTextColor();
                 workstationTileEntity.getInventory().set(0, ItemStack.EMPTY);
             }
@@ -262,9 +258,8 @@ public class ServerPlayHandler
     public static void handleHelicopterInputMessage(ServerPlayer player, MessageHelicopterInput message)
     {
         Entity riding = player.getVehicle();
-        if(riding instanceof HelicopterEntity)
+        if(riding instanceof HelicopterEntity helicopter)
         {
-            HelicopterEntity helicopter = (HelicopterEntity) riding;
             helicopter.setLift(message.getLift());
             helicopter.setForwardInput(message.getForward());
             helicopter.setSideInput(message.getSide());
@@ -273,10 +268,9 @@ public class ServerPlayHandler
 
     public static void handleHitchTrailerMessage(ServerPlayer player, MessageHitchTrailer message)
     {
-        if(!(player.getVehicle() instanceof VehicleEntity))
+        if(!(player.getVehicle() instanceof VehicleEntity vehicle))
             return;
 
-        VehicleEntity vehicle = (VehicleEntity) player.getVehicle();
         if(!vehicle.canTowTrailers())
             return;
 
@@ -329,9 +323,8 @@ public class ServerPlayHandler
     public static void handleInteractKeyMessage(ServerPlayer player, MessageInteractKey message)
     {
         Entity targetEntity = player.level.getEntity(message.getEntityId());
-        if(targetEntity instanceof PoweredVehicleEntity)
+        if(targetEntity instanceof PoweredVehicleEntity poweredVehicle)
         {
-            PoweredVehicleEntity poweredVehicle = (PoweredVehicleEntity) targetEntity;
             if(poweredVehicle.isKeyNeeded())
             {
                 ItemStack stack = player.getMainHandItem();
@@ -388,9 +381,8 @@ public class ServerPlayHandler
     public static void handlePlaneInputMessage(ServerPlayer player, MessagePlaneInput message)
     {
         Entity riding = player.getVehicle();
-        if(riding instanceof PlaneEntity)
+        if(riding instanceof PlaneEntity plane)
         {
-            PlaneEntity plane = (PlaneEntity) riding;
             plane.setLift(message.getLift());
             plane.setForwardInput(message.getForward());
             plane.setSideInput(message.getSide());
@@ -460,7 +452,7 @@ public class ServerPlayHandler
     public static void handleInteractCosmeticMessage(ServerPlayer player, MessageInteractCosmetic message)
     {
         Entity targetEntity = player.level.getEntity(message.getEntityId());
-        if(!(targetEntity instanceof VehicleEntity))
+        if(!(targetEntity instanceof VehicleEntity vehicle))
             return;
 
         if(player.distanceTo(targetEntity) > 20.0D) //TODO determine a better condition to check if player is close to vehicle
@@ -468,7 +460,6 @@ public class ServerPlayHandler
 
         //TODO log if player tries to interact with cosmetic that doesn't exist?
 
-        VehicleEntity vehicle = (VehicleEntity) targetEntity;
         CosmeticTracker tracker = vehicle.getCosmeticTracker();
         tracker.getActions(message.getCosmeticId()).forEach(action -> action.onInteract(vehicle, player));
     }
@@ -477,10 +468,9 @@ public class ServerPlayHandler
     {
         Level world = player.level;
         Entity targetEntity = world.getEntity(message.getEntityId());
-        if(!(targetEntity instanceof IStorage))
+        if(!(targetEntity instanceof IStorage storage))
             return;
 
-        IStorage storage = (IStorage) targetEntity;
         if(player.distanceTo(targetEntity) >= 64.0)
             return;
 
@@ -488,7 +478,7 @@ public class ServerPlayHandler
         if(inventory == null)
             return;
 
-        if(targetEntity instanceof IAttachableChest)
+        if(targetEntity instanceof IAttachableChest attachableChest)
         {
             //TODO prevent non-owners from removing chest
             /*if(targetEntity instanceof VehicleEntity)
@@ -497,7 +487,6 @@ public class ServerPlayHandler
                 vehicle.get
             }*/
 
-            IAttachableChest attachableChest = (IAttachableChest) targetEntity;
             if(attachableChest.hasChest(message.getKey()))
             {
                 ItemStack stack = player.getInventory().getSelected();

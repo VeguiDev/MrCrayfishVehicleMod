@@ -73,19 +73,18 @@ public class JackRenderer implements BlockEntityRenderer<JackTileEntity>
             if(jackEntity != null && jackEntity.getPassengers().size() > 0)
             {
                 Entity passenger = jackEntity.getPassengers().get(0);
-                if(passenger instanceof VehicleEntity && passenger.isAlive())
+                if(passenger instanceof VehicleEntity vehicle && passenger.isAlive())
                 {
                     matrices.translate(0, 1 * 0.0625, 0);
                     matrices.translate(0.5, 0.5, 0.5);
                     float progress = (entity.prevLiftProgress + (entity.liftProgress - entity.prevLiftProgress) * delta) / (float) JackTileEntity.MAX_LIFT_PROGRESS;
                     matrices.translate(0, 0.5 * progress, 0);
 
-                    VehicleEntity vehicle = (VehicleEntity) passenger;
                     Vec3 heldOffset = vehicle.getProperties().getHeldOffset().yRot(passenger.getYRot() * 0.017453292F);
                     matrices.translate(-heldOffset.z * 0.0625, -heldOffset.y * 0.0625, -heldOffset.x * 0.0625);
                     matrices.mulPose(Axis.POSITIVE_Y.rotationDegrees(-passenger.getYRot()));
 
-                    AbstractVehicleRenderer wrapper = VehicleRenderRegistry.getRenderer(vehicle.getType());
+                    AbstractVehicleRenderer<VehicleEntity> wrapper = (AbstractVehicleRenderer<VehicleEntity>) VehicleRenderRegistry.getRenderer(vehicle.getType());
                     if(wrapper != null)
                     {
                         wrapper.setupTransformsAndRender(vehicle, matrices, buffers, delta, light);

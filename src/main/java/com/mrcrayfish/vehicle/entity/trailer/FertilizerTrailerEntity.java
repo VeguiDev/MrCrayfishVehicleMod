@@ -120,9 +120,8 @@ public class FertilizerTrailerEntity extends TrailerEntity implements IStorage
         lastPos[index] = pos;
 
         BlockState state = level.getBlockState(pos);
-        if(state.getBlock() instanceof BonemealableBlock)
+        if(state.getBlock() instanceof BonemealableBlock growable)
         {
-            BonemealableBlock growable = (BonemealableBlock) state.getBlock();
             if(growable.isValidBonemealTarget(level, pos, state, false))
             {
                 if(growable.isBonemealSuccess(level, random, pos, state))

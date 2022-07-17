@@ -44,17 +44,24 @@ public class FluidPumpRenderer implements BlockEntityRenderer<PumpTileEntity>
     @Override
     public void render(PumpTileEntity entity, float delta, PoseStack matrices, MultiBufferSource buffers, int light, int overlay)
     {
+        if(this.camera == null)
+        {
+            return;
+        }
+
         Entity cameraEntity = this.camera.getEntity();
-        if(!(cameraEntity instanceof Player))
+        if(!(cameraEntity instanceof Player player))
             return;
 
-        Player player = (Player) cameraEntity;
         if(player.getMainHandItem().getItem() != ModItems.WRENCH.get())
             return;
 
         this.renderInteractableBox(entity, matrices, buffers);
 
-        if(this.hitResult == null || this.hitResult.getType() != HitResult.Type.BLOCK)
+        if(this.hitResult == null)
+            return;
+
+        if(this.hitResult.getType() != HitResult.Type.BLOCK)
             return;
 
         BlockHitResult result = (BlockHitResult) this.hitResult;

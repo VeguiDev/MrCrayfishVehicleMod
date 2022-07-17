@@ -737,9 +737,8 @@ public class EntityRayTracer
         {
             list.forEach(data ->
             {
-                if(!Config.CLIENT.forceRenderAllInteractableBoxes.get() && data instanceof InteractableBoxRayTraceData)
+                if(!Config.CLIENT.forceRenderAllInteractableBoxes.get() && data instanceof InteractableBoxRayTraceData interactableBoxData)
                 {
-                    InteractableBoxRayTraceData interactableBoxData = (InteractableBoxRayTraceData) data;
                     if(!interactableBoxData.getInteractableBox().isActive(entity))
                     {
                         return;
@@ -866,11 +865,10 @@ public class EntityRayTracer
         }
 
         RayTraceData data = result.getData();
-        if(!mc.player.isCrouching() && entity instanceof VehicleEntity && data instanceof CosmeticRayTraceData)
+        if(!mc.player.isCrouching() && entity instanceof VehicleEntity vehicle && data instanceof CosmeticRayTraceData)
         {
             mc.player.swing(InteractionHand.MAIN_HAND);
             ResourceLocation cosmeticId = ((CosmeticRayTraceData) data).getCosmeticId();
-            VehicleEntity vehicle = (VehicleEntity) entity;
             Collection<Action> actions = vehicle.getCosmeticTracker().getActions(cosmeticId);
             if(!actions.isEmpty())
             {

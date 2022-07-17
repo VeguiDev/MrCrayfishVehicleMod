@@ -64,9 +64,8 @@ public class FluidNetworkHandler
             positions.forEach(pos ->
             {
                 BlockEntity tileEntity = event.world.getBlockEntity(pos);
-                if(tileEntity instanceof PipeTileEntity)
+                if(tileEntity instanceof PipeTileEntity pipeTileEntity)
                 {
-                    PipeTileEntity pipeTileEntity = (PipeTileEntity) tileEntity;
                     BlockState state = pipeTileEntity.getBlockState();
                     boolean disabled = pipeTileEntity.getPumps().isEmpty() || event.world.hasNeighborSignal(pos);
                     event.world.setBlock(pos, state.setValue(FluidPipeBlock.DISABLED, disabled), (1 << 0) | (1 << 1));

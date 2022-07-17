@@ -2,8 +2,11 @@ package com.mrcrayfish.vehicle.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.datafixers.util.Pair;
+import com.mrcrayfish.vehicle.client.util.OptifineHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -18,9 +21,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HalfTransparentBlock;
+import net.minecraft.world.level.block.StainedGlassPaneBlock;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.RenderProperties;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -44,7 +53,7 @@ public class RenderUtil
 
         //This was 7.. is there a seven somewhere?
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-
+        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
         bufferbuilder.vertex(x, y + height, 0).uv(((float) textureX * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
         bufferbuilder.vertex(x + width, y + height, 0).uv(((float) (textureX + width) * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
         bufferbuilder.vertex(x + width, y, 0).uv(((float) (textureX + width) * 0.00390625F), ((float) textureY * 0.00390625F)).endVertex();
@@ -66,10 +75,10 @@ public class RenderUtil
         float greenEnd = (float)(rightColor >> 16 & 255) / 255.0F;
         float blueEnd = (float)(rightColor >> 8 & 255) / 255.0F;
         float alphaEnd = (float)(rightColor & 255) / 255.0F;
-
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
@@ -94,6 +103,7 @@ public class RenderUtil
         return Minecraft.getInstance().getItemRenderer().getItemModelShaper().getItemModel(stack);
     }
 
+    //TODO: All models are bright, is this the lightmap?, does it need a light engine?, or is it something else?
     public static void renderColoredModel(BakedModel model, ItemTransforms.TransformType transformType, boolean leftHanded, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int color, int lightTexture, int overlayTexture)
     {
         matrixStack.pushPose();
@@ -102,6 +112,7 @@ public class RenderUtil
         if(!model.isCustomRenderer())
         {
             VertexConsumer vertexBuilder = renderTypeBuffer.getBuffer(RenderType.cutoutMipped());
+            RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
             renderModel(model, ItemStack.EMPTY, color, lightTexture, overlayTexture, matrixStack, vertexBuilder);
         }
         matrixStack.popPose();
@@ -110,12 +121,13 @@ public class RenderUtil
     public static void renderDamagedVehicleModel(BakedModel model, ItemTransforms.TransformType transformType, boolean leftHanded, PoseStack matrixStack, int stage, int color, int lightTexture, int overlayTexture)
     {
         matrixStack.pushPose();
-        net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(matrixStack, model, transformType, leftHanded);
+        ForgeHooksClient.handleCameraTransforms(matrixStack, model, transformType, leftHanded);
         matrixStack.translate(-0.5, -0.5, -0.5);
         if(!model.isCustomRenderer())
         {
             Minecraft mc = Minecraft.getInstance();
             PoseStack.Pose entry = matrixStack.last();
+            RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
             VertexConsumer vertexBuilder = new SheetedDecalTextureGenerator(mc.renderBuffers().crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(stage)), entry.pose(), entry.normal());
             renderModel(model, ItemStack.EMPTY, color, lightTexture, overlayTexture, matrixStack, vertexBuilder);
         }
@@ -129,28 +141,59 @@ public class RenderUtil
             matrixStack.pushPose();
             boolean isGui = transformType == ItemTransforms.TransformType.GUI;
             boolean tridentFlag = isGui || transformType == ItemTransforms.TransformType.GROUND || transformType == ItemTransforms.TransformType.FIXED;
-            if(stack.getItem() == Items.TRIDENT && tridentFlag)
+
+            if(stack.is(Items.TRIDENT) && tridentFlag)
             {
                 model = Minecraft.getInstance().getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
             }
-
-            model = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(matrixStack, model, transformType, leftHanded);
-            matrixStack.translate(-0.5, -0.5, -0.5);
-            if(!model.isCustomRenderer() && (stack.getItem() != Items.TRIDENT || tridentFlag))
+            else if (stack.is(Items.SPYGLASS))
             {
+                model = Minecraft.getInstance().getModelManager().getModel(new ModelResourceLocation("minecraft:spyglass#inventory"));
+            }
+
+            model = ForgeHooksClient.handleCameraTransforms(matrixStack, model, transformType, leftHanded);
+            matrixStack.translate(-0.5, -0.5, -0.5);
+            if(!model.isCustomRenderer() && (!stack.is(Items.TRIDENT) || tridentFlag))
+            {
+                boolean fabulous = true;
+                if (!isGui && !transformType.firstPerson() && stack.getItem() instanceof BlockItem)
+                {
+                    Block block = ((BlockItem) stack.getItem()).getBlock();
+                    fabulous = !(block instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock);
+                }
+
                 if(model.isLayered())
                 {
-                    //TODO: Layered model render
+                    for(Pair<BakedModel,RenderType> layerModel : model.getLayerModels(stack, fabulous))
+                    {
+                        RenderType type = layerModel.getSecond();
+
+                        ForgeHooksClient.setRenderType(type);
+
+                        VertexConsumer buffer = fabulous ?
+                                ItemRenderer.getFoilBufferDirect(renderTypeBuffer, type, true, stack.hasFoil()) :
+                                ItemRenderer.getFoilBuffer(renderTypeBuffer, type, true, stack.hasFoil());
+
+                        renderModel(model, stack, 0xFFFFFFFF, lightTexture, overlayTexture, matrixStack, buffer);
+                    }
+                    ForgeHooksClient.setRenderType(null);
                 }
                 else
                 {
-                    RenderType renderType = ItemBlockRenderTypes.getRenderType(stack, false); //TODO test what this flag does
-                    if(isGui && Objects.equals(renderType, RenderType.translucentMovingBlock()))
+                    RenderType type = ItemBlockRenderTypes.getRenderType(stack, fabulous);
+                    ForgeHooksClient.setRenderType(type);
+
+                    if(isGui && Objects.equals(type, RenderType.translucentMovingBlock()))
                     {
-                        renderType = RenderType.translucentMovingBlock();
+                        type = RenderType.translucentMovingBlock();
                     }
-                    VertexConsumer vertexBuilder = ItemRenderer.getFoilBuffer(renderTypeBuffer, renderType, true, stack.hasFoil());
-                    renderModel(model, stack, -1, lightTexture, overlayTexture, matrixStack, vertexBuilder);
+
+                    VertexConsumer buffer = fabulous ?
+                            ItemRenderer.getFoilBufferDirect(renderTypeBuffer, type, true, stack.hasFoil()) :
+                            ItemRenderer.getFoilBuffer(renderTypeBuffer, type, true, stack.hasFoil());
+
+                    renderModel(model, stack, 0xFFFFFFFF, lightTexture, overlayTexture, matrixStack, buffer);
+                    ForgeHooksClient.setRenderType(null);
                 }
             }
             else
@@ -168,10 +211,10 @@ public class RenderUtil
         for(Direction direction : Direction.values())
         {
             random.setSeed(42L);
-            renderQuads(matrixStack, vertexBuilder, model.getQuads(null, direction, random), stack, color, lightTexture, overlayTexture);
+            renderQuads(matrixStack, vertexBuilder, model.getQuads(null, direction, random, EmptyModelData.INSTANCE), stack, color, lightTexture, overlayTexture);
         }
         random.setSeed(42L);
-        renderQuads(matrixStack, vertexBuilder, model.getQuads(null, null, random), stack, color, lightTexture, overlayTexture);
+        renderQuads(matrixStack, vertexBuilder, model.getQuads(null, null, random, EmptyModelData.INSTANCE), stack, color, lightTexture, overlayTexture);
     }
 
     private static void renderQuads(PoseStack matrixStack, VertexConsumer vertexBuilder, List<BakedQuad> quads, ItemStack stack, int color, int lightTexture, int overlayTexture)
@@ -180,7 +223,12 @@ public class RenderUtil
         PoseStack.Pose entry = matrixStack.last();
         for(BakedQuad quad : quads)
         {
-            int tintColor = 0xFFFFFF;
+            if(OptifineHelper.isEmissiveTexturesEnabled())
+            {
+                quad = OptifineHelper.castAsEmissive(quad);
+            }
+
+            int tintColor = 0xFFFFFFFF;
             if(quad.isTinted())
             {
                 if(useItemColor)
@@ -192,6 +240,7 @@ public class RenderUtil
                     tintColor = color;
                 }
             }
+
             float red = (float) (tintColor >> 16 & 255) / 255.0F;
             float green = (float) (tintColor >> 8 & 255) / 255.0F;
             float blue = (float) (tintColor & 255) / 255.0F;

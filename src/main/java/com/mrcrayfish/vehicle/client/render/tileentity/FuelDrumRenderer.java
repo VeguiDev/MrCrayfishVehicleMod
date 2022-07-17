@@ -50,6 +50,9 @@ public class FuelDrumRenderer implements BlockEntityRenderer<FuelDrumTileEntity>
     @Override
     public void render(FuelDrumTileEntity entity, float delta, PoseStack matrices, MultiBufferSource buffers, int light, int overlay)
     {
+        if(this.camera == null)
+            return;
+
         if(Minecraft.getInstance().player.isCrouching())
         {
             if(entity.hasFluid() && this.cameraHitResult != null && this.cameraHitResult.getType() == HitResult.Type.BLOCK)

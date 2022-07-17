@@ -289,9 +289,8 @@ public class FluidPipeBlock extends ObjectBlock implements EntityBlock
             {
                 BlockPos relativePos = pos.relative(direction);
                 BlockEntity relativeTileEntity = world.getBlockEntity(relativePos);
-                if(relativeTileEntity instanceof PipeTileEntity)
+                if(relativeTileEntity instanceof PipeTileEntity pipeTileEntity)
                 {
-                    PipeTileEntity pipeTileEntity = (PipeTileEntity) relativeTileEntity;
                     if(!pipeTileEntity.getDisabledConnections()[direction.getOpposite().get3DDataValue()])
                     {
                         BlockState relativeState = pipeTileEntity.getBlockState();
