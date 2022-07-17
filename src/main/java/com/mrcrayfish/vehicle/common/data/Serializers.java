@@ -13,7 +13,7 @@ import java.util.Optional;
  */
 public class Serializers
 {
-    public static final IDataSerializer<Optional<BlockPos>> OPTIONAL_BLOCK_POS = new IDataSerializer<Optional<BlockPos>>()
+    public static final IDataSerializer<Optional<BlockPos>> OPTIONAL_BLOCK_POS = new IDataSerializer<>()
     {
         @Override
         public void write(FriendlyByteBuf buffer, Optional<BlockPos> optional)

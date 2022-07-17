@@ -24,7 +24,6 @@ import net.minecraftforge.fluids.capability.templates.FluidTank;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * Author: MrCrayfish

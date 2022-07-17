@@ -8,7 +8,6 @@ import com.mrcrayfish.vehicle.client.screen.toolbar.widget.IconButton;
 import com.mrcrayfish.vehicle.client.screen.toolbar.widget.Spacer;
 import com.mrcrayfish.vehicle.util.CommonUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.Screen;

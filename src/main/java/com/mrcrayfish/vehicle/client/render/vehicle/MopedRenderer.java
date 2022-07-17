@@ -17,6 +17,7 @@ import com.mrcrayfish.vehicle.init.ModEntities;
 import com.mrcrayfish.vehicle.item.IDyeable;
 import com.mrcrayfish.vehicle.util.RenderUtil;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -111,7 +112,7 @@ public class MopedRenderer extends AbstractMotorcycleRenderer<MopedEntity>
     }
 
     @Override
-    public void applyPlayerModel(MopedEntity entity, Player player, PlayerModel model, float partialTicks)
+    public void applyPlayerModel(MopedEntity entity, Player player, PlayerModel<AbstractClientPlayer> model, float partialTicks)
     {
         float wheelAngle = this.wheelAngleProperty.get(entity, partialTicks);
         float maxSteeringAngle = this.vehiclePropertiesProperty.get(entity).getExtended(PoweredProperties.class).getMaxSteeringAngle();

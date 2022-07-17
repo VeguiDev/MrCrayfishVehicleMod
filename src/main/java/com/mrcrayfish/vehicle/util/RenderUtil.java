@@ -42,51 +42,27 @@ import java.util.stream.Collectors;
  */
 public class RenderUtil
 {
-    /**
-     * Draws a textured modal rectangle with more precision than GuiScreen's methods. This will only
-     * work correctly if the bound texture is 256x256.
-     */
-    public static void drawTexturedModalRect(double x, double y, int textureX, int textureY, double width, double height)
-    {
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuilder();
-
-        //This was 7.. is there a seven somewhere?
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
-        bufferbuilder.vertex(x, y + height, 0).uv(((float) textureX * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
-        bufferbuilder.vertex(x + width, y + height, 0).uv(((float) (textureX + width) * 0.00390625F), ((float) (textureY + height) * 0.00390625F)).endVertex();
-        bufferbuilder.vertex(x + width, y, 0).uv(((float) (textureX + width) * 0.00390625F), ((float) textureY * 0.00390625F)).endVertex();
-        bufferbuilder.vertex(x + 0, y, 0).uv(((float) textureX * 0.00390625F), ((float) textureY * 0.00390625F)).endVertex();
-
-        tessellator.end();
-    }
+    private static final Minecraft MINECRAFT = Minecraft.getInstance();
 
     /**
      * Draws a rectangle with a horizontal gradient between the specified colors (ARGB format).
      */
     public static void drawGradientRectHorizontal(int left, int top, int right, int bottom, int leftColor, int rightColor)
     {
-        float redStart = (float)(leftColor >> 24 & 255) / 255.0F;
-        float greenStart = (float)(leftColor >> 16 & 255) / 255.0F;
-        float blueStart = (float)(leftColor >> 8 & 255) / 255.0F;
-        float alphaStart = (float)(leftColor & 255) / 255.0F;
-        float redEnd = (float)(rightColor >> 24 & 255) / 255.0F;
-        float greenEnd = (float)(rightColor >> 16 & 255) / 255.0F;
-        float blueEnd = (float)(rightColor >> 8 & 255) / 255.0F;
-        float alphaEnd = (float)(rightColor & 255) / 255.0F;
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tessellator.getBuilder();
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferbuilder = tesselator.getBuilder();
+
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        bufferbuilder.vertex(right, top, 0).color(greenEnd, blueEnd, alphaEnd, redEnd).endVertex();
-        bufferbuilder.vertex(left, top, 0).color(greenStart, blueStart, alphaStart, redStart).endVertex();
-        bufferbuilder.vertex(left, bottom, 0).color(greenStart, blueStart, alphaStart, redStart).endVertex();
-        bufferbuilder.vertex(right, bottom, 0).color(greenEnd, blueEnd, alphaEnd, redEnd).endVertex();
-        tessellator.end();
+        bufferbuilder.vertex(right, top, 0).color(rightColor).endVertex();
+        bufferbuilder.vertex(left, top, 0).color(leftColor).endVertex();
+        bufferbuilder.vertex(left, bottom, 0).color(leftColor).endVertex();
+        bufferbuilder.vertex(right, bottom, 0).color(rightColor).endVertex();
+
+        tesselator.end();
         RenderSystem.disableBlend();
         RenderSystem.enableTexture();
     }
@@ -100,19 +76,19 @@ public class RenderUtil
 
     public static BakedModel getModel(ItemStack stack)
     {
-        return Minecraft.getInstance().getItemRenderer().getItemModelShaper().getItemModel(stack);
+        return MINECRAFT.getItemRenderer().getItemModelShaper().getItemModel(stack);
     }
 
     //TODO: All models are bright, is this the lightmap?, does it need a light engine?, or is it something else?
     public static void renderColoredModel(BakedModel model, ItemTransforms.TransformType transformType, boolean leftHanded, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int color, int lightTexture, int overlayTexture)
     {
         matrixStack.pushPose();
-        net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(matrixStack, model, transformType, leftHanded);
+        ForgeHooksClient.handleCameraTransforms(matrixStack, model, transformType, leftHanded);
+        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
         matrixStack.translate(-0.5, -0.5, -0.5);
         if(!model.isCustomRenderer())
         {
             VertexConsumer vertexBuilder = renderTypeBuffer.getBuffer(RenderType.cutoutMipped());
-            RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
             renderModel(model, ItemStack.EMPTY, color, lightTexture, overlayTexture, matrixStack, vertexBuilder);
         }
         matrixStack.popPose();
@@ -122,6 +98,7 @@ public class RenderUtil
     {
         matrixStack.pushPose();
         ForgeHooksClient.handleCameraTransforms(matrixStack, model, transformType, leftHanded);
+        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
         matrixStack.translate(-0.5, -0.5, -0.5);
         if(!model.isCustomRenderer())
         {
@@ -226,6 +203,11 @@ public class RenderUtil
             if(OptifineHelper.isEmissiveTexturesEnabled())
             {
                 quad = OptifineHelper.castAsEmissive(quad);
+
+                if (quad == null)
+                {
+                    continue;
+                }
             }
 
             int tintColor = 0xFFFFFFFF;
@@ -238,6 +220,11 @@ public class RenderUtil
                 else
                 {
                     tintColor = color;
+                }
+
+                if (OptifineHelper.isCustomColorsEnabled())
+                {
+                    color = Integer.reverseBytes(OptifineHelper.castAsCustomColor(stack, quad.getTintIndex(), color) << 8 | 0xFF);
                 }
             }
 
