@@ -211,7 +211,7 @@ public abstract class PlaneEntity extends PoweredVehicleEntity
         }
         else
         {
-            this.setXRot(0F);
+            this.xRot = 0F;
         }
     }
 

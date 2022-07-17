@@ -124,7 +124,7 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
         this.velocity = CommonUtils.lerp(this.velocity, heading, this.getMovementStrength());
         this.motion = this.motion.add(this.velocity);
 
-        this.setXRot(this.getPitch());
+        this.xRot = this.getPitch();
 
         // Makes the helicopter fall if it's not being operated by a pilot
         if(!operating)
@@ -147,7 +147,7 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
 
     private float getPitch()
     {
-        return -(float) new Vec3(-this.motion.x, 0, this.motion.z).scale(this.getMaxLeanAngle()).yRot((float) Math.toRadians(-(this.getYRot() + 90))).x;
+        return -(float) new Vec3(-this.motion.x, 0, this.motion.z).scale(this.getMaxLeanAngle()).yRot((float) Math.toRadians(-(this.yRot + 90))).x;
     }
 
     protected Vec3 getInput()
@@ -156,7 +156,7 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
         {
             double strafe = Mth.clamp(this.getSideInput(), -1.0F, 1.0F);
             double forward = Mth.clamp(this.getForwardInput(), -1.0F, 1.0F);
-            Vec3 input = new Vec3(strafe, 0, forward).yRot((float) Math.toRadians(-this.getYRot()));
+            Vec3 input = new Vec3(strafe, 0, forward).yRot((float) Math.toRadians(-this.yRot));
             return input.length() > 1.0 ? input.normalize() : input;
         }
         return Vec3.ZERO;

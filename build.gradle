@@ -1,3 +1,6 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
 plugins {
     id 'net.minecraftforge.gradle' version '5.1.+'
 }
@@ -74,6 +77,14 @@ dependencies {
     implementation fg.deobf('curse.maven:catalogue-459701:3803098')
 }
 
+processResources {
+    doLast {
+        fileTree(dir: outputs.files.asPath, include: "**/*.json").each {
+            File file -> file.text = JsonOutput.toJson(new JsonSlurper().parse(file))
+        }
+    }
+}
+
 jar {
     manifest {
         attributes([
@@ -88,3 +99,36 @@ jar {
     }
 }
 
+def reobfFile = file("$buildDir/reobfJar/output.jar")
+def reobfArtifact = artifacts.add('default', reobfFile) {
+    type 'jar'
+    builtBy 'reobfJar'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact reobfArtifact
+        }
+    }
+    repositories {
+        maven {
+            url "file:///X:/localmaven/mcmods"
+        }
+    }
+}
+
+// Workaround as per https://youtrack.jetbrains.com/issue/IDEA-197469
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src/main/java"]
+        }
+        resources {
+            srcDirs = ["src/main/java", "src/main/resources", "src/generated/resources"]
+        }
+    }
+
+    // at compile time, put resources in same directories as classes
+    main.output.resourcesDir = main.java.outputDir
+}

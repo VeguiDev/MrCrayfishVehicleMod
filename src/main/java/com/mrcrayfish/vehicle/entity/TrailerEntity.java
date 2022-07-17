@@ -117,7 +117,7 @@ public abstract class TrailerEntity extends VehicleEntity
         }
 
         this.setYRot((float) Math.toDegrees(Math.atan2(towBar.z - this.getZ(), towBar.x - this.getX()) - Math.toRadians(90F)));
-        double deltaRot = this.yRotO - this.getYRot();
+        double deltaRot = this.yRotO - this.yRot;
         if (deltaRot < -180.0D)
         {
             this.yRotO += 360.0F;

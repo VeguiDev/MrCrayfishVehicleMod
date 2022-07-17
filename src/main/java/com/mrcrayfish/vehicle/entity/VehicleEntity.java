@@ -820,7 +820,7 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
         if(newSeatIndex != -1 && this.level.isClientSide())
         {
             Seat seat = this.getProperties().getSeats().get(newSeatIndex);
-            player.setYRot(this.getYRot() + seat.getYawOffset());
+            player.setYRot(this.yRot + seat.getYawOffset());
             player.setYHeadRot(player.getYRot());
             this.updatePassengerOffsets(player);
             this.updatePassengerPosition(player);
@@ -846,8 +846,8 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
         {
             this.lerpSteps = 0;
             this.setPos(this.lerpX, this.lerpY, this.lerpZ);
-            this.setYRot((float) this.lerpYaw);
-            this.setXRot((float) this.lerpPitch);
+            this.yRot = (float) this.lerpYaw;
+            this.xRot = (float) this.lerpPitch;
         }
 
         // Makes the player face the same direction of the vehicle
@@ -925,9 +925,11 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
         passenger.setYBodyRot(this.getYRot() + seatYawOffset);
         float wrappedYaw = Mth.wrapDegrees(passenger.getYRot() - this.getYRot() - seatYawOffset);
         float clampedYaw = Mth.clamp(wrappedYaw, -120.0F, 120.0F);
-        passenger.yRotO += clampedYaw - wrappedYaw;
+    //    passenger.yRotO += clampedYaw - wrappedYaw;
+    //    passenger.yRot += clampedYaw - wrappedYaw;
+
         passenger.setYRot(passenger.getYRot() + (clampedYaw - wrappedYaw));
-        passenger.setYHeadRot(clampedYaw - wrappedYaw);
+        passenger.setYHeadRot(passenger.getYRot());
     }
 
     @Override
@@ -946,9 +948,9 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     {
         int seatIndex = this.getSeatTracker().getSeatIndex(passenger.getUUID());
         float seatYawOffset = seatIndex != -1 ? this.getProperties().getSeats().get(seatIndex).getYawOffset() : 0F;
-        Vec3 vehicleForward = Vec3.directionFromRotation(0, this.getYRot());
+        Vec3 vehicleForward = Vec3.directionFromRotation(0, this.yRot);
         Vec3 passengerForward = Vec3.directionFromRotation(passenger.getXRot(), passenger.getYHeadRot());
-        this.passengerPitchOffset = Mth.degreesDifference(CommonUtils.pitch(passengerForward), CommonUtils.pitch(vehicleForward)) - this.getXRot();
+        this.passengerPitchOffset = Mth.degreesDifference(CommonUtils.pitch(passengerForward), CommonUtils.pitch(vehicleForward)) - this.xRot;
 
         if(!this.canApplyYawOffset(passenger))
         {

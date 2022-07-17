@@ -324,7 +324,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
 
         /* Updates the rotation and fixes the old rotation */
         this.setRot(this.getYRot(), this.getXRot());
-        double deltaRot = this.yRotO - this.getYRot();
+        double deltaRot = this.yRotO - this.yRot;
         this.yRotO += (deltaRot < -180) ? 360F : (deltaRot >= 180) ? -360F : 0F;
 
         this.updateWheelPositions();
