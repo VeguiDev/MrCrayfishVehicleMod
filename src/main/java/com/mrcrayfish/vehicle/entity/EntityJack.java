@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
@@ -43,9 +44,7 @@ public class EntityJack extends Entity implements IEntityAdditionalSpawnData
 
     @Override
     protected void defineSynchedData()
-    {
-
-    }
+    {}
 
     @Override
     public void tick()
@@ -85,7 +84,7 @@ public class EntityJack extends Entity implements IEntityAdditionalSpawnData
     }
 
     @Override
-    protected void addPassenger(Entity passenger)
+    protected void addPassenger(@NotNull Entity passenger)
     {
         super.addPassenger(passenger);
         if(this.getPassengers().contains(passenger))
@@ -100,13 +99,14 @@ public class EntityJack extends Entity implements IEntityAdditionalSpawnData
     }
 
     @Override
+    @NotNull
     public Packet<?> getAddEntityPacket()
     {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 
     @Override
-    public void positionRider(Entity passenger)
+    public void positionRider(@NotNull Entity passenger)
     {
         if(passenger instanceof VehicleEntity vehicle)
         {
@@ -145,10 +145,13 @@ public class EntityJack extends Entity implements IEntityAdditionalSpawnData
         this.initialX = buffer.readDouble();
         this.initialY = buffer.readDouble();
         this.initialZ = buffer.readDouble();
+
         this.moveTo(this.initialX, this.initialY, this.initialZ, this.getYRot(), this.getXRot());
+
         this.xo = this.initialX;
         this.yo = this.initialY;
         this.zo = this.initialZ;
+
         this.xOld = this.initialX;
         this.yOld = this.initialY;
         this.zOld = this.initialZ;

@@ -81,6 +81,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
     protected static final int MAX_WHEELIE_TICKS = 10;
 
     protected static final EntityDataAccessor<Float> THROTTLE = SynchedEntityData.defineId(PoweredVehicleEntity.class, EntityDataSerializers.FLOAT);
+    protected static final EntityDataAccessor<Float> STEP_HEIGHT = SynchedEntityData.defineId(PoweredVehicleEntity.class, EntityDataSerializers.FLOAT);
     protected static final EntityDataAccessor<Boolean> HANDBRAKE = SynchedEntityData.defineId(PoweredVehicleEntity.class, EntityDataSerializers.BOOLEAN);
     protected static final EntityDataAccessor<Float> STEERING_ANGLE = SynchedEntityData.defineId(PoweredVehicleEntity.class, EntityDataSerializers.FLOAT);
     protected static final EntityDataAccessor<Boolean> HORN = SynchedEntityData.defineId(PoweredVehicleEntity.class, EntityDataSerializers.BOOLEAN);
@@ -110,18 +111,17 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
     private SimpleContainer vehicleInventory;
 
     @OnlyIn(Dist.CLIENT)
-    protected float renderWheelAngle;
-    @OnlyIn(Dist.CLIENT)
-    protected float prevRenderWheelAngle;
+    protected float prevRenderWheelAngle, renderWheelAngle;
+
     @OnlyIn(Dist.CLIENT)
     protected float enginePitch;
+
     @OnlyIn(Dist.CLIENT)
     protected float engineVolume;
 
     protected PoweredVehicleEntity(EntityType<?> entityType, Level worldIn)
     {
         super(entityType, worldIn);
-        this.maxUpStep = 1.0F;
     }
 
     public PoweredVehicleEntity(EntityType<?> entityType, Level worldIn, double posX, double posY, double posZ)
@@ -142,6 +142,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
         this.entityData.define(NEEDS_KEY, false);
         this.entityData.define(KEY_STACK, ItemStack.EMPTY);
         this.entityData.define(ENGINE_STACK, ItemStack.EMPTY);
+        this.entityData.define(STEP_HEIGHT, 1F);
     }
 
     public final SoundEvent getEngineSound()
@@ -217,11 +218,12 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
             return;
 
         Optional<IFluidHandlerItem> optional = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).resolve();
-        if(!optional.isPresent())
+        if(optional.isEmpty())
             return;
 
         IFluidHandlerItem handler = optional.get();
         FluidStack fluidStack = handler.getFluidInTank(0);
+
         if(fluidStack.isEmpty() || !Config.SERVER.validFuels.get().contains(fluidStack.getFluid().getRegistryName().toString()))
             return;
 
@@ -232,7 +234,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
     }
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand hand)
+    public @NotNull InteractionResult interact(@NotNull Player player, @NotNull InteractionHand hand)
     {
         ItemStack stack = player.getItemInHand(hand);
         if(!level.isClientSide)
@@ -517,7 +519,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
         }
         if(compound.contains("StepHeight", Tag.TAG_FLOAT))
         {
-            this.maxUpStep = compound.getFloat("StepHeight");
+            this.setStepHeight(compound.getFloat("StepHeight"));
         }
         if(compound.contains("CurrentFuel", Tag.TAG_FLOAT))
         {
@@ -542,7 +544,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
         CommonUtils.writeItemStackToTag(compound, "EngineStack", this.getEngineStack());
         compound.putFloat("AccelerationSpeed", this.getAccelerationSpeed());
         compound.putFloat("MaxSteeringAngle", this.getMaxSteeringAngle());
-        compound.putFloat("StepHeight", this.maxUpStep);
+        compound.putFloat("StepHeight", this.getStepHeight());
         compound.putBoolean("RequiresFuel", this.requiresEnergy());
         compound.putFloat("CurrentFuel", this.getCurrentEnergy());
         compound.putFloat("FuelCapacity", this.getEnergyCapacity());
@@ -814,7 +816,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
     }
 
     @Override
-    public boolean causeFallDamage(float p_146828_, float distance, DamageSource p_146830_)
+    public boolean causeFallDamage(float p_146828_, float distance, @NotNull DamageSource p_146830_)
     {
         if(this.disableFallDamage)
         {
@@ -1135,4 +1137,14 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
         return this.prevRenderWheelAngle + (this.renderWheelAngle - this.prevRenderWheelAngle) * partialTicks;
     }
 
+    public void setStepHeight(float stepHeight)
+    {
+        this.entityData.set(STEP_HEIGHT, stepHeight);
+    }
+
+    @Override
+    public float getStepHeight()
+    {
+        return this.entityData.get(STEP_HEIGHT);
+    }
 }

@@ -23,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public class StorageTrailerEntity extends TrailerEntity implements IStorage
     }
 
     @Override
-    protected boolean canAddPassenger(Entity passenger)
+    protected boolean canAddPassenger(@NotNull Entity passenger)
     {
         return false;
     }

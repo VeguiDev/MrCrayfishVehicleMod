@@ -25,6 +25,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -479,7 +480,7 @@ public abstract class PlaneEntity extends PoweredVehicleEntity
      */
 
     @Override
-    public boolean causeFallDamage(float p_146828_, float distance, DamageSource p_146830_) {
+    public boolean causeFallDamage(float p_146828_, float distance, @NotNull DamageSource p_146830_) {
         return super.causeFallDamage(p_146828_, distance, p_146830_);
     }
 

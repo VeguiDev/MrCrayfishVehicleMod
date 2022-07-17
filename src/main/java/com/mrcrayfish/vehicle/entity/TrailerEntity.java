@@ -16,6 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -37,7 +38,6 @@ public abstract class TrailerEntity extends VehicleEntity
     public TrailerEntity(EntityType<?> entityType, Level worldIn)
     {
         super(entityType, worldIn);
-        this.maxUpStep = 1.0F;
     }
 
     @Override
@@ -92,7 +92,7 @@ public abstract class TrailerEntity extends VehicleEntity
                 this.pullingEntity = null;
                 return;
             }
-            this.updatePullingMotion();
+            this.updatePullingMotion(this.pullingEntity);
         }
         else if(!this.level.isClientSide())
         {
@@ -103,10 +103,10 @@ public abstract class TrailerEntity extends VehicleEntity
         this.checkInsideBlocks();
     }
 
-    private void updatePullingMotion()
+    private void updatePullingMotion(Entity entity)
     {
-        Vec3 towBar = this.pullingEntity.position();
-        if(this.pullingEntity instanceof VehicleEntity vehicle)
+        Vec3 towBar = entity.position();
+        if(entity instanceof VehicleEntity vehicle)
         {
             Vec3 towBarVec = vehicle.getProperties().getTowBarOffset();
             towBarVec = new Vec3(towBarVec.x, towBarVec.y, towBarVec.z).scale(0.0625);
@@ -184,7 +184,7 @@ public abstract class TrailerEntity extends VehicleEntity
     }
 
     @Override
-    protected boolean canRide(Entity entityIn)
+    protected boolean canRide(@NotNull Entity entityIn)
     {
         return false;
     }
@@ -211,5 +211,11 @@ public abstract class TrailerEntity extends VehicleEntity
     public float getWheelRotation(@Nullable Wheel wheel, float partialTicks)
     {
         return this.prevWheelRotation + (this.wheelRotation - this.prevWheelRotation) * partialTicks;
+    }
+
+    @Override
+    public float getStepHeight()
+    {
+        return 1F;
     }
 }

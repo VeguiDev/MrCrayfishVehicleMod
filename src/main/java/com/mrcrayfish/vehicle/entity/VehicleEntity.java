@@ -91,19 +91,17 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     protected final Map<EntityDataAccessor<?>, VehicleDataValue<?>> paramToDataValue = new HashMap<>();
 
     @OnlyIn(Dist.CLIENT)
-    protected float bodyRotationPitch;
+    protected float prevBodyRotationPitch, bodyRotationPitch;
+
     @OnlyIn(Dist.CLIENT)
-    protected float prevBodyRotationPitch;
+    protected float prevBodyRotationYaw, bodyRotationYaw;
+
     @OnlyIn(Dist.CLIENT)
-    protected float bodyRotationYaw;
-    @OnlyIn(Dist.CLIENT)
-    protected float prevBodyRotationYaw;
-    @OnlyIn(Dist.CLIENT)
-    protected float bodyRotationRoll;
-    @OnlyIn(Dist.CLIENT)
-    protected float prevBodyRotationRoll;
+    protected float prevBodyRotationRoll, bodyRotationRoll;
+
     @OnlyIn(Dist.CLIENT)
     protected float passengerYawOffset;
+
     @OnlyIn(Dist.CLIENT)
     protected float passengerPitchOffset;
 
@@ -155,9 +153,10 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     /* Overridden to prevent odd step sound when driving vehicles. Ain't no subclasses getting
      * the ability to override this. */
     @Override
-    protected final void playStepSound(BlockPos pos, BlockState blockIn) {}
+    protected final void playStepSound(@NotNull BlockPos pos, @NotNull BlockState state) {}
 
     @Override
+    @NotNull
     public AABB getBoundingBoxForCulling()
     {
         return this.getBoundingBox().inflate(1);
@@ -170,7 +169,8 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     }
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand hand)
+    @NotNull
+    public InteractionResult interact(@NotNull Player player, @NotNull InteractionHand hand)
     {
         if(this.level.isClientSide || player.isCrouching())
         {
@@ -205,6 +205,7 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
                     {
                         compound.putInt("RemainingSprays", ModItems.SPRAY_CAN.get().getCapacity(heldItem));
                     }
+
                     int remainingSprays = compound.getInt("RemainingSprays");
                     if(compound.contains("Color", IntTag.TAG_INT) && remainingSprays > 0)
                     {
@@ -400,20 +401,25 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
             this.prevBodyRotationPitch = this.bodyRotationPitch;
             this.prevBodyRotationYaw = this.bodyRotationYaw;
             this.prevBodyRotationRoll = this.bodyRotationRoll;
+
             this.updateBodyRotations();
             this.updateWheelRotations();
+
             while(this.bodyRotationYaw - this.prevBodyRotationYaw < -180F)
             {
                 this.prevBodyRotationYaw -= 360F;
             }
+
             while(this.bodyRotationYaw - this.prevBodyRotationYaw >= 180F)
             {
                 this.prevBodyRotationYaw += 360F;
             }
+
             while(this.bodyRotationRoll - this.prevBodyRotationRoll < -180F)
             {
                 this.prevBodyRotationRoll -= 360F;
             }
+
             while(this.bodyRotationRoll - this.prevBodyRotationRoll >= 180F)
             {
                 this.prevBodyRotationRoll += 360F;
@@ -439,7 +445,7 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     protected abstract void onUpdateVehicle();
 
     @Override
-    public boolean hurt(DamageSource source, float amount)
+    public boolean hurt(@NotNull DamageSource source, float amount)
     {
         if(this.isInvulnerableTo(source))
         {
@@ -476,7 +482,8 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     }
 
     @Override
-    public boolean causeFallDamage(float p_146828_, float distance, DamageSource p_146830_) {
+    public boolean causeFallDamage(float amount, float distance, @NotNull DamageSource source)
+    {
         if(Config.SERVER.vehicleDamage.get() && !this.immuneToFallDamage() && distance >= 4F && this.getDeltaMovement().y() < -1.0F)
         {
             float damage = distance / 2F;
@@ -553,7 +560,7 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     }
 
     @Override
-    protected boolean canRide(Entity entityIn)
+    protected boolean canRide(@NotNull Entity entityIn)
     {
         return true;
     }
@@ -789,6 +796,7 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     }
 
     @Override
+    @NotNull
     public Packet<?> getAddEntityPacket()
     {
         return NetworkHooks.getEntitySpawningPacket(this);
@@ -825,7 +833,7 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     }
 
     @Override
-    protected void removePassenger(Entity passenger)
+    protected void removePassenger(@NotNull Entity passenger)
     {
         super.removePassenger(passenger);
         if(!this.level.isClientSide() && passenger instanceof Player)
@@ -836,7 +844,7 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     }
 
     @Override
-    public void addPassenger(Entity passenger)
+    public void addPassenger(@NotNull Entity passenger)
     {
         super.addPassenger(passenger);
         if(this.isControlledByLocalInstance() && this.lerpSteps > 0)
@@ -860,13 +868,13 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     }
 
     @Override
-    protected boolean canAddPassenger(Entity passenger)
+    protected boolean canAddPassenger(@NotNull Entity passenger)
     {
         return this.getPassengers().size() < this.getProperties().getSeats().size();
     }
 
     @Override
-    public void positionRider(Entity passenger)
+    public void positionRider(@NotNull Entity passenger)
     {
         super.positionRider(passenger);
         this.updatePassengerPosition(passenger);
@@ -893,11 +901,11 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
                             if(Config.CLIENT.immersiveCamera.get() && Config.CLIENT.shouldFollowPitch.get())
                             {
                                 passenger.xRotO = passenger.getXRot();
-                                passenger.setXRot(this.getXRot() + this.passengerPitchOffset);
+                                passenger.xRot = this.getXRot() + this.passengerPitchOffset;
                             }
                             if(this.canApplyYawOffset(passenger) && Config.CLIENT.shouldFollowYaw.get())
                             {
-                                passenger.setYRot(passenger.getYRot() - Mth.degreesDifference(this.yRot - this.passengerYawOffset, passenger.getYRot()));
+                                passenger.yRot -= Mth.degreesDifference(this.yRot - this.passengerYawOffset, passenger.getYRot());
                                 passenger.setYHeadRot(passenger.getYRot());
                             }
                         }
@@ -922,16 +930,15 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
         passenger.setYBodyRot(this.getYRot() + seatYawOffset);
         float wrappedYaw = Mth.wrapDegrees(passenger.getYRot() - this.getYRot() - seatYawOffset);
         float clampedYaw = Mth.clamp(wrappedYaw, -120.0F, 120.0F);
-    //    passenger.yRotO += clampedYaw - wrappedYaw;
-    //    passenger.yRot += clampedYaw - wrappedYaw;
+        passenger.yRotO += clampedYaw - wrappedYaw;
+        passenger.yRot += clampedYaw - wrappedYaw;
 
-        passenger.setYRot(passenger.getYRot() + (clampedYaw - wrappedYaw));
         passenger.setYHeadRot(passenger.getYRot());
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void onPassengerTurned(Entity passenger)
+    public void onPassengerTurned(@NotNull Entity passenger)
     {
         this.clampYaw(passenger);
         if(VehicleHelper.canFollowVehicleOrientation(passenger))
