@@ -17,6 +17,8 @@ import com.mrcrayfish.vehicle.init.ModSounds;
 import com.mrcrayfish.vehicle.item.SprayCanItem;
 import com.mrcrayfish.vehicle.network.datasync.VehicleDataValue;
 import com.mrcrayfish.vehicle.util.CommonUtils;
+import net.minecraft.client.model.QuadrupedModel;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -42,6 +44,7 @@ import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
@@ -141,7 +144,12 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
             {
                 if(!((Player) entity).isLocalPlayer())
                 {
-                    this.paramToDataValue.get(key).updateLocal(this);
+                    VehicleDataValue<?> value = this.paramToDataValue.get(key);
+
+                    if(value != null)
+                    {
+                        value.updateLocal(this);
+                    }
                 }
             }
         }
@@ -892,7 +900,7 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
                             }
                             if(this.canApplyYawOffset(passenger) && Config.CLIENT.shouldFollowYaw.get())
                             {
-                                passenger.setXRot(passenger.getYRot() - Mth.degreesDifference(this.getYRot() - this.passengerYawOffset, passenger.getYRot()));
+                                passenger.setYRot(passenger.getYRot() - Mth.degreesDifference(this.yRot - this.passengerYawOffset, passenger.getYRot()));
                                 passenger.setYHeadRot(passenger.getYRot());
                             }
                         }

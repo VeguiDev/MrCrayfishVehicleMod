@@ -101,7 +101,7 @@ public abstract class LandVehicleEntity extends PoweredVehicleEntity
             Vec3 nextPosition = frontWheel.subtract(frontWheel.yRot((float) Math.toRadians(steeringAngle)));
             Vec3 nextMovement = Vec3.ZERO.vectorTo(nextPosition).scale(speed);
             this.motion = this.motion.add(nextMovement);
-            this.setYRot(this.getYRot() - (steeringAngle * speed));
+            this.yRot -= (steeringAngle * speed);
             float forwardForce = Mth.clamp(this.getThrottle(), -1.0F, 1.0F);
             forwardForce *= this.getEngineTier().map(IEngineTier::getPowerMultiplier).orElse(1.0F);
             this.chargingAmount = Mth.clamp(this.chargingAmount + forwardForce * 0.025F, 0.0F, 1.0F);
@@ -183,7 +183,7 @@ public abstract class LandVehicleEntity extends PoweredVehicleEntity
             float vehicleDeltaYaw = CommonUtils.yaw(forward) - CommonUtils.yaw(heading);
             vehicleDeltaYaw = Mth.wrapDegrees(vehicleDeltaYaw);
 
-            this.setYRot(this.getYRot() - vehicleDeltaYaw);
+            this.yRot -= vehicleDeltaYaw;
         }
 
         // Add gravity

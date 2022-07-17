@@ -113,8 +113,9 @@ public abstract class PlaneEntity extends PoweredVehicleEntity
         // Adds delta pitch and yaw to the plane based on the flaps and roll of the plane
         Vector3f elevatorDirection = new Vector3f(Vec3.directionFromRotation(this.elevatorAngle * elevatorForce * this.getElevatorSensitivity(), 0));
         elevatorDirection.transform(new Quaternion(Vector3f.ZP, this.planeRoll.get(this), true));
-        this.setXRot(this.getXRot() + CommonUtils.pitch(elevatorDirection));
-        this.setYRot(this.getYRot() - CommonUtils.yaw(elevatorDirection));
+        this.xRot += CommonUtils.pitch(elevatorDirection);
+
+        this.yRot -= CommonUtils.yaw(elevatorDirection);
 
         // Makes the plane turn slightly when roll is turned to the side
         float planeRoll = this.planeRoll.get(this) % 360;
@@ -125,12 +126,13 @@ public abstract class PlaneEntity extends PoweredVehicleEntity
             float turnStrength = 1.0F - (Mth.degreesDifferenceAbs(absPlaneRoll, 45F) / 45F);
             turnStrength *= Math.signum(planeRoll);
             float turnAmount = turnStrength * forwardFactor * this.getMaxTurnAngle();
-            this.setYRot(this.getYRot() + turnAmount);
+
+            this.yRot += turnAmount;
         }
 
         // Makes the plane fall the closer it is to being sideways
         float fallAmount = 1.0F - Mth.degreesDifferenceAbs(absPlaneRoll, 90F) / 90F;
-        this.setXRot(this.getXRot() + Math.abs(fallAmount));
+        this.xRot += Math.abs(fallAmount);
 
         // Updates the accelerations of the plane with drag and friction applied
         Vec3 forward = Vec3.directionFromRotation(this.getRotationVector());
@@ -174,7 +176,8 @@ public abstract class PlaneEntity extends PoweredVehicleEntity
             // Calculates the difference from the old yaw to the new yaw
             float vehicleDeltaYaw = CommonUtils.yaw(forward) - CommonUtils.yaw(heading);
             vehicleDeltaYaw = Mth.wrapDegrees(vehicleDeltaYaw);
-            this.setYRot(this.getYRot() - vehicleDeltaYaw);
+
+            this.yRot -= vehicleDeltaYaw;
         }
         else
         {
@@ -188,7 +191,7 @@ public abstract class PlaneEntity extends PoweredVehicleEntity
             float pitchDelta = Mth.degreesDifference(90F, Math.abs(this.xRotO));
             float yawDelta = (float) Math.floor(Math.abs(CommonUtils.yaw(this.motion) - this.getYRot()));
             boolean flipped = this.motion.multiply(1, 0, 1).length() > 0 && yawDelta > 45F && yawDelta <= 180F;
-            this.setXRot(-CommonUtils.pitch(this.motion));
+            this.xRot = -CommonUtils.pitch(this.motion);
             this.setYRot(this.motion.multiply(1, 0, 1).length() > 0 ? CommonUtils.yaw(this.motion) : this.getYRot());
             if(flipped)
             {
