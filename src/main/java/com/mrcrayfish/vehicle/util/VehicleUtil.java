@@ -44,6 +44,7 @@ public class VehicleUtil
         Supplier<EntityType<T>> type = VehicleUtil.buildVehicleType(id, function, width, height);
         VehicleRegistry.registerVehicle(id);
         if(includeCrate) VehicleCrateBlock.registerVehicle(id);
+
         return deferredRegister.register(name, type);
     }
 

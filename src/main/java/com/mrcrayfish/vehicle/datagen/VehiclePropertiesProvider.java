@@ -32,7 +32,7 @@ import java.util.Objects;
 public abstract class VehiclePropertiesProvider implements DataProvider
 {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final Gson GSON = new GsonBuilder().registerTypeAdapter(VehicleProperties.class, new VehicleProperties.Serializer()).create();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(VehicleProperties.class, new VehicleProperties.Serializer()).create();
 
     private final DataGenerator generator;
     private final Map<ResourceLocation, VehicleProperties> vehiclePropertiesMap = new HashMap<>();

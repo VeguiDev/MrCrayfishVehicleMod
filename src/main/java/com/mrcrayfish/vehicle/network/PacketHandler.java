@@ -10,7 +10,6 @@ public class PacketHandler
 {
     private static final SimpleChannel HANDSHAKE_CHANNEL = FrameworkChannelBuilder
             .create(Reference.MOD_ID, "handshake", 1)
-            .registerHandshakeMessage(HandshakeMessages.C2SAcknowledge.class)
             .registerHandshakeMessage(HandshakeMessages.S2CVehicleProperties.class)
             .build();
 
@@ -41,6 +40,9 @@ public class PacketHandler
             .registerPlayMessage(MessageInteractCosmetic.class)
             .registerPlayMessage(MessageSyncActionData.class, NetworkDirection.PLAY_TO_CLIENT)
             .build();
+
+    public static void init()
+    {}
 
     /**
      * Gets the handshake network channel for MrCrayfish's Vehicle Mod

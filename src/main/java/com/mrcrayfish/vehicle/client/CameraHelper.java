@@ -30,10 +30,10 @@ import java.lang.reflect.Method;
 @OnlyIn(Dist.CLIENT)
 public class CameraHelper
 {
-    private static final Method SET_POSITION_METHOD = ObfuscationReflectionHelper.findMethod(Camera.class, "m_90581_", double.class, double.class, double.class);
+    private static final Method SET_POSITION_METHOD = ObfuscationReflectionHelper.findMethod(Camera.class, "m_90584_", double.class, double.class, double.class);
     private static final Method MOVE_METHOD = ObfuscationReflectionHelper.findMethod(Camera.class, "m_90568_", double.class, double.class, double.class);
     private static final Method GET_MAX_MOVE_METHOD = ObfuscationReflectionHelper.findMethod(Camera.class, "m_90566_", double.class);
-    private static final Field LEFT_FIELD = ObfuscationReflectionHelper.findField(Camera.class, "f_167688_");
+    private static final Field LEFT_FIELD = ObfuscationReflectionHelper.findField(Camera.class, "f_90556_");
 
     private VehicleProperties properties;
     private Quaternion currentRotation;

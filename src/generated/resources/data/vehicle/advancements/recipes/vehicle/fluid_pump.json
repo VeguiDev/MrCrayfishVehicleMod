@@ -21,7 +21,9 @@
       "conditions": {
         "items": [
           {
-            "item": "minecraft:redstone"
+            "items": [
+              "minecraft:redstone"
+            ]
           }
         ]
       }
@@ -41,7 +43,9 @@
       "conditions": {
         "items": [
           {
-            "item": "minecraft:dispenser"
+            "items": [
+              "minecraft:dispenser"
+            ]
           }
         ]
       }
@@ -51,7 +55,9 @@
       "conditions": {
         "items": [
           {
-            "item": "minecraft:hopper"
+            "items": [
+              "minecraft:hopper"
+            ]
           }
         ]
       }

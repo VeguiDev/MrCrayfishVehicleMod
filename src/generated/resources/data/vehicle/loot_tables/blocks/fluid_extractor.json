@@ -12,7 +12,7 @@
               "function": "vehicle:copy_fluid_tanks"
             }
           ],
-          "name": "minecraft:air"
+          "name": "vehicle:fluid_extractor"
         }
       ],
       "conditions": [

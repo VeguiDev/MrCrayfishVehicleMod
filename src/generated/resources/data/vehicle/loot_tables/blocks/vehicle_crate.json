@@ -40,7 +40,7 @@
               ]
             }
           ],
-          "name": "minecraft:air"
+          "name": "vehicle:vehicle_crate"
         }
       ],
       "conditions": [

@@ -3,19 +3,15 @@ package com.mrcrayfish.vehicle.init;
 import com.mrcrayfish.vehicle.Config;
 import com.mrcrayfish.vehicle.Reference;
 import com.mrcrayfish.vehicle.VehicleMod;
+import com.mrcrayfish.vehicle.block.FuelDrumBlock;
 import com.mrcrayfish.vehicle.entity.EngineTier;
 import com.mrcrayfish.vehicle.entity.EngineType;
 import com.mrcrayfish.vehicle.entity.WheelType;
-import com.mrcrayfish.vehicle.item.EngineItem;
-import com.mrcrayfish.vehicle.item.HammerItem;
-import com.mrcrayfish.vehicle.item.JerryCanItem;
-import com.mrcrayfish.vehicle.item.KeyItem;
-import com.mrcrayfish.vehicle.item.SprayCanItem;
-import com.mrcrayfish.vehicle.item.WheelItem;
-import com.mrcrayfish.vehicle.item.WrenchItem;
+import com.mrcrayfish.vehicle.item.*;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -54,6 +50,18 @@ public class ModItems
     public static final RegistryObject<BucketItem> FUELIUM_BUCKET = register("fuelium_bucket", () -> new BucketItem(ModFluids.FUELIUM, (new Item.Properties()).craftRemainder(Items.BUCKET).stacksTo(1).tab(VehicleMod.CREATIVE_TAB)));
     public static final RegistryObject<BucketItem> ENDER_SAP_BUCKET = register("ender_sap_bucket", () -> new BucketItem(ModFluids.ENDER_SAP, (new Item.Properties()).craftRemainder(Items.BUCKET).stacksTo(1).tab(VehicleMod.CREATIVE_TAB)));
     public static final RegistryObject<BucketItem> BLAZE_JUICE_BUCKET = register("blaze_juice_bucket", () -> new BucketItem(ModFluids.BLAZE_JUICE, (new Item.Properties()).craftRemainder(Items.BUCKET).stacksTo(1).tab(VehicleMod.CREATIVE_TAB)));
+
+    public static final RegistryObject<LazyBlockItem<Block>> TRAFFIC_CONE = register("traffic_cone", () -> new LazyBlockItem<>(ModBlocks.TRAFFIC_CONE, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
+    public static final RegistryObject<LazyBlockItem<Block>> FLUID_EXTRACTOR = register("fluid_extractor", () -> new LazyBlockItem<>(ModBlocks.FLUID_EXTRACTOR, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
+    public static final RegistryObject<LazyBlockItem<Block>> FLUID_MIXER = register("fluid_mixer", () -> new LazyBlockItem<>(ModBlocks.FLUID_MIXER, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
+    public static final RegistryObject<LazyBlockItem<Block>> GAS_PUMP = register("gas_pump", () -> new LazyBlockItem<>(ModBlocks.GAS_PUMP, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
+    public static final RegistryObject<LazyBlockItem<Block>> FLUID_PIPE = register("fluid_pipe", () -> new LazyBlockItem<>(ModBlocks.FLUID_PIPE, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
+    public static final RegistryObject<LazyBlockItem<Block>> FLUID_PUMP = register("fluid_pump", () -> new LazyBlockItem<>(ModBlocks.FLUID_PUMP, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
+    public static final RegistryObject<LazyBlockItem<FuelDrumBlock>> FUEL_DRUM = register("fuel_drum", () -> new LazyBlockItem<>(ModBlocks.FUEL_DRUM, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
+    public static final RegistryObject<LazyBlockItem<FuelDrumBlock>> INDUSTRIAL_FUEL_DRUM = register("industrial_fuel_drum", () -> new LazyBlockItem<>(ModBlocks.INDUSTRIAL_FUEL_DRUM, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
+    public static final RegistryObject<LazyBlockItem<Block>> WORKSTATION = register("workstation", () -> new LazyBlockItem<>(ModBlocks.WORKSTATION, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
+    public static final RegistryObject<LazyBlockItem<Block>> VEHICLE_CRATE = register("vehicle_crate", () -> new LazyBlockItem<>(ModBlocks.VEHICLE_CRATE, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
+    public static final RegistryObject<LazyBlockItem<Block>> JACK = register("jack", () -> new LazyBlockItem<>(ModBlocks.JACK, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
 
     protected static <T extends Item> RegistryObject<T> register(String id, Supplier<T> item)
     {

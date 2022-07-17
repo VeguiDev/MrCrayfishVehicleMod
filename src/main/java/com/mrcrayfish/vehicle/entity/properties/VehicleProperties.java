@@ -11,7 +11,6 @@ import com.mrcrayfish.vehicle.common.VehicleRegistry;
 import com.mrcrayfish.vehicle.common.cosmetic.CosmeticProperties;
 import com.mrcrayfish.vehicle.common.entity.Transform;
 import com.mrcrayfish.vehicle.datagen.VehiclePropertiesProvider;
-import com.mrcrayfish.vehicle.entity.VehicleEntity;
 import com.mrcrayfish.vehicle.entity.Wheel;
 import com.mrcrayfish.vehicle.network.HandshakeMessages;
 import com.mrcrayfish.vehicle.util.ExtraJSONUtils;
@@ -231,14 +230,14 @@ public class VehicleProperties
     {
         for(ResourceLocation location : VehicleRegistry.getRegisteredVehicles())
         {
-            System.out.println("Loading default " + location);
+            VehicleMod.LOGGER.info("Loading default vehicle {}", location);
             DEFAULT_VEHICLE_PROPERTIES.computeIfAbsent(location, VehicleProperties::loadDefaultProperties);
         }
     }
 
     private static VehicleProperties loadDefaultProperties(ResourceLocation id)
     {
-        String resource = String.format("data/%s/vehicles/properties/%s.json", id.getNamespace(), id.getPath());
+        String resource = String.format("/data/%s/vehicles/properties/%s.json", id.getNamespace(), id.getPath());
         try(InputStream is = VehicleProperties.class.getResourceAsStream(resource))
         {
             Objects.requireNonNull(is, "");
@@ -260,7 +259,7 @@ public class VehicleProperties
 
     private static void loadDefaultCosmetics(ResourceLocation id, VehicleProperties properties)
     {
-        String resource = String.format("data/%s/vehicles/cosmetics/%s.json", id.getNamespace(), id.getPath());
+        String resource = String.format("/data/%s/vehicles/cosmetics/%s.json", id.getNamespace(), id.getPath());
         try(InputStream is = VehicleProperties.class.getResourceAsStream(resource))
         {
             Objects.requireNonNull(is, "");

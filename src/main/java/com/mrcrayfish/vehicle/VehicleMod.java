@@ -5,7 +5,6 @@ import com.mrcrayfish.vehicle.client.model.ComponentManager;
 import com.mrcrayfish.vehicle.client.model.VehicleModels;
 import com.mrcrayfish.vehicle.common.CommonEvents;
 import com.mrcrayfish.vehicle.common.FluidNetworkHandler;
-import com.mrcrayfish.vehicle.common.VehicleRegistry;
 import com.mrcrayfish.vehicle.common.entity.HeldVehicleDataHandler;
 import com.mrcrayfish.vehicle.crafting.RecipeTypes;
 import com.mrcrayfish.vehicle.crafting.WorkstationIngredient;
@@ -21,6 +20,7 @@ import com.mrcrayfish.vehicle.entity.properties.PoweredProperties;
 import com.mrcrayfish.vehicle.entity.properties.TrailerProperties;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.init.*;
+import com.mrcrayfish.vehicle.network.PacketHandler;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -89,6 +89,7 @@ public class VehicleMod
     {
         RecipeTypes.init();
         VehicleProperties.loadDefaultProperties();
+        PacketHandler.init();
         HeldVehicleDataHandler.register();
         ModDataKeys.register();
         ModLootFunctions.init();

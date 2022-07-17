@@ -37,27 +37,6 @@ public class HandshakeMessages
         }
     }
 
-    static class C2SAcknowledge extends HandshakeMessage<C2SAcknowledge>
-    {
-        @Override
-        public void encode(C2SAcknowledge c2SAcknowledge, FriendlyByteBuf friendlyByteBuf)
-        {
-
-        }
-
-        @Override
-        public C2SAcknowledge decode(FriendlyByteBuf friendlyByteBuf)
-        {
-            return new C2SAcknowledge();
-        }
-
-        @Override
-        public void handle(C2SAcknowledge msg, Supplier<NetworkEvent.Context> supplier)
-        {
-            supplier.get().enqueueWork(() -> HandshakeHandler.handleAcknowledge(msg, supplier));
-        }
-    }
-
     public static class S2CVehicleProperties extends HandshakeMessage<S2CVehicleProperties>
     {
         private ImmutableMap<ResourceLocation, VehicleProperties> propertiesMap;

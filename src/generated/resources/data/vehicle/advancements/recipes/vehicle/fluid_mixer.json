@@ -21,7 +21,9 @@
       "conditions": {
         "items": [
           {
-            "item": "minecraft:redstone_block"
+            "items": [
+              "minecraft:redstone_block"
+            ]
           }
         ]
       }
@@ -31,7 +33,9 @@
       "conditions": {
         "items": [
           {
-            "item": "minecraft:hopper"
+            "items": [
+              "minecraft:hopper"
+            ]
           }
         ]
       }
@@ -41,7 +45,9 @@
       "conditions": {
         "items": [
           {
-            "item": "vehicle:iron_electric_engine"
+            "items": [
+              "vehicle:iron_electric_engine"
+            ]
           }
         ]
       }

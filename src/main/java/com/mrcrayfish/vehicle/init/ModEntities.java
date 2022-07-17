@@ -47,5 +47,5 @@ public class ModEntities
     public static final RegistryObject<EntityType<SofacopterEntity>> SOFACOPTER = VehicleUtil.createModDependentEntityType(REGISTER, "cfm", "sofacopter", SofacopterEntity::new, 1.0F, 1.0F, false);
 
     /* Other */
-    public static final RegistryObject<EntityType<EntityJack>> JACK = REGISTER.register("jack", () -> EntityType.Builder.of((EntityType.EntityFactory<EntityJack>) EntityJack::new, MobCategory.MISC).setUpdateInterval(1).noSummon().fireImmune().setShouldReceiveVelocityUpdates(true).build("jack")); //registerEntity("jack", EntityJack::new, 0.0F, 0.0F);
+    public static final RegistryObject<EntityType<EntityJack>> JACK = REGISTER.register("jack", () -> EntityType.Builder.of((EntityType.EntityFactory<EntityJack>) EntityJack::new, MobCategory.MISC).setUpdateInterval(1).noSummon().fireImmune().sized(0F, 0F).setShouldReceiveVelocityUpdates(true).build("jack")); //registerEntity("jack", EntityJack::new, 0.0F, 0.0F);
 }

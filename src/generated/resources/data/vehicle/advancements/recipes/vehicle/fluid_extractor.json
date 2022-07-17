@@ -31,7 +31,9 @@
       "conditions": {
         "items": [
           {
-            "item": "minecraft:piston"
+            "items": [
+              "minecraft:piston"
+            ]
           }
         ]
       }
@@ -41,7 +43,9 @@
       "conditions": {
         "items": [
           {
-            "item": "minecraft:redstone_block"
+            "items": [
+              "minecraft:redstone_block"
+            ]
           }
         ]
       }
@@ -51,7 +55,9 @@
       "conditions": {
         "items": [
           {
-            "item": "vehicle:iron_electric_engine"
+            "items": [
+              "vehicle:iron_electric_engine"
+            ]
           }
         ]
       }

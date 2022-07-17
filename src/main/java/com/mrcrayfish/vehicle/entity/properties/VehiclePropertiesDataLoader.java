@@ -30,7 +30,7 @@ public class VehiclePropertiesDataLoader extends SimplePreparableReloadListener<
 {
     private static final VehiclePropertiesDataLoader instance = new VehiclePropertiesDataLoader();
 
-    public static final Gson GSON = new GsonBuilder().registerTypeAdapter(VehicleProperties.class, new VehicleProperties.Serializer()).create();
+    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(VehicleProperties.class, new VehicleProperties.Serializer()).create();
 
     private static final String PROPERTIES_DIRECTORY = "vehicles/properties";
     private static final String COSMETICS_DIRECTORY = "vehicles/cosmetics";
@@ -49,6 +49,7 @@ public class VehiclePropertiesDataLoader extends SimplePreparableReloadListener<
                     try(Resource resource = manager.getResource(location))
                     {
                         InputStream stream = resource.getInputStream();
+
                         VehicleProperties properties = loadPropertiesFromStream(stream);
                         propertiesMap.put(format(location, PROPERTIES_DIRECTORY), properties);
                     }

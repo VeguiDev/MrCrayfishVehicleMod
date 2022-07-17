@@ -1,5 +1,6 @@
 package com.mrcrayfish.vehicle.network;
 
+import com.mrcrayfish.framework.api.network.HandshakeMessage;
 import com.mrcrayfish.vehicle.VehicleMod;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import net.minecraft.network.chat.TextComponent;
@@ -17,12 +18,6 @@ import java.util.function.Supplier;
 public class HandshakeHandler
 {
     private static final Marker VEHICLE_HANDSHAKE = MarkerManager.getMarker("VEHICLE_HANDSHAKE");
-
-    static void handleAcknowledge(HandshakeMessages.C2SAcknowledge message, Supplier<NetworkEvent.Context> c)
-    {
-        VehicleMod.LOGGER.debug(VEHICLE_HANDSHAKE, "Received acknowledgement from client");
-        c.get().setPacketHandled(true);
-    }
 
     static void handleVehicleProperties(HandshakeMessages.S2CVehicleProperties message, Supplier<NetworkEvent.Context> c)
     {
@@ -50,7 +45,7 @@ public class HandshakeHandler
         if(updated.get())
         {
             VehicleMod.LOGGER.info("Successfully synchronized vehicle properties from server");
-            PacketHandler.getHandshakeChannel().reply(new HandshakeMessages.C2SAcknowledge(), c.get());
+            PacketHandler.getHandshakeChannel().reply(new HandshakeMessage.Acknowledge(), c.get());
         }
         else
         {
