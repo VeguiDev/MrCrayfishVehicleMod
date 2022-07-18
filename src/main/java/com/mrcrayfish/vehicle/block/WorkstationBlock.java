@@ -11,7 +11,6 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
@@ -19,6 +18,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -27,7 +27,8 @@ import java.util.List;
 /**
  * Author: MrCrayfish
  */
-public class WorkstationBlock extends RotatedObjectBlock implements EntityBlock
+@SuppressWarnings("deprecation")
+public class WorkstationBlock extends RotatedEntityObjectBlock
 {
     private static final VoxelShape SHAPE = Util.make(() -> {
         List<VoxelShape> shapes = new ArrayList<>();
@@ -45,12 +46,15 @@ public class WorkstationBlock extends RotatedObjectBlock implements EntityBlock
     }
 
     @Override
-    public VoxelShape getShape(BlockState p_60555_, BlockGetter p_60556_, BlockPos p_60557_, CollisionContext p_60558_) {
+    @NotNull
+    public VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext ctx)
+    {
         return SHAPE;
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult result)
+    @NotNull
+    public InteractionResult use(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult result)
     {
         if(!level.isClientSide)
         {
@@ -66,7 +70,7 @@ public class WorkstationBlock extends RotatedObjectBlock implements EntityBlock
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+    public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
     {
         return new WorkstationTileEntity(pos, state);
     }

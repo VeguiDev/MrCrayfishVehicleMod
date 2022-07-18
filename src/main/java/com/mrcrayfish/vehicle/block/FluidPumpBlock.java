@@ -30,10 +30,13 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.mrcrayfish.vehicle.block.RotatedEntityObjectBlock.createTickerHelper;
 
 /**
  * Author: MrCrayfish
@@ -52,13 +55,15 @@ public class FluidPumpBlock extends FluidPipeBlock implements EntityBlock
     };
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext p_60558_)
+    @NotNull
+    public VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter worldIn, @NotNull BlockPos pos, @NotNull CollisionContext p_60558_)
     {
         return this.getPumpShape(state, worldIn, pos);
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx)
+    @NotNull
+    public VoxelShape getCollisionShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext ctx)
     {
         return this.getPumpShape(state, level, pos);
     }
@@ -186,13 +191,14 @@ public class FluidPumpBlock extends FluidPipeBlock implements EntityBlock
 
     @Nullable
     @Override
-    public PumpTileEntity newBlockEntity(BlockPos pos, BlockState state) {
+    public PumpTileEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
+    {
         return new PumpTileEntity(pos, state);
     }
 
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, @NotNull BlockState state, @NotNull BlockEntityType<T> type)
     {
         if(!level.isClientSide())
         {
@@ -200,10 +206,5 @@ public class FluidPumpBlock extends FluidPipeBlock implements EntityBlock
         }
 
         return null;
-    }
-
-    @Nullable
-    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> p_152133_, BlockEntityType<E> p_152134_, BlockEntityTicker<? super E> p_152135_) {
-        return p_152134_ == p_152133_ ? (BlockEntityTicker<A>)p_152135_ : null;
     }
 }

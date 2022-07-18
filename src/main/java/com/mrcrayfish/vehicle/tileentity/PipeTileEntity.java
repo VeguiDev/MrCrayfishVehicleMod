@@ -8,6 +8,7 @@ import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -72,12 +73,13 @@ public class PipeTileEntity extends TileEntitySynced
     }
 
     @Override
-    public void load(CompoundTag compound)
+    public void load(@NotNull CompoundTag compound)
     {
         super.load(compound);
         if(compound.contains("DisabledConnections", ByteArrayTag.TAG_BYTE_ARRAY))
         {
             byte[] connections = compound.getByteArray("DisabledConnections");
+
             for(int i = 0; i < connections.length; i++)
             {
                 this.disabledConnections[i] = connections[i] == (byte) 1;
@@ -86,19 +88,21 @@ public class PipeTileEntity extends TileEntitySynced
     }
 
     @Override
-    protected void saveAdditional(CompoundTag p_187471_)
+    protected void saveAdditional(@NotNull CompoundTag compound)
     {
-        super.saveAdditional(p_187471_);
-        this.writeConnections(p_187471_);
+        super.saveAdditional(compound);
+        this.writeConnections(compound);
     }
 
     private void writeConnections(CompoundTag compound)
     {
         byte[] connections = new byte[this.disabledConnections.length];
+
         for(int i = 0; i < connections.length; i++)
         {
             connections[i] = (byte) (this.disabledConnections[i] ? 1 : 0);
         }
+
         compound.putByteArray("DisabledConnections", connections);
     }
 }

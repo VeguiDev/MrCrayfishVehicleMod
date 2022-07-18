@@ -8,10 +8,12 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
  */
+@SuppressWarnings("deprecation")
 public class TrafficConeBlock extends ObjectBlock
 {
     private static final VoxelShape COLLISION_SHAPE = Block.box(2, 0, 2, 14, 18, 14);
@@ -23,13 +25,16 @@ public class TrafficConeBlock extends ObjectBlock
     }
 
     @Override
-    public VoxelShape getShape(BlockState p_60555_, BlockGetter p_60556_, BlockPos p_60557_, CollisionContext p_60558_)
+    @NotNull
+    public VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext ctx)
     {
         return SELECTION_SHAPE;
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState p_60572_, BlockGetter p_60573_, BlockPos p_60574_, CollisionContext p_60575_) {
+    @NotNull
+    public VoxelShape getCollisionShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext ctx)
+    {
         return COLLISION_SHAPE;
     }
 }

@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -97,7 +98,7 @@ public class BoostRampBlock extends RotatedObjectBlock implements EntityBlock
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext ctx)
+    public BlockState getStateForPlacement(@NotNull BlockPlaceContext ctx)
     {
         return this.getRampState(this.defaultBlockState(), ctx.getLevel(), ctx.getClickedPos(), ctx.getHorizontalDirection());
     }

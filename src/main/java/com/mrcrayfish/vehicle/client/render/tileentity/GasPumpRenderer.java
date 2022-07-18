@@ -30,6 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -42,7 +43,7 @@ public class GasPumpRenderer implements BlockEntityRenderer<GasPumpTileEntity>
     {}
 
     @Override
-    public void render(GasPumpTileEntity entity, float delta, PoseStack matrices, MultiBufferSource buffers, int light, int overlay)
+    public void render(GasPumpTileEntity entity, float delta, @NotNull PoseStack matrices, @NotNull MultiBufferSource buffers, int light, int overlay)
     {
         BlockState state = entity.getBlockState();
         if(state.getBlock() != ModBlocks.GAS_PUMP.get())
@@ -109,6 +110,12 @@ public class GasPumpRenderer implements BlockEntityRenderer<GasPumpTileEntity>
         }
 
         matrices.popPose();
+    }
+
+    @Override
+    public boolean shouldRenderOffScreen(@NotNull GasPumpTileEntity entity)
+    {
+        return true;
     }
 
     @Override

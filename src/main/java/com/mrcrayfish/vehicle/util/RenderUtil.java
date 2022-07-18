@@ -102,10 +102,8 @@ public class RenderUtil
         matrixStack.translate(-0.5, -0.5, -0.5);
         if(!model.isCustomRenderer())
         {
-            Minecraft mc = Minecraft.getInstance();
             PoseStack.Pose entry = matrixStack.last();
-            RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
-            VertexConsumer vertexBuilder = new SheetedDecalTextureGenerator(mc.renderBuffers().crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(stage)), entry.pose(), entry.normal());
+            VertexConsumer vertexBuilder = new SheetedDecalTextureGenerator(MINECRAFT.renderBuffers().crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(stage)), entry.pose(), entry.normal());
             renderModel(model, ItemStack.EMPTY, color, lightTexture, overlayTexture, matrixStack, vertexBuilder);
         }
         matrixStack.popPose();
@@ -210,17 +208,9 @@ public class RenderUtil
                 }
             }
 
-            int tintColor = 0xFFFFFFFF;
-            if(quad.isTinted())
+            if(quad.isTinted() && useItemColor)
             {
-                if(useItemColor)
-                {
-                    tintColor = Minecraft.getInstance().getItemColors().getColor(stack, quad.getTintIndex());
-                }
-                else
-                {
-                    tintColor = color;
-                }
+                color = MINECRAFT.getItemColors().getColor(stack, quad.getTintIndex());
 
                 if (OptifineHelper.isCustomColorsEnabled())
                 {
@@ -228,16 +218,18 @@ public class RenderUtil
                 }
             }
 
-            float red = (float) (tintColor >> 16 & 255) / 255.0F;
-            float green = (float) (tintColor >> 8 & 255) / 255.0F;
-            float blue = (float) (tintColor & 255) / 255.0F;
+            float NORM = 1F / 255.0F;
+
+            float red = (color >> 16) * NORM;
+            float green = (color >> 8) * NORM;
+            float blue = (color) * NORM;
             vertexBuilder.putBulkData(entry, quad, red, green, blue, lightTexture, overlayTexture, true);
         }
     }
 
     public static List<Component> lines(FormattedText text, int maxWidth)
     {
-        List<FormattedText> lines = Minecraft.getInstance().font.getSplitter().splitLines(text, maxWidth, Style.EMPTY);
+        List<FormattedText> lines = MINECRAFT.font.getSplitter().splitLines(text, maxWidth, Style.EMPTY);
         return lines.stream().map(t -> new TextComponent(t.getString()).withStyle(ChatFormatting.GRAY)).collect(Collectors.toList());
     }
 }

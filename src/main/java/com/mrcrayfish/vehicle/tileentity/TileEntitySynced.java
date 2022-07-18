@@ -10,6 +10,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -29,7 +30,11 @@ public class TileEntitySynced extends BlockEntity
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
     {
-        this.load(pkt.getTag());
+        CompoundTag nbt = pkt.getTag();
+        if(nbt != null)
+        {
+            this.load(nbt);
+        }
     }
 
     @Nullable
@@ -40,6 +45,7 @@ public class TileEntitySynced extends BlockEntity
     }
 
     @Override
+    @NotNull
     public CompoundTag getUpdateTag()
     {
         return this.saveWithId();

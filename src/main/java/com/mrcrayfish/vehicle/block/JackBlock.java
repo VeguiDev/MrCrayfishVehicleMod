@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 /**
  * Author: MrCrayfish
  */
+@SuppressWarnings("deprecation")
 public class JackBlock extends RotatedObjectBlock implements EntityBlock
 {
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;

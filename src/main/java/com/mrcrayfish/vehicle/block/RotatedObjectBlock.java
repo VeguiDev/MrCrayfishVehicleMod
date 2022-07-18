@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -29,25 +30,29 @@ public abstract class RotatedObjectBlock extends ObjectBlock
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext ctx)
+    public BlockState getStateForPlacement(@NotNull BlockPlaceContext ctx)
     {
-        return super.getStateForPlacement(ctx).setValue(DIRECTION, ctx.getHorizontalDirection());
+        BlockState state = this.defaultBlockState();
+
+        return state.setValue(DIRECTION, ctx.getHorizontalDirection());
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+    protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder)
     {
         super.createBlockStateDefinition(builder);
         builder.add(DIRECTION);
     }
 
     @Override
+    @NotNull
     public BlockState rotate(BlockState state, Rotation rotation)
     {
         return state.setValue(DIRECTION, rotation.rotate(state.getValue(DIRECTION)));
     }
 
     @Override
+    @NotNull
     public BlockState mirror(BlockState state, Mirror mirror)
     {
         return state.rotate(mirror.getRotation(state.getValue(DIRECTION)));

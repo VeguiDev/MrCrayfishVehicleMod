@@ -1,6 +1,7 @@
 package com.mrcrayfish.vehicle.client.handler;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mrcrayfish.controllable.client.RenderEvents;
 import com.mrcrayfish.framework.common.data.SyncedEntityData;
 import com.mrcrayfish.vehicle.client.model.VehicleModels;
 import com.mrcrayfish.vehicle.client.raytrace.EntityRayTracer;
@@ -10,6 +11,7 @@ import com.mrcrayfish.vehicle.client.render.Axis;
 import com.mrcrayfish.vehicle.init.ModDataKeys;
 import com.mrcrayfish.vehicle.init.ModSounds;
 import com.mrcrayfish.vehicle.util.RenderUtil;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -18,6 +20,7 @@ import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -139,7 +142,7 @@ public class FuelingHandler
     }
 
     @SubscribeEvent
-    public void onModelRenderPost(RenderPlayerEvent.Pre event)
+    public void onModelRenderPost(RenderPlayerEvent.Post event)
     {
         Player player = event.getPlayer();
         if(SyncedEntityData.instance().get(player, ModDataKeys.GAS_PUMP).isEmpty())
@@ -170,19 +173,27 @@ public class FuelingHandler
         matrixStack.translate(0, -9 * 0.0625F, 5.75 * 0.0625F);
 
         MultiBufferSource renderTypeBuffer = Minecraft.getInstance().renderBuffers().bufferSource();
-        RenderUtil.renderColoredModel(VehicleModels.NOZZLE.getBaseModel(), ItemTransforms.TransformType.NONE, false, matrixStack, renderTypeBuffer, -1, 15728880, OverlayTexture.NO_OVERLAY);
+        RenderUtil.renderColoredModel(VehicleModels.NOZZLE.getBaseModel(), ItemTransforms.TransformType.NONE, false, matrixStack, renderTypeBuffer, 0xFFFFFFFF, 15728880, OverlayTexture.NO_OVERLAY);
 
         matrixStack.popPose();
     }
 
-    //TODO: Look or ask forge to add this back
-  /**  @SubscribeEvent
-    public void onRenderThirdPerson(RenderEvent.Held.Pre event)
+    @SubscribeEvent
+    public void onRenderThirdPerson(RenderPlayerEvent.Pre event)
     {
         Entity entity = event.getEntity();
-        if(entity instanceof PlayerEntity && SyncedPlayerData.instance().get((PlayerEntity) entity, ModDataKeys.GAS_PUMP).isPresent())
+        if(entity instanceof Player && SyncedEntityData.instance().get((Player) entity, ModDataKeys.GAS_PUMP).isPresent())
         {
-            event.setCanceled(true);
+            if(((Player) entity).isLocalPlayer())
+            {
+                Minecraft minecraft = Minecraft.getInstance();
+                if(minecraft.options.getCameraType() != CameraType.THIRD_PERSON_BACK || minecraft.options.getCameraType() != CameraType.THIRD_PERSON_FRONT)
+                {
+                    return;
+                }
+
+                event.setCanceled(true);
+            }
         }
-    } */
+    }
 }

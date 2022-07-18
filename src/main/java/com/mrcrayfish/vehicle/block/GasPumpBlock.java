@@ -18,7 +18,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -33,6 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.fluids.FluidUtil;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -43,7 +44,8 @@ import java.util.Map;
 /**
  * Author: MrCrayfish
  */
-public class GasPumpBlock extends RotatedObjectBlock implements EntityBlock
+@SuppressWarnings("deprecation")
+public class GasPumpBlock extends RotatedEntityObjectBlock
 {
     public static final BooleanProperty TOP = BooleanProperty.create("top");
     private static final Map<BlockState, VoxelShape> SHAPES = new HashMap<>();
@@ -77,13 +79,15 @@ public class GasPumpBlock extends RotatedObjectBlock implements EntityBlock
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter p_60556_, BlockPos p_60557_, CollisionContext p_60558_)
+    @NotNull
+    public VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext ctx)
     {
         return this.getShape(state);
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult result)
+    @NotNull
+    public InteractionResult use(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult result)
     {
         if(level.isClientSide())
         {
@@ -117,19 +121,19 @@ public class GasPumpBlock extends RotatedObjectBlock implements EntityBlock
     }
 
     @Override
-    public boolean canSurvive(BlockState st, LevelReader level, BlockPos pos)
+    public boolean canSurvive(@NotNull BlockState state, LevelReader level, @NotNull BlockPos pos)
     {
         return level.isEmptyBlock(pos) && level.isEmptyBlock(pos.above());
     }
 
     @Override
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity p_49850_, ItemStack p_49851_)
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, @NotNull ItemStack stack)
     {
         level.setBlockAndUpdate(pos.above(), state.setValue(TOP, true));
     }
 
     @Override
-    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player)
+    public void playerWillDestroy(Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Player player)
     {
         if (!level.isClientSide())
         {
@@ -147,7 +151,8 @@ public class GasPumpBlock extends RotatedObjectBlock implements EntityBlock
     }
 
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder)
+    @NotNull
+    public List<ItemStack> getDrops(BlockState state, LootContext.@NotNull Builder builder)
     {
         if (state.getValue(TOP))
         {
@@ -166,15 +171,22 @@ public class GasPumpBlock extends RotatedObjectBlock implements EntityBlock
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+    protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder)
     {
         super.createBlockStateDefinition(builder);
         builder.add(TOP);
     }
 
+    @Override
+    @NotNull
+    public RenderShape getRenderShape(@NotNull BlockState state)
+    {
+        return RenderShape.MODEL;
+    }
+
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+    public BlockEntity newBlockEntity(@NotNull BlockPos pos, BlockState state)
     {
         if (state.getValue(TOP))
         {
@@ -185,7 +197,7 @@ public class GasPumpBlock extends RotatedObjectBlock implements EntityBlock
 
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, BlockState state, @NotNull BlockEntityType<T> type)
     {
         if(state.getValue(TOP))
         {
@@ -197,10 +209,5 @@ public class GasPumpBlock extends RotatedObjectBlock implements EntityBlock
         }
 
         return null;
-    }
-
-    @Nullable
-    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> p_152133_, BlockEntityType<E> p_152134_, BlockEntityTicker<? super E> p_152135_) {
-        return p_152134_ == p_152133_ ? (BlockEntityTicker<A>)p_152135_ : null;
     }
 }

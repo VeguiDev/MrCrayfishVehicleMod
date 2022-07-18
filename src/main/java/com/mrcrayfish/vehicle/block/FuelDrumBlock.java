@@ -38,6 +38,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -45,6 +46,7 @@ import java.util.List;
 /**
  * Author: MrCrayfish
  */
+@SuppressWarnings("deprecation")
 public class FuelDrumBlock extends Block implements EntityBlock
 {
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.AXIS;
@@ -63,24 +65,28 @@ public class FuelDrumBlock extends Block implements EntityBlock
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
-        return SHAPE[state.getValue(AXIS).ordinal()];
-    }
-
-    @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx)
+    @NotNull
+    public VoxelShape getShape(BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext ctx)
     {
         return SHAPE[state.getValue(AXIS).ordinal()];
     }
 
     @Override
-    public VoxelShape getInteractionShape(BlockState state, BlockGetter p_60548_, BlockPos p_60549_)
+    @NotNull
+    public VoxelShape getCollisionShape(BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext ctx)
     {
         return SHAPE[state.getValue(AXIS).ordinal()];
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable BlockGetter level, List<Component> tooltips, TooltipFlag flag)
+    @NotNull
+    public VoxelShape getInteractionShape(BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos)
+    {
+        return SHAPE[state.getValue(AXIS).ordinal()];
+    }
+
+    @Override
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable BlockGetter level, @NotNull List<Component> tooltips, @NotNull TooltipFlag flag)
     {
         if(Screen.hasShiftDown())
         {
@@ -109,7 +115,8 @@ public class FuelDrumBlock extends Block implements EntityBlock
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult result)
+    @NotNull
+    public InteractionResult use(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult result)
     {
         if(!level.isClientSide())
         {
@@ -122,7 +129,8 @@ public class FuelDrumBlock extends Block implements EntityBlock
     }
 
     @Override
-    public BlockState rotate(BlockState state, Rotation rotation)
+    @NotNull
+    public BlockState rotate(BlockState state, @NotNull Rotation rotation)
     {
         return switch (rotation) {
             case COUNTERCLOCKWISE_90, CLOCKWISE_90 -> switch (state.getValue(AXIS)) {
@@ -156,7 +164,7 @@ public class FuelDrumBlock extends Block implements EntityBlock
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+    public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
     {
         return new FuelDrumTileEntity(pos, state);
     }

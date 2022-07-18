@@ -34,6 +34,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import java.util.Set;
 /**
  * Author: MrCrayfish
  */
+@SuppressWarnings("deprecation")
 public class FluidPipeBlock extends ObjectBlock implements EntityBlock
 {
     public static final BooleanProperty[] CONNECTED_PIPES = {BlockStateProperties.DOWN, BlockStateProperties.UP, BlockStateProperties.NORTH, BlockStateProperties.SOUTH, BlockStateProperties.WEST, BlockStateProperties.EAST};
@@ -76,13 +78,15 @@ public class FluidPipeBlock extends ObjectBlock implements EntityBlock
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext p_60558_)
+    @NotNull
+    public VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext ctx)
     {
-        return this.getPipeShape(state, worldIn, pos);
+        return this.getPipeShape(state, level, pos);
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext p_60575_)
+    @NotNull
+    public VoxelShape getCollisionShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext ctx)
     {
         return this.getPipeShape(state, level, pos);
     }

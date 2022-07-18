@@ -22,6 +22,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -92,7 +93,7 @@ public class SteepBoostRampBlock extends RotatedObjectBlock implements EntityBlo
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext ctx)
+    public BlockState getStateForPlacement(@NotNull BlockPlaceContext ctx)
     {
         return this.getRampState(this.defaultBlockState(), ctx.getLevel(), ctx.getClickedPos(), ctx.getHorizontalDirection());
     }

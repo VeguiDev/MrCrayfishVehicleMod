@@ -67,6 +67,7 @@ public class TileFluidHandlerSynced extends TileFluidHandler
     }
 
     @Override
+    @Nonnull
     public CompoundTag getUpdateTag()
     {
         return this.saveWithId();
@@ -82,7 +83,11 @@ public class TileFluidHandlerSynced extends TileFluidHandler
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
     {
-        this.load(pkt.getTag());
+        CompoundTag nbt = pkt.getTag();
+        if(nbt != null)
+        {
+            this.load(nbt);
+        }
     }
 
     public FluidTank getFluidTank()

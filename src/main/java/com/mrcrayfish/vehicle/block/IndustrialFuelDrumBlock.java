@@ -5,6 +5,7 @@ import com.mrcrayfish.vehicle.tileentity.IndustrialFuelDrumTileEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -21,7 +22,7 @@ public class IndustrialFuelDrumBlock extends FuelDrumBlock
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+    public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
     {
         return new IndustrialFuelDrumTileEntity(pos, state);
     }

@@ -32,8 +32,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -55,7 +53,8 @@ import java.util.List;
 /**
  * Author: MrCrayfish
  */
-public class VehicleCrateBlock extends RotatedObjectBlock implements EntityBlock
+@SuppressWarnings("deprecation")
+public class VehicleCrateBlock extends RotatedEntityObjectBlock
 {
     public static final List<ResourceLocation> REGISTERED_CRATES = new ArrayList<>();
     private static final VoxelShape PANEL = box(0, 0, 0, 16, 2, 16);
@@ -66,13 +65,13 @@ public class VehicleCrateBlock extends RotatedObjectBlock implements EntityBlock
     }
 
     @Override
-    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items)
+    public void fillItemCategory(@NotNull CreativeModeTab group, @NotNull NonNullList<ItemStack> items)
     {
         REGISTERED_CRATES.forEach(resourceLocation ->
         {
             CompoundTag blockEntityTag = new CompoundTag();
-            blockEntityTag.putString("Vehicle", resourceLocation.toString());
-            blockEntityTag.putBoolean("Creative", true);
+            blockEntityTag.putString("vehicle", resourceLocation.toString());
+            blockEntityTag.putBoolean("creative", true);
             CompoundTag itemTag = new CompoundTag();
             itemTag.put("BlockEntityTag", blockEntityTag);
             ItemStack stack = new ItemStack(ModBlocks.VEHICLE_CRATE.get());
@@ -82,20 +81,27 @@ public class VehicleCrateBlock extends RotatedObjectBlock implements EntityBlock
     }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState p_49928_, BlockGetter p_49929_, BlockPos p_49930_) {
+    public boolean propagatesSkylightDown(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos)
+    {
         return true;
     }
 
     @Override
-    public VoxelShape getShape(BlockState p_60555_, BlockGetter level, BlockPos pos, CollisionContext p_60558_) {
-        BlockEntity te = level.getBlockEntity(pos);
-        if(te instanceof VehicleCrateTileEntity && ((VehicleCrateTileEntity)te).isOpened())
+    @NotNull
+    public VoxelShape getShape(@NotNull BlockState state, BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext ctx)
+    {
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if(blockEntity instanceof VehicleCrateTileEntity && ((VehicleCrateTileEntity) blockEntity).isOpened())
+        {
             return PANEL;
+        }
+
         return Shapes.block();
     }
 
     @Override
-    public boolean canSurvive(BlockState p_60525_, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(@NotNull BlockState state, @NotNull LevelReader level, @NotNull BlockPos pos)
+    {
         return this.isBelowBlockTopSolid(level, pos) && this.canOpen(level, pos);
     }
 
@@ -121,9 +127,10 @@ public class VehicleCrateBlock extends RotatedObjectBlock implements EntityBlock
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult result)
+    @NotNull
+    public InteractionResult use(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, BlockHitResult result)
     {
-        if(result.getDirection() == Direction.UP && player.getItemInHand(hand).getItem() == ModItems.WRENCH.get())
+        if(result.getDirection() == Direction.UP && player.getItemInHand(hand).is(ModItems.WRENCH.get()))
         {
             this.openCrate(level, pos, state, player);
             return InteractionResult.SUCCESS;
@@ -133,7 +140,7 @@ public class VehicleCrateBlock extends RotatedObjectBlock implements EntityBlock
     }
 
     @Override
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack)
+    public void setPlacedBy(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, @Nullable LivingEntity entity, @NotNull ItemStack stack)
     {
         if(entity instanceof Player && ((Player) entity).isCreative())
         {
@@ -162,6 +169,7 @@ public class VehicleCrateBlock extends RotatedObjectBlock implements EntityBlock
     {
         double y = 0.875;
         double x, z;
+
         TerrainParticle.Provider provider = new TerrainParticle.Provider();
         for(int j = 0; j < 4; ++j)
         {
@@ -170,21 +178,26 @@ public class VehicleCrateBlock extends RotatedObjectBlock implements EntityBlock
                 x = (j + 0.5D) / 4.0D;
                 z = (l + 0.5D) / 4.0D;
 
-                Minecraft.getInstance().particleEngine.add(provider.createParticle(new BlockParticleOption(ParticleTypes.BLOCK, state), world, pos.getX() + x, pos.getY() + y, pos.getZ() + z, x - 0.5D, y - 0.5D, z - 0.5D));
+                Minecraft.getInstance().particleEngine.add(provider.createParticle(
+                        new BlockParticleOption(ParticleTypes.BLOCK, state),
+                        world,
+                        pos.getX() + x, pos.getY() + y, pos.getZ() + z,
+                        x - 0.5D, y - 0.5D, z - 0.5D)
+                );
             }
         }
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+    public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state)
     {
         return new VehicleCrateTileEntity(pos, state);
     }
 
     @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, @NotNull BlockState state, @NotNull BlockEntityType<T> type)
     {
         if(level.isClientSide)
         {
@@ -192,17 +205,6 @@ public class VehicleCrateBlock extends RotatedObjectBlock implements EntityBlock
         }
 
         return createTickerHelper(type, ModTileEntities.VEHICLE_CRATE.get(), VehicleCrateTileEntity::onServerTick);
-    }
-
-    @Nullable
-    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> createTickerHelper(BlockEntityType<A> p_152133_, BlockEntityType<E> p_152134_, BlockEntityTicker<? super E> p_152135_) {
-        return p_152134_ == p_152133_ ? (BlockEntityTicker<A>)p_152135_ : null;
-    }
-
-    @Override
-    public RenderShape getRenderShape(BlockState state)
-    {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     @Override
@@ -217,7 +219,7 @@ public class VehicleCrateBlock extends RotatedObjectBlock implements EntityBlock
             if(tagCompound.contains("BlockEntityTag", CompoundTag.TAG_COMPOUND))
             {
                 CompoundTag blockEntityTag = tagCompound.getCompound("BlockEntityTag");
-                String entityType = blockEntityTag.getString("Vehicle");
+                String entityType = blockEntityTag.getString("vehicle");
                 if(!Strings.isNullOrEmpty(entityType))
                 {
                     vehicleName = EntityType.byString(entityType).orElse(EntityType.PIG).getDescription();
@@ -239,10 +241,10 @@ public class VehicleCrateBlock extends RotatedObjectBlock implements EntityBlock
     public static ItemStack create(ResourceLocation entityId, int color, ItemStack engine, ItemStack wheel)
     {
         CompoundTag blockEntityTag = new CompoundTag();
-        blockEntityTag.putString("Vehicle", entityId.toString());
-        blockEntityTag.putInt("Color", color);
-        blockEntityTag.put("EngineStack", engine.save(new CompoundTag()));
-        blockEntityTag.put("WheelStack", wheel.save(new CompoundTag()));
+        blockEntityTag.putString("vehicle", entityId.toString());
+        blockEntityTag.putInt("color", color);
+        blockEntityTag.put("engineStack", engine.save(new CompoundTag()));
+        blockEntityTag.put("wheelStack", wheel.save(new CompoundTag()));
         CompoundTag itemTag = new CompoundTag();
         itemTag.put("BlockEntityTag", blockEntityTag);
         ItemStack stack = new ItemStack(ModBlocks.VEHICLE_CRATE.get());

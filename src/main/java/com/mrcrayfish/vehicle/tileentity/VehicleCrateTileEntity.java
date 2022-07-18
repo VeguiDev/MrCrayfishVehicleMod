@@ -31,6 +31,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Random;
@@ -209,73 +210,70 @@ public class VehicleCrateTileEntity extends TileEntitySynced
     }
 
     @Override
-    public void load(CompoundTag compound)
+    public void load(@NotNull CompoundTag compound)
     {
         super.load(compound);
 
-        if(compound.contains("Vehicle", Tag.TAG_STRING))
+        if(compound.contains("vehicle", Tag.TAG_STRING))
         {
-            this.entityId = new ResourceLocation(compound.getString("Vehicle"));
+            this.entityId = new ResourceLocation(compound.getString("vehicle"));
         }
-        if(compound.contains("Color", Tag.TAG_INT))
+
+        this.color = compound.getInt("color");
+
+        if(compound.contains("engineStack", Tag.TAG_COMPOUND))
         {
-            this.color = compound.getInt("Color");
+            this.engineStack = ItemStack.of(compound.getCompound("engineStack"));
         }
-        if(compound.contains("EngineStack", Tag.TAG_COMPOUND))
-        {
-            this.engineStack = ItemStack.of(compound.getCompound("EngineStack"));
-        }
-        else if(compound.getBoolean("Creative"))
+        else if(compound.getBoolean("creative"))
         {
             VehicleProperties properties = VehicleProperties.get(this.entityId);
             EngineItem engineItem = VehicleRegistry.getEngineItem(properties.getExtended(PoweredProperties.class).getEngineType(), EngineTier.IRON);
             this.engineStack = engineItem != null ? new ItemStack(engineItem) : ItemStack.EMPTY;
         }
-        if(compound.contains("WheelStack", Tag.TAG_COMPOUND))
+        if(compound.contains("wheelStack", Tag.TAG_COMPOUND))
         {
-            this.wheelStack = ItemStack.of(compound.getCompound("WheelStack"));
+            this.wheelStack = ItemStack.of(compound.getCompound("wheelStack"));
         }
         else
         {
             this.wheelStack = new ItemStack(ModItems.STANDARD_WHEEL.get());
         }
-        if(compound.contains("Opener", Tag.TAG_STRING))
+        if(compound.contains("opener", Tag.TAG_STRING))
         {
-            this.opener = compound.getUUID("Opener");
+            this.opener = compound.getUUID("opener");
         }
-        if(compound.contains("Opened", Tag.TAG_BYTE))
-        {
-            this.opened = compound.getBoolean("Opened");
-        }
+
+        this.opened = compound.getBoolean("opened");
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compound)
+    protected void saveAdditional(@NotNull CompoundTag compound)
     {
         super.saveAdditional(compound);
 
         if(this.entityId != null)
         {
-            compound.putString("Vehicle", this.entityId.toString());
+            compound.putString("vehicle", this.entityId.toString());
         }
 
         if(this.opener != null)
         {
-            compound.putUUID("Opener", this.opener);
+            compound.putUUID("opener", this.opener);
         }
 
         if(!this.engineStack.isEmpty())
         {
-            CommonUtils.writeItemStackToTag(compound, "EngineStack", this.engineStack);
+            CommonUtils.writeItemStackToTag(compound, "engineStack", this.engineStack);
         }
 
         if(!this.wheelStack.isEmpty())
         {
-            CommonUtils.writeItemStackToTag(compound, "WheelStack", this.wheelStack);
+            CommonUtils.writeItemStackToTag(compound, "wheelStack", this.wheelStack);
         }
 
-        compound.putInt("Color", this.color);
-        compound.putBoolean("Opened", this.opened);
+        compound.putInt("color", this.color);
+        compound.putBoolean("opened", this.opened);
     }
 
     @Override

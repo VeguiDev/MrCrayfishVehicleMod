@@ -10,6 +10,8 @@ import com.mrcrayfish.vehicle.common.FluidNetworkHandler;
 import com.mrcrayfish.vehicle.init.ModTileEntities;
 import com.mrcrayfish.vehicle.util.FluidUtils;
 import com.mrcrayfish.vehicle.util.TileEntityUtil;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -21,6 +23,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
@@ -34,8 +37,8 @@ public class PumpTileEntity extends PipeTileEntity
 {
     private int lastHandlerIndex;
     private boolean validatedNetwork;
-    private Map<BlockPos, PipeNode> fluidNetwork = new HashMap<>();
-    private List<Pair<BlockPos, Direction>> fluidHandlers = new ArrayList<>();
+    private final Map<BlockPos, PipeNode> fluidNetwork = new Reference2ObjectOpenHashMap<>();
+    private final List<Pair<BlockPos, Direction>> fluidHandlers = new ObjectArrayList<>();
     private PowerMode powerMode = PowerMode.ALWAYS_ACTIVE;
 
     public PumpTileEntity(BlockPos pos, BlockState state)
@@ -87,7 +90,7 @@ public class PumpTileEntity extends PipeTileEntity
             return;
 
         Optional<IFluidHandler> source = this.getSourceFluidHandler(this.level);
-        if(!source.isPresent())
+        if(source.isEmpty())
             return;
 
         IFluidHandler sourceHandler = source.get();
@@ -306,21 +309,21 @@ public class PumpTileEntity extends PipeTileEntity
     }
 
     @Override
-    public void load(CompoundTag compound)
+    public void load(@NotNull CompoundTag compound)
     {
         super.load(compound);
 
-        if(compound.contains("PowerMode", Tag.TAG_INT))
+        if(compound.contains("powerMode", Tag.TAG_INT))
         {
-            this.powerMode = PowerMode.fromOrdinal(compound.getInt("PowerMode"));
+            this.powerMode = PowerMode.fromOrdinal(compound.getInt("powerMode"));
         }
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compound)
+    protected void saveAdditional(@NotNull CompoundTag compound)
     {
         super.saveAdditional(compound);
-        compound.putInt("PowerMode", this.powerMode.ordinal());
+        compound.putInt("powerMode", this.powerMode.ordinal());
     }
 
     private static class PipeNode
@@ -334,9 +337,11 @@ public class PumpTileEntity extends PipeTileEntity
         REQUIRES_SIGNAL_ON("on", input -> Objects.requireNonNull(input.level).hasNeighborSignal(input.worldPosition)),
         REQUIRES_SIGNAL_OFF("off", input -> !Objects.requireNonNull(input.level).hasNeighborSignal(input.worldPosition));
 
+        private static final PowerMode[] VALUES = values();
+
         private static final String LANG_KEY_CHAT_PREFIX = Reference.MOD_ID + ".chat.pump.power";
-        private String key;
-        private Function<PumpTileEntity, Boolean> function;
+        private final String key;
+        private final Function<PumpTileEntity, Boolean> function;
 
         PowerMode(String key, Function<PumpTileEntity, Boolean> function)
         {
@@ -357,9 +362,7 @@ public class PumpTileEntity extends PipeTileEntity
         @Nullable
         public static PowerMode fromOrdinal(int ordinal)
         {
-            if(ordinal < 0 || ordinal >= values().length)
-                return null;
-            return values()[ordinal];
+            return VALUES[Math.floorMod(ordinal, VALUES.length)];
         }
     }
 }
