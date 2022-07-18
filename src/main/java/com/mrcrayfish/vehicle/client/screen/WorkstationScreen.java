@@ -366,7 +366,6 @@ public class WorkstationScreen extends AbstractContainerScreen<WorkstationContai
                     this.blit(matrixStack, startX + 172, startY + i * 19 + 63, 0, 222, 80, 19);
                 }
 
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 String name = stack.getHoverName().getString();
                 if(this.font.width(name) > 55)
                 {

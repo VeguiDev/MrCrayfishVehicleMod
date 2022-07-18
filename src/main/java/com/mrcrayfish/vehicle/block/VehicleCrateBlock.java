@@ -199,7 +199,7 @@ public class VehicleCrateBlock extends RotatedEntityObjectBlock
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, @NotNull BlockState state, @NotNull BlockEntityType<T> type)
     {
-        if(level.isClientSide)
+        if(level.isClientSide())
         {
             return createTickerHelper(type, ModTileEntities.VEHICLE_CRATE.get(), VehicleCrateTileEntity::onClientTick);
         }

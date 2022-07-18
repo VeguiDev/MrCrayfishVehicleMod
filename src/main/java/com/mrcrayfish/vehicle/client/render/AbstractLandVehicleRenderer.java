@@ -1,5 +1,6 @@
 package com.mrcrayfish.vehicle.client.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import com.mrcrayfish.vehicle.common.entity.Transform;
@@ -8,6 +9,7 @@ import com.mrcrayfish.vehicle.entity.properties.LandProperties;
 import com.mrcrayfish.vehicle.entity.properties.PoweredProperties;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.util.RenderUtil;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -78,6 +80,7 @@ public abstract class AbstractLandVehicleRenderer<T extends LandVehicleEntity> e
         matrixStack.mulPose(Vector3f.XP.rotationDegrees((float) bodyPosition.getRotX()));
         matrixStack.mulPose(Vector3f.YP.rotationDegrees((float) bodyPosition.getRotY()));
         matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) bodyPosition.getRotZ()));
+        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
         this.render(vehicle, matrixStack, renderTypeBuffer, partialTicks, light);
         matrixStack.popPose();
 

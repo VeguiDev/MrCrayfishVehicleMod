@@ -1,9 +1,11 @@
 package com.mrcrayfish.vehicle.client.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mrcrayfish.vehicle.common.entity.Transform;
 import com.mrcrayfish.vehicle.entity.BoatEntity;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.EntityType;
 
@@ -62,6 +64,7 @@ public abstract class AbstractBoatRenderer<T extends BoatEntity> extends Abstrac
         matrixStack.translate(0.0, properties.getWheelOffset() * 0.0625, 0.0);
 
         //Render body
+        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
         this.render(vehicle, matrixStack, renderTypeBuffer, partialTicks, light);
 
         this.renderEngine(vehicle, matrixStack, renderTypeBuffer, light);

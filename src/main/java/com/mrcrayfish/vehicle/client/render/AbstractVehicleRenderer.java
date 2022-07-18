@@ -1,5 +1,6 @@
 package com.mrcrayfish.vehicle.client.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import com.mrcrayfish.vehicle.client.model.ComponentManager;
@@ -18,6 +19,7 @@ import com.mrcrayfish.vehicle.item.IDyeable;
 import com.mrcrayfish.vehicle.util.RenderUtil;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -99,12 +101,15 @@ public abstract class AbstractVehicleRenderer<T extends VehicleEntity>
         matrixStack.mulPose(Vector3f.XP.rotationDegrees((float) bodyPosition.getRotX()));
         matrixStack.mulPose(Vector3f.YP.rotationDegrees((float) bodyPosition.getRotY()));
         matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) bodyPosition.getRotZ()));
+        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
         this.render(vehicle, matrixStack, renderTypeBuffer, partialTicks, light);
         matrixStack.popPose();
 
         this.renderWheels(vehicle, matrixStack, renderTypeBuffer, partialTicks, light);
 
         matrixStack.popPose();
+
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     /**
