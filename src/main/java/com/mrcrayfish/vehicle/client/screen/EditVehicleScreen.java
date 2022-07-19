@@ -62,37 +62,36 @@ public class EditVehicleScreen extends AbstractContainerScreen<EditVehicleContai
     }
 
     @Override
-    protected void renderBg(PoseStack matrixStack, float partialTicks, int mouseX, int mouseY)
+    protected void renderBg(PoseStack matrices, float partialTicks, int mouseX, int mouseY)
     {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        Minecraft minecraft = Minecraft.getInstance();
-        minecraft.getTextureManager().bindForSetup(GUI_TEXTURES);
+        RenderSystem.setShaderTexture(0, GUI_TEXTURES);
         int left = (this.width - this.imageWidth) / 2;
         int top = (this.height - this.imageHeight) / 2;
-        this.blit(matrixStack, left, top, 0, 0, this.imageWidth, this.imageHeight);
+        this.blit(matrices, left, top, 0, 0, this.imageWidth, this.imageHeight);
 
         if(this.cachedVehicle.getProperties().getExtended(PoweredProperties.class).getEngineType() != EngineType.NONE)
         {
             if(this.vehicleInventory.getItem(0).isEmpty())
             {
-                this.blit(matrixStack, left + 8, top + 17, 176, 0, 16, 16);
+                this.blit(matrices, left + 8, top + 17, 176, 0, 16, 16);
             }
         }
         else if(this.vehicleInventory.getItem(0).isEmpty())
         {
-            this.blit(matrixStack, left + 8, top + 17, 176, 32, 16, 16);
+            this.blit(matrices, left + 8, top + 17, 176, 32, 16, 16);
         }
 
         if(this.cachedVehicle.getProperties().canChangeWheels())
         {
             if(this.vehicleInventory.getItem(1).isEmpty())
             {
-                this.blit(matrixStack, left + 8, top + 35, 176, 16, 16, 16);
+                this.blit(matrices, left + 8, top + 35, 176, 16, 16, 16);
             }
         }
         else if(this.vehicleInventory.getItem(1).isEmpty())
         {
-            this.blit(matrixStack, left + 8, top + 35, 176, 32, 16, 16);
+            this.blit(matrices, left + 8, top + 35, 176, 32, 16, 16);
         }
 
         if(this.framebuffer != null)
@@ -101,7 +100,7 @@ public class EditVehicleScreen extends AbstractContainerScreen<EditVehicleContai
             int startX = left + 26;
             int startY = top + 17;
             RenderSystem.disableCull();
-            Matrix4f pose = matrixStack.last().pose();
+            Matrix4f pose = matrices.last().pose();
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder builder = tesselator.getBuilder();
             builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);

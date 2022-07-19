@@ -1,5 +1,6 @@
 package com.mrcrayfish.vehicle.client.screen;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mrcrayfish.vehicle.inventory.container.StorageContainer;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -46,7 +47,7 @@ public class StorageScreen extends AbstractContainerScreen<StorageContainer>
     @Override
     protected void renderBg(PoseStack matrixStack, float partialTicks, int mouseX, int mouseY)
     {
-        this.minecraft.getTextureManager().bindForSetup(CHEST_GUI_TEXTURE);
+        RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
         int startX = (this.width - this.imageWidth) / 2;
         int startY = (this.height - this.imageHeight) / 2;
         this.blit(matrixStack, startX, startY, 0, 0, this.imageWidth, this.inventoryRows * 18 + 17);

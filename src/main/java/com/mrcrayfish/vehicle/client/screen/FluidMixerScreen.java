@@ -114,7 +114,7 @@ public class FluidMixerScreen extends AbstractContainerScreen<FluidMixerContaine
         int startX = (this.width - this.imageWidth) / 2;
         int startY = (this.height - this.imageHeight) / 2;
 
-        this.minecraft.getTextureManager().bindForSetup(GUI);
+        RenderSystem.setShaderTexture(0, GUI);
         this.blit(matrixStack, startX, startY, 0, 0, this.imageWidth, this.imageHeight);
 
         if(this.fluidMixerTileEntity.getRemainingFuel() >= 0)
@@ -213,14 +213,14 @@ public class FluidMixerScreen extends AbstractContainerScreen<FluidMixerContaine
     private void drawFluidTank(FluidStack fluid, PoseStack matrixStack, int x, int y, double level)
     {
         FluidUtils.drawFluidTankInGUI(fluid, x, y, level, 59);
-        this.minecraft.getTextureManager().bindForSetup(GUI);
+        RenderSystem.setShaderTexture(0, GUI);
         this.blit(matrixStack, x, y, 176, 44, 16, 59);
     }
 
     private void drawSmallFluidTank(FluidStack fluid, PoseStack matrixStack, int x, int y, double level)
     {
         FluidUtils.drawFluidTankInGUI(fluid, x, y, level, 29);
-        this.minecraft.getTextureManager().bindForSetup(GUI);
+        RenderSystem.setShaderTexture(0, GUI);
         this.blit(matrixStack, x, y, 176, 44, 16, 29);
     }
 

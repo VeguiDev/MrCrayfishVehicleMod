@@ -1,5 +1,6 @@
 package com.mrcrayfish.vehicle.client.handler;
 
+import com.mrcrayfish.obfuscate.client.event.PlayerModelEvent;
 import com.mrcrayfish.vehicle.client.render.layer.LayerHeldVehicle;
 import com.mrcrayfish.vehicle.common.entity.HeldVehicleDataHandler;
 import net.minecraft.client.model.PlayerModel;
@@ -32,9 +33,9 @@ public class HeldVehicleHandler
     public static final Map<UUID, AnimationCounter> idToCounter = new HashMap<>();
 
     @SubscribeEvent
-    public void onSetupAngles(RenderPlayerEvent.Post event)
+    public void onSetupAngles(PlayerModelEvent.SetupAngles.Post event)
     {
-        PlayerModel<AbstractClientPlayer> model = event.getRenderer().getModel();
+        PlayerModel<AbstractClientPlayer> model = event.getModelPlayer();
         Player player = event.getPlayer();
 
         boolean holdingVehicle = HeldVehicleDataHandler.isHoldingVehicle(player);
@@ -44,7 +45,7 @@ public class HeldVehicleHandler
         }
         else if(idToCounter.containsKey(player.getUUID()))
         {
-            if(idToCounter.get(player.getUUID()).getProgress(event.getPartialTick()) == 0F)
+            if(idToCounter.get(player.getUUID()).getProgress(event.getDeltaTicks()) == 0F)
             {
                 idToCounter.remove(player.getUUID());
                 return;
@@ -52,7 +53,7 @@ public class HeldVehicleHandler
             if(!holdingVehicle)
             {
                 AnimationCounter counter = idToCounter.get(player.getUUID());
-                player.yBodyRot = player.getYHeadRot() - (player.getYHeadRot() - player.yBodyRotO) * counter.getProgress(event.getPartialTick());
+                player.yBodyRot = player.getYHeadRot() - (player.getYHeadRot() - player.yBodyRotO) * counter.getProgress(event.getDeltaTicks());
             }
         }
         else
@@ -62,7 +63,7 @@ public class HeldVehicleHandler
 
         AnimationCounter counter = idToCounter.get(player.getUUID());
         counter.update(holdingVehicle);
-        float progress = counter.getProgress(event.getPartialTick());
+        float progress = counter.getProgress(event.getDeltaTicks());
         model.rightArm.xRot = (float) Math.toRadians(-180F * progress);
         model.rightArm.zRot = (float) Math.toRadians(-5F * progress);
         model.rightArm.y = (player.isCrouching() ? 3.0F : -0.5F) * progress;

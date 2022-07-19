@@ -3,6 +3,7 @@ package com.mrcrayfish.vehicle.client.handler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mrcrayfish.controllable.client.RenderEvents;
 import com.mrcrayfish.framework.common.data.SyncedEntityData;
+import com.mrcrayfish.obfuscate.client.event.PlayerModelEvent;
 import com.mrcrayfish.vehicle.client.model.VehicleModels;
 import com.mrcrayfish.vehicle.client.raytrace.EntityRayTracer;
 import com.mrcrayfish.vehicle.client.raytrace.RayTraceFunction;
@@ -142,7 +143,7 @@ public class FuelingHandler
     }
 
     @SubscribeEvent
-    public void onModelRenderPost(RenderPlayerEvent.Post event)
+    public void onModelRenderPost(PlayerModelEvent.Render.Post event)
     {
         Player player = event.getPlayer();
         if(SyncedEntityData.instance().get(player, ModDataKeys.GAS_PUMP).isEmpty())
@@ -151,7 +152,7 @@ public class FuelingHandler
         PoseStack matrixStack = event.getPoseStack();
         matrixStack.pushPose();
 
-        PlayerModel<AbstractClientPlayer> model = event.getRenderer().getModel();
+        PlayerModel<AbstractClientPlayer> model = event.getModelPlayer();
 
         if(model.young)
         {

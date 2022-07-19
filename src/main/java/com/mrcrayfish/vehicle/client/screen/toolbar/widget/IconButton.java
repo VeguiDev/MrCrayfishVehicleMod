@@ -1,5 +1,6 @@
 package com.mrcrayfish.vehicle.client.screen.toolbar.widget;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mrcrayfish.vehicle.client.screen.toolbar.IToolbarLabel;
 import net.minecraft.client.Minecraft;
@@ -62,7 +63,7 @@ public class IconButton extends Button implements IToolbarLabel
         }
         if(this.icon != null)
         {
-            mc.getTextureManager().bindForSetup(this.icon.getTextureLocation());
+            RenderSystem.setShaderTexture(0, this.icon.getTextureLocation());
             this.drawIcon(this.x + this.width / 2 - combinedWidth / 2, this.y + 5, this.icon.getU(), this.icon.getV());
         }
         if(!message.isEmpty())

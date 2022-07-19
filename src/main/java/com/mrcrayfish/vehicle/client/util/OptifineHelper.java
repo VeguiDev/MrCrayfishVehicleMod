@@ -19,7 +19,7 @@ public class OptifineHelper
         try
         {
             Class<?> clazz = Class.forName("net.optifine.EmissiveTextures");
-            return isLoaded() && (boolean) clazz.getDeclaredMethod("isActive", clazz).invoke(null, clazz);
+            return isLoaded() && (boolean) clazz.getDeclaredMethod("isActive").invoke(clazz, new Object[0]);
         }
         catch(ClassNotFoundException ignored)
         {}

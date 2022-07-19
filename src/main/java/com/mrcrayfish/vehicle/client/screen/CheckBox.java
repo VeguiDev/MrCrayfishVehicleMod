@@ -1,5 +1,6 @@
 package com.mrcrayfish.vehicle.client.screen;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -8,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
@@ -35,16 +37,16 @@ public class CheckBox extends AbstractWidget
     }
 
     @Override
-    public void renderButton(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks)
+    public void renderButton(@NotNull PoseStack matrices, int mouseX, int mouseY, float partialTicks)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        minecraft.getTextureManager().bindForSetup(GUI);
-        this.blit(matrixStack, this.x, this.y, 0, 0, 8, 8);
+        RenderSystem.setShaderTexture(0, GUI);
+        this.blit(matrices, this.x, this.y, 0, 0, 8, 8);
         if(this.toggled)
         {
-            this.blit(matrixStack, this.x, this.y - 1, 8, 0, 9, 8);
+            this.blit(matrices, this.x, this.y - 1, 8, 0, 9, 8);
         }
-        minecraft.font.draw(matrixStack, this.getMessage().getString(), this.x + 12, this.y, 0xFFFFFF);
+        minecraft.font.draw(matrices, this.getMessage().getString(), this.x + 12, this.y, 0xFFFFFF);
     }
 
     @Override

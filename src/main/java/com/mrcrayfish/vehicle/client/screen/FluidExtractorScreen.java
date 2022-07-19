@@ -82,7 +82,7 @@ public class FluidExtractorScreen extends AbstractContainerScreen<FluidExtractor
         int startX = (this.width - this.imageWidth) / 2;
         int startY = (this.height - this.imageHeight) / 2;
 
-        this.minecraft.getTextureManager().bindForSetup(GUI);
+        RenderSystem.setShaderTexture(0, GUI);
         this.blit(matrixStack, startX, startY, 0, 0, this.imageWidth, this.imageHeight);
 
         if(this.fluidExtractorTileEntity.getRemainingFuel() >= 0)
@@ -116,7 +116,7 @@ public class FluidExtractorScreen extends AbstractContainerScreen<FluidExtractor
     private void drawFluidTank(FluidStack fluid, PoseStack matrixStack, int x, int y, double level, int height)
     {
         FluidUtils.drawFluidTankInGUI(fluid, x, y, level, height);
-        Minecraft.getInstance().getTextureManager().bindForSetup(GUI);
+        RenderSystem.setShaderTexture(0, GUI);
         this.blit(matrixStack, x, y, 176, 44, 16, 59);
     }
 

@@ -121,7 +121,7 @@ public abstract class AbstractToolbarScreen extends Screen
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
-        Minecraft.getInstance().getTextureManager().bindForSetup(WINDOW_TEXTURE);
+        RenderSystem.setShaderTexture(0, WINDOW_TEXTURE);
         int offset = 17;
         this.drawTexturedRect(x, y, offset, 0, 4, 4, 4, 4);                              /* Top left corner */
         this.drawTexturedRect(x + width - 4, y, 5 + offset, 0, 4, 4, 4, 4);              /* Top right corner */

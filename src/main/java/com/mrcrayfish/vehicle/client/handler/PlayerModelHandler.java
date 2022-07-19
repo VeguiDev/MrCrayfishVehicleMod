@@ -1,8 +1,10 @@
 package com.mrcrayfish.vehicle.client.handler;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import com.mrcrayfish.framework.common.data.SyncedEntityData;
+import com.mrcrayfish.obfuscate.client.event.PlayerModelEvent;
 import com.mrcrayfish.vehicle.client.render.AbstractVehicleRenderer;
 import com.mrcrayfish.vehicle.client.render.VehicleRenderRegistry;
 import com.mrcrayfish.vehicle.common.Seat;
@@ -31,19 +33,19 @@ public class PlayerModelHandler
      */
     @SubscribeEvent
     @SuppressWarnings("unchecked")
-    public void onPreRender(RenderPlayerEvent.Pre event)
+    public void onPreRender(PlayerModelEvent.Render.Pre event)
     {
         Player player = event.getPlayer();
         Entity ridingEntity = player.getVehicle();
         if(ridingEntity instanceof VehicleEntity vehicle)
         {
-            this.applyPassengerTransformations(vehicle, player, event.getPoseStack(), event.getMultiBufferSource(), event.getPartialTick());
-            this.applyWheelieTransformations(vehicle, player, event.getPoseStack(), event.getPartialTick());
+            this.applyPassengerTransformations(vehicle, player, event.getPoseStack(), event.getVertexConsumer(), event.getDeltaTicks());
+            this.applyWheelieTransformations(vehicle, player, event.getPoseStack(), event.getDeltaTicks());
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void applyPassengerTransformations(VehicleEntity vehicle, Player player, PoseStack matrixStack, MultiBufferSource builder, float partialTicks)
+    private void applyPassengerTransformations(VehicleEntity vehicle, Player player, PoseStack matrixStack, VertexConsumer builder, float partialTicks)
     {
         AbstractVehicleRenderer<VehicleEntity> render = (AbstractVehicleRenderer<VehicleEntity>) VehicleRenderRegistry.getRenderer(vehicle.getType());
         if(render != null)
@@ -87,21 +89,22 @@ public class PlayerModelHandler
     }
 
     @SubscribeEvent
-    public void onSetupAngles(RenderPlayerEvent.Post event)
+    public void onSetupAngles(PlayerModelEvent.SetupAngles.Post event)
     {
         Player player = event.getPlayer();
+        PlayerModel model = event.getModelPlayer();
 
         if(player.equals(Minecraft.getInstance().player) && Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON)
             return;
 
         if(SyncedEntityData.instance().get(player, ModDataKeys.GAS_PUMP).isPresent())
         {
-            FuelingHandler.applyFuelingPose(player, event.getRenderer().getModel());
+            FuelingHandler.applyFuelingPose(player, model);
             return;
         }
 
-        SprayCanHandler.applySprayCanPose(player, event.getRenderer().getModel());
-        this.applyPassengerPose(player, event.getRenderer().getModel(), event.getPartialTick());
+        SprayCanHandler.applySprayCanPose(player, model);
+        this.applyPassengerPose(player, model, event.getDeltaTicks());
     }
 
     /**

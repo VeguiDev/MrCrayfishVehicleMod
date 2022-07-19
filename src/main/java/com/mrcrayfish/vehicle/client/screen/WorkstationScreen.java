@@ -1,6 +1,7 @@
 package com.mrcrayfish.vehicle.client.screen;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
@@ -32,6 +33,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -331,7 +333,7 @@ public class WorkstationScreen extends AbstractContainerScreen<WorkstationContai
 
         RenderSystem.enableBlend();
 
-        this.minecraft.getTextureManager().bindForSetup(GUI);
+        RenderSystem.setShaderTexture(0, GUI);
         this.blit(matrixStack, startX, startY, 0, 0, 173, 184);
         blit(matrixStack, startX + 173, startY, 78, 184, 173, 0, 1, 184, 256, 256);
         this.blit(matrixStack, startX + 251, startY, 174, 0, 24, 184);
@@ -351,12 +353,13 @@ public class WorkstationScreen extends AbstractContainerScreen<WorkstationContai
         for(int i = 0; i < this.filteredMaterials.size(); i++)
         {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            this.minecraft.getTextureManager().bindForSetup(GUI);
+            RenderSystem.setShaderTexture(0, GUI);
 
             MaterialItem materialItem = this.filteredMaterials.get(i);
             ItemStack stack = materialItem.getDisplayStack();
             if(!stack.isEmpty())
             {
+                Lighting.setupForEntityInInventory();
                 if(materialItem.isEnabled())
                 {
                     this.blit(matrixStack, startX + 172, startY + i * 19 + 63, 0, 184, 80, 19);

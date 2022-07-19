@@ -2,6 +2,7 @@ package com.mrcrayfish.vehicle.client.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import com.mrcrayfish.vehicle.client.model.ComponentManager;
 import com.mrcrayfish.vehicle.client.model.ComponentModel;
@@ -121,7 +122,7 @@ public abstract class AbstractVehicleRenderer<T extends VehicleEntity>
 
     public void applyPlayerModel(T entity, Player player, PlayerModel<AbstractClientPlayer> model, float partialTicks) {}
 
-    public void applyPlayerRender(T entity, Player player, float partialTicks, PoseStack matrixStack, MultiBufferSource buffers)
+    public void applyPlayerRender(T entity, Player player, float partialTicks, PoseStack matrixStack, VertexConsumer buffers)
     {
         int index = entity.getSeatTracker().getSeatIndex(player.getUUID());
         if(index != -1)
