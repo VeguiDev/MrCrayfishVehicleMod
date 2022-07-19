@@ -80,7 +80,6 @@ public abstract class AbstractLandVehicleRenderer<T extends LandVehicleEntity> e
         matrixStack.mulPose(Vector3f.XP.rotationDegrees((float) bodyPosition.getRotX()));
         matrixStack.mulPose(Vector3f.YP.rotationDegrees((float) bodyPosition.getRotY()));
         matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float) bodyPosition.getRotZ()));
-        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
         this.render(vehicle, matrixStack, renderTypeBuffer, partialTicks, light);
         matrixStack.popPose();
 

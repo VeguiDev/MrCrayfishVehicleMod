@@ -17,7 +17,9 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -35,13 +37,14 @@ public class EntityVehicleRenderer<T extends VehicleEntity> extends EntityRender
     }
 
     @Override
-    public ResourceLocation getTextureLocation(T entity)
+    @NotNull
+    public ResourceLocation getTextureLocation(@NotNull T entity)
     {
-        return null;
+        return InventoryMenu.BLOCK_ATLAS;
     }
 
     @Override
-    public void render(T entity, float entityYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, int light)
+    public void render(T entity, float entityYaw, float partialTicks, @NotNull PoseStack matrixStack, @NotNull MultiBufferSource renderTypeBuffer, int light)
     {
         if(!entity.isAlive())
             return;

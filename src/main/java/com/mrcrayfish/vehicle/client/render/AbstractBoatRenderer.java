@@ -64,7 +64,6 @@ public abstract class AbstractBoatRenderer<T extends BoatEntity> extends Abstrac
         matrixStack.translate(0.0, properties.getWheelOffset() * 0.0625, 0.0);
 
         //Render body
-        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
         this.render(vehicle, matrixStack, renderTypeBuffer, partialTicks, light);
 
         this.renderEngine(vehicle, matrixStack, renderTypeBuffer, light);

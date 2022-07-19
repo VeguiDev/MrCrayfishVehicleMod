@@ -349,6 +349,7 @@ public class WorkstationScreen extends AbstractContainerScreen<WorkstationContai
         drawCenteredString(matrixStack, this.font, cachedVehicle.getType().getDescription(), startX + 88, startY + 22, Color.WHITE.getRGB());
 
         this.filteredMaterials = this.getMaterials();
+        Lighting.setupFor3DItems();
         for(int i = 0; i < this.filteredMaterials.size(); i++)
         {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -358,7 +359,6 @@ public class WorkstationScreen extends AbstractContainerScreen<WorkstationContai
             ItemStack stack = materialItem.getDisplayStack();
             if(!stack.isEmpty())
             {
-                Lighting.setupForEntityInInventory();
                 if(materialItem.isEnabled())
                 {
                     this.blit(matrixStack, startX + 172, startY + i * 19 + 63, 0, 184, 80, 19);
@@ -388,7 +388,7 @@ public class WorkstationScreen extends AbstractContainerScreen<WorkstationContai
             }
         }
 
-        this.drawVehicle(matrixStack, startX + 88, startY + 90, partialTicks);
+        this.drawVehicle(RenderSystem.getModelViewStack(), startX + 88, startY + 90, partialTicks);
     }
 
     private void drawVehicle(PoseStack matrices, int x, int y, float partialTicks)
@@ -397,6 +397,7 @@ public class WorkstationScreen extends AbstractContainerScreen<WorkstationContai
         {
             matrices.translate(x, y, 1050F);
             matrices.scale(-1F, -1F, -1F);
+            RenderSystem.applyModelViewMatrix();
 
             PoseStack matrixStack = new PoseStack();
             matrixStack.translate(0.0D, 0.0D, 1000.0D);
@@ -418,6 +419,8 @@ public class WorkstationScreen extends AbstractContainerScreen<WorkstationContai
             matrixStack.mulPose(Axis.POSITIVE_Z.rotationDegrees((float) position.getRotZ()));
             matrixStack.translate(position.getX(), position.getY(), position.getZ());
 
+            Lighting.setupForEntityInInventory();
+
             EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
             renderManager.setRenderShadow(false);
             renderManager.overrideCameraOrientation(quaternion);
@@ -429,6 +432,9 @@ public class WorkstationScreen extends AbstractContainerScreen<WorkstationContai
             matrixStack.popPose();
         }
         matrices.popPose();
+
+        RenderSystem.applyModelViewMatrix();
+        Lighting.setupFor3DItems();
     }
 
     private void drawSlot(PoseStack matrixStack, int startX, int startY, int x, int y, int iconX, int iconY, int slot, boolean required, boolean applicable)

@@ -6,10 +6,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mrcrayfish.vehicle.client.util.OptifineHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -84,11 +81,10 @@ public class RenderUtil
     {
         matrixStack.pushPose();
         ForgeHooksClient.handleCameraTransforms(matrixStack, model, transformType, leftHanded);
-        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
         matrixStack.translate(-0.5, -0.5, -0.5);
         if(!model.isCustomRenderer())
         {
-            VertexConsumer vertexBuilder = renderTypeBuffer.getBuffer(RenderType.cutoutMipped());
+            VertexConsumer vertexBuilder = renderTypeBuffer.getBuffer(Sheets.cutoutBlockSheet());
             renderModel(model, ItemStack.EMPTY, color, lightTexture, overlayTexture, matrixStack, vertexBuilder);
         }
         matrixStack.popPose();
@@ -98,7 +94,6 @@ public class RenderUtil
     {
         matrixStack.pushPose();
         ForgeHooksClient.handleCameraTransforms(matrixStack, model, transformType, leftHanded);
-        RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
         matrixStack.translate(-0.5, -0.5, -0.5);
         if(!model.isCustomRenderer())
         {
@@ -200,8 +195,9 @@ public class RenderUtil
         // noinspection ForLoopReplaceableByForEach
         for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++)
         {
+
             BakedQuad quad = quads.get(i);
-            int tintColor = 0xFFFFFFFF;
+            int tintColor = 0xFFFFFF;
 
             if(OptifineHelper.isEmissiveTexturesEnabled())
             {

@@ -107,8 +107,6 @@ public abstract class AbstractVehicleRenderer<T extends VehicleEntity>
         this.renderWheels(vehicle, matrixStack, renderTypeBuffer, partialTicks, light);
 
         matrixStack.popPose();
-
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     /**
