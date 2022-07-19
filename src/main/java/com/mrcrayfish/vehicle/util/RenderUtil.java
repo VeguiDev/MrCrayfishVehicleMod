@@ -194,7 +194,7 @@ public class RenderUtil
 
     private static void renderQuads(PoseStack matrixStack, VertexConsumer vertexBuilder, List<BakedQuad> quads, ItemStack stack, int color, int lightTexture, int overlayTexture)
     {
-        boolean useItemColor = !stack.isEmpty() && color == -1;
+        boolean useItemColor = !stack.isEmpty() && color == 0xFFFFFFFF;
         PoseStack.Pose entry = matrixStack.last();
         for(BakedQuad quad : quads)
         {
@@ -208,23 +208,34 @@ public class RenderUtil
                 }
             }
 
-            if(quad.isTinted() && useItemColor)
+            int tintColor = 0xFFFFFFFF;
+            if(quad.isTinted())
             {
-                color = MINECRAFT.getItemColors().getColor(stack, quad.getTintIndex());
+                if(useItemColor)
+                {
+                    tintColor = MINECRAFT.getItemColors().getColor(stack, quad.getTintIndex());
+                }
+                else
+                {
+                    tintColor = color;
+                }
 
                 if (OptifineHelper.isCustomColorsEnabled())
                 {
-                    color = Integer.reverseBytes(OptifineHelper.castAsCustomColor(stack, quad.getTintIndex(), color) << 8 | 0xFF);
+                    tintColor = OptifineHelper.castAsCustomColor(stack, quad.getTintIndex(), tintColor);
                 }
             }
 
-            float NORM = 1F / 255.0F;
-
-            float red = (color >> 16) * NORM;
-            float green = (color >> 8) * NORM;
-            float blue = (color) * NORM;
+            float red = normalise(tintColor >> 16);
+            float green = normalise(tintColor >> 8);
+            float blue = normalise(tintColor);
             vertexBuilder.putBulkData(entry, quad, red, green, blue, lightTexture, overlayTexture, true);
         }
+    }
+
+    protected static float normalise(int value)
+    {
+        return value * (1F / 255.0F);
     }
 
     public static List<Component> lines(FormattedText text, int maxWidth)
