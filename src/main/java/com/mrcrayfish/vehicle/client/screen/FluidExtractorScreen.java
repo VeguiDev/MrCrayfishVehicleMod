@@ -10,7 +10,6 @@ import com.mrcrayfish.vehicle.tileentity.FluidExtractorTileEntity;
 import com.mrcrayfish.vehicle.util.FluidUtils;
 import com.mrcrayfish.vehicle.util.RenderUtil;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;

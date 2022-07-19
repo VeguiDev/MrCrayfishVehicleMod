@@ -36,7 +36,7 @@ public class OptifineHelper
         try
         {
             Class<?> clazz = Class.forName("net.optifine.Config");
-            return isLoaded() && (boolean) clazz.getDeclaredMethod("isCustomColors", clazz).invoke(null, clazz);
+            return isLoaded() && (boolean) clazz.getDeclaredMethod("isCustomColors").invoke(clazz, new Object[0]);
         }
         catch(ClassNotFoundException ignored)
         {}

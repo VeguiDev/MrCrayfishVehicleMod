@@ -1,7 +1,6 @@
 package com.mrcrayfish.vehicle.client.handler;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mrcrayfish.controllable.client.RenderEvents;
 import com.mrcrayfish.framework.common.data.SyncedEntityData;
 import com.mrcrayfish.obfuscate.client.event.PlayerModelEvent;
 import com.mrcrayfish.vehicle.client.model.VehicleModels;

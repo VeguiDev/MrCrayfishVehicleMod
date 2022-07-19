@@ -20,7 +20,6 @@ import com.mrcrayfish.vehicle.item.IDyeable;
 import com.mrcrayfish.vehicle.util.RenderUtil;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;

@@ -149,7 +149,7 @@ public class RenderUtil
                                 ItemRenderer.getFoilBufferDirect(renderTypeBuffer, type, true, stack.hasFoil()) :
                                 ItemRenderer.getFoilBuffer(renderTypeBuffer, type, true, stack.hasFoil());
 
-                        renderModel(model, stack, 0xFFFFFFFF, lightTexture, overlayTexture, matrixStack, buffer);
+                        renderModel(model, stack, -1, lightTexture, overlayTexture, matrixStack, buffer);
                     }
                     ForgeHooksClient.setRenderType(null);
                 }
@@ -167,7 +167,7 @@ public class RenderUtil
                             ItemRenderer.getFoilBufferDirect(renderTypeBuffer, type, true, stack.hasFoil()) :
                             ItemRenderer.getFoilBuffer(renderTypeBuffer, type, true, stack.hasFoil());
 
-                    renderModel(model, stack, 0xFFFFFFFF, lightTexture, overlayTexture, matrixStack, buffer);
+                    renderModel(model, stack, -1, lightTexture, overlayTexture, matrixStack, buffer);
                     ForgeHooksClient.setRenderType(null);
                 }
             }
@@ -194,10 +194,15 @@ public class RenderUtil
 
     private static void renderQuads(PoseStack matrixStack, VertexConsumer vertexBuilder, List<BakedQuad> quads, ItemStack stack, int color, int lightTexture, int overlayTexture)
     {
-        boolean useItemColor = !stack.isEmpty() && color == 0xFFFFFFFF;
+        boolean useItemColor = !stack.isEmpty() && color == -1;
         PoseStack.Pose entry = matrixStack.last();
-        for(BakedQuad quad : quads)
+
+        // noinspection ForLoopReplaceableByForEach
+        for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++)
         {
+            BakedQuad quad = quads.get(i);
+            int tintColor = 0xFFFFFFFF;
+
             if(OptifineHelper.isEmissiveTexturesEnabled())
             {
                 quad = OptifineHelper.castAsEmissive(quad);
@@ -208,7 +213,6 @@ public class RenderUtil
                 }
             }
 
-            int tintColor = 0xFFFFFFFF;
             if(quad.isTinted())
             {
                 if(useItemColor)

@@ -227,6 +227,7 @@ public class CameraHandler
     /*
      * Called via transformer. Do not delete!
      */
+    @SuppressWarnings("unused")
     public static void setupShaderCamera(Camera info, float partialTicks)
     {
         CameraHandler.instance().setupVanillaCamera(info, partialTicks);
@@ -235,6 +236,7 @@ public class CameraHandler
     /*
      * Called via transformer. Do not delete!
      */
+    @SuppressWarnings("unused")
     public static void onPlayerTurn(double x, double y)
     {
         CameraHandler.instance().cameraHelper.turnPlayerView(x, y);

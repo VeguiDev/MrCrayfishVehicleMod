@@ -209,7 +209,7 @@ public class CameraHelper
             }
             else
             {
-                quaternion.mul(Vector3f.XP.rotationDegrees(Mth.lerp(partialTicks, player.xRotO, player.getXRot())));
+                quaternion.mul(Vector3f.XP.rotationDegrees(Mth.lerp(partialTicks, player.xRotO, player.xRot)));
             }
 
             // If the player is in third person, applies additional vehicle specific camera rotations

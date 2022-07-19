@@ -1,6 +1,5 @@
 package com.mrcrayfish.vehicle.client.render.vehicle;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mrcrayfish.vehicle.client.model.VehicleModels;
 import com.mrcrayfish.vehicle.client.raytrace.RayTraceTransforms;
@@ -8,7 +7,6 @@ import com.mrcrayfish.vehicle.client.raytrace.TransformHelper;
 import com.mrcrayfish.vehicle.client.render.AbstractHelicopterRenderer;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.entity.vehicle.CompactHelicopterEntity;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.EntityType;
 
