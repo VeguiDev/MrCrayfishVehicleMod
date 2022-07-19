@@ -96,8 +96,15 @@ public class CosmeticTracker
     public void setSelectedModel(ResourceLocation cosmeticId, ResourceLocation modelLocation)
     {
         if(FMLLoader.isProduction() && !this.isValidCosmeticModel(cosmeticId, modelLocation))
+        {
             return;
-        Optional.ofNullable(this.selectedCosmetics.get(cosmeticId)).ifPresent(entry -> entry.setModelLocation(modelLocation));
+        }
+
+        Entry entry = this.selectedCosmetics.get(cosmeticId);
+        if(entry != null)
+        {
+            entry.setModelLocation(modelLocation);
+        }
         this.dirty = true;
     }
 
@@ -115,26 +122,44 @@ public class CosmeticTracker
     @Nullable
     public ResourceLocation getSelectedModelLocation(ResourceLocation cosmeticId)
     {
-        return Optional.ofNullable(this.selectedCosmetics.get(cosmeticId)).map(Entry::getModelLocation).orElse(null);
+        Entry entry = this.selectedCosmetics.get(cosmeticId);
+        if(entry != null)
+        {
+            return entry.getModelLocation();
+        }
+
+        return null;
     }
 
     @Nullable
     @OnlyIn(Dist.CLIENT)
     public ComponentModel getSelectedModel(ResourceLocation cosmeticId)
     {
-        return Optional.ofNullable(this.selectedCosmetics.get(cosmeticId)).map(entry -> (ComponentModel) entry.getComponentModel()).orElse(null);
+        Entry entry = this.selectedCosmetics.get(cosmeticId);
+        if(entry != null)
+        {
+            return entry.getComponentModel();
+        }
+
+        return null;
     }
 
     @Nullable
     @OnlyIn(Dist.CLIENT)
     public Entry getSelectedEntry(ResourceLocation cosmeticId)
     {
-        return Optional.ofNullable(this.selectedCosmetics.get(cosmeticId)).orElse(null);
+        return this.selectedCosmetics.get(cosmeticId);
     }
 
     public Collection<Action> getActions(ResourceLocation cosmeticId)
     {
-        return Optional.ofNullable(this.selectedCosmetics.get(cosmeticId)).map(Entry::getActions).orElse(Collections.emptyList());
+        Entry entry = this.selectedCosmetics.get(cosmeticId);
+        if(entry != null)
+        {
+            return entry.getActions();
+        }
+
+        return Collections.emptyList();
     }
 
     private List<Pair<ResourceLocation, ResourceLocation>> getDirtyEntries()
@@ -248,7 +273,7 @@ public class CosmeticTracker
         private boolean dirty;
 
         @Nullable
-        private Object componentModel; // ComponentModel
+        private ComponentModel componentModel; // ComponentModel
 
         public Entry(CosmeticProperties properties)
         {
@@ -269,7 +294,7 @@ public class CosmeticTracker
         }
 
         @Nullable
-        public Object getComponentModel()
+        public ComponentModel getComponentModel()
         {
             if(this.componentModel == null)
             {

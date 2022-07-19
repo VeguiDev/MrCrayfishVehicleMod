@@ -22,6 +22,9 @@ import com.mrcrayfish.vehicle.network.PacketHandler;
 import com.mrcrayfish.vehicle.network.message.MessageInteractCosmetic;
 import com.mrcrayfish.vehicle.network.message.MessageInteractKey;
 import com.mrcrayfish.vehicle.network.message.MessagePickupVehicle;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -63,7 +66,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * Author: Phylogeny, MrCrayfish
@@ -75,25 +77,29 @@ public class EntityRayTracer
     private static EntityRayTracer instance;
 
     //TODO lazy load ray trace transforms and regenerate when joining a server
-    private final Map<EntityType<?>, Supplier<RayTraceTransforms>> entityRayTraceTransformSuppliers = new HashMap<>();
+    private final Map<EntityType<?>, Supplier<RayTraceTransforms>> entityRayTraceTransformSuppliers = new Reference2ObjectOpenHashMap<>();
 
     /**
      * Maps raytraceable entities to maps, which map rendered model item parts to the triangles that comprise static versions of the faces of their BakedQuads
      */
-    private final Map<EntityType<?>, List<RayTraceData>> entityRayTraceData = new HashMap<>();
-    private final Map<EntityType<?>, Function<VehicleEntity, List<RayTraceData>>> entityDynamicRayTraceData = new HashMap<>();
+    private final Map<EntityType<?>, List<RayTraceData>> entityRayTraceData = new Reference2ObjectOpenHashMap<>();
+    private final Map<EntityType<?>, Function<VehicleEntity, List<RayTraceData>>> entityDynamicRayTraceData = new Reference2ObjectOpenHashMap<>();
 
     /**
      * Scales and offsets for rendering the entities in crates
      */
-    private final Map<EntityType<?>, Pair<Float, Float>> entityCrateScalesAndOffsets = new HashMap<>();
+    private final Map<EntityType<?>, Pair<Float, Float>> entityCrateScalesAndOffsets = new Reference2ObjectOpenHashMap<>();
     private static final Pair<Float, Float> SCALE_AND_OFFSET_DEFAULT = new ImmutablePair<>(0.25F, 0.0F);
 
     /**
      * Interactable boxes
      */
-    private final Map<EntityType<?>, List<InteractableBox<?>>> entityInteractableBoxes = new HashMap<>();
-    private final Map<EntityType<?>, List<RayTraceData>> entityInteractableBoxData = new HashMap<>();
+    private final Map<EntityType<?>, List<InteractableBox<?>>> entityInteractableBoxes = new Reference2ObjectOpenHashMap<>();
+    private final Map<EntityType<?>, List<RayTraceData>> entityInteractableBoxData = Util.make(() -> {
+        Reference2ObjectOpenHashMap<EntityType<?>, List<RayTraceData>> map = new Reference2ObjectOpenHashMap<>();
+        map.defaultReturnValue(new ObjectArrayList<>());
+        return map;
+    });
 
     /**
      * The result of clicking and holding on a continuously interactable raytrace part. Every tick that this is not null,
@@ -179,8 +185,7 @@ public class EntityRayTracer
      */
     public synchronized <T extends VehicleEntity> void registerInteractionBox(EntityType<T> type, Supplier<AABB> boxSupplier, BiConsumer<T, Boolean> action, Predicate<T> active)
     {
-        this.entityInteractableBoxes.computeIfAbsent(type, entityType -> new ArrayList<>())
-                .add(new InteractableBox<>(boxSupplier, action, active));
+        this.entityInteractableBoxes.computeIfAbsent(type, (t) -> new ObjectArrayList<>()).add(new InteractableBox<>(boxSupplier, action, active));
     }
 
     /**
@@ -193,6 +198,7 @@ public class EntityRayTracer
      * @param function a function that returns custom raytracedata
      * @param <T>      an entity that extends vehicle entity
      */
+    @SuppressWarnings("unchecked")
     public synchronized <T extends VehicleEntity> void registerDynamicRayTraceData(EntityType<T> type, Function<T, List<RayTraceData>> function)
     {
         this.entityDynamicRayTraceData.put(type, (Function<VehicleEntity, List<RayTraceData>>) function);
@@ -325,7 +331,9 @@ public class EntityRayTracer
         if(event.phase != TickEvent.Phase.START)
             return;
 
-        if(this.continuousInteraction == null || Minecraft.getInstance().player == null)
+        Player player = Minecraft.getInstance().player;
+
+        if(this.continuousInteraction == null || player == null)
             return;
 
         VehicleRayTraceResult result = rayTraceEntities(this.continuousInteraction.isRightClick());
@@ -336,7 +344,7 @@ public class EntityRayTracer
             return;
         }
 
-        this.continuousInteractionHand = result.performContinuousInteraction();
+        this.continuousInteractionHand = result.performContinuousInteraction(player);
 
         if(this.continuousInteractionHand == null)
         {
@@ -400,7 +408,7 @@ public class EntityRayTracer
         VehicleRayTraceResult result = this.rayTraceEntities(rightClick);
         if(result != null)
         {
-            this.continuousInteractionHand = result.performContinuousInteraction();
+            this.continuousInteractionHand = result.performContinuousInteraction(Minecraft.getInstance().player);
             if(this.continuousInteractionHand != null)
             {
                 this.continuousInteraction = result;
@@ -463,7 +471,7 @@ public class EntityRayTracer
             {
                 /* If the hit entity is a raytraceable entity, and if the player's eyes are inside what MC
                  * thinks the player is looking at, then process the hit regardless of what MC thinks */
-                boolean bypass = this.entityRayTraceData.keySet().contains(closestRayTraceResult.getEntity().getType());
+                boolean bypass = this.entityRayTraceData.containsKey(closestRayTraceResult.getEntity().getType());
                 HitResult result = Minecraft.getInstance().hitResult;
                 if(bypass && result != null && result.getType() != HitResult.Type.MISS)
                 {
@@ -513,7 +521,7 @@ public class EntityRayTracer
     {
         if(!this.entityRayTraceData.containsKey(type))
         {
-            List<MatrixTransform> transforms = new ArrayList<>();
+            List<MatrixTransform> transforms = new ObjectArrayList<>();
             TransformHelper.createBodyTransforms(transforms, type);
             HashMap<RayTraceData, List<MatrixTransform>> parts = Maps.newHashMap();
             RayTraceTransforms rayTraceTransforms = this.entityRayTraceTransformSuppliers.get(type).get();
@@ -554,16 +562,20 @@ public class EntityRayTracer
 
     private <T extends VehicleEntity> void generateInteractableBoxes(EntityType<T> type, List<MatrixTransform> transforms)
     {
-        Optional.ofNullable(this.entityInteractableBoxes.get(type)).ifPresent(list ->
+        List<InteractableBox<?>> boxes = this.entityInteractableBoxes.get(type);
+        if(boxes != null)
         {
-            list.forEach(box ->
+            //noinspection ForLoopReplaceableByForEach
+            for(int idx = 0; idx < boxes.size(); idx++)
             {
+                InteractableBox<?> box = boxes.get(idx);
+
                 RayTraceData data = box.getData();
                 data.clearTriangles();
                 data.setMatrix(TransformHelper.createMatrixFromTransformsForInteractionBox(transforms));
-                this.entityInteractableBoxData.computeIfAbsent(type, t -> new ArrayList<>()).add(data);
-            });
-        });
+                this.entityInteractableBoxData.get(type).add(data);
+            }
+        }
     }
 
     /**
@@ -576,7 +588,26 @@ public class EntityRayTracer
     private List<RayTraceData> getApplicableInteractableBoxes(VehicleEntity entity)
     {
         List<InteractableBox<?>> boxes = this.entityInteractableBoxes.get(entity.getType());
-        return boxes != null ? boxes.stream().filter(box -> box.isActive(entity)).map(InteractableBox::getData).collect(Collectors.toList()) : Collections.emptyList();
+
+        if(boxes != null)
+        {
+            List<RayTraceData> availableData = new ObjectArrayList<>();
+
+            //noinspection ForLoopReplaceableByForEach
+            for(int idx = 0; idx < boxes.size(); idx++)
+            {
+                InteractableBox<?> box = boxes.get(idx);
+
+                if(box.isActive(entity))
+                {
+                    availableData.add(box.getData());
+                }
+            }
+
+            return availableData;
+        }
+
+        return Collections.emptyList();
     }
 
     /**
@@ -620,7 +651,7 @@ public class EntityRayTracer
         }
 
         InterceptResult result = lookPart != null ? lookPart : lookBox;
-        return result != null ? new VehicleRayTraceResult(entity, rotateVecXZ(result.getHitPos(), -angle, entityPos), result.getDistance(), result.getPart(), rightClick) : null;
+        return result != null ? new VehicleRayTraceResult(entity, rotateVecXZ(result.getHitPos(), -angle, entityPos), result.getDistance(), this, result.getPart(), rightClick) : null;
     }
 
     /**

@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mrcrayfish.vehicle.Config;
+import com.mrcrayfish.vehicle.Reference;
 import com.mrcrayfish.vehicle.client.render.AbstractLandVehicleRenderer;
 import com.mrcrayfish.vehicle.client.render.AbstractPoweredRenderer;
 import com.mrcrayfish.vehicle.client.render.AbstractVehicleRenderer;
@@ -61,7 +62,7 @@ import java.util.stream.Stream;
  */
 public class WorkstationScreen extends AbstractContainerScreen<WorkstationContainer>
 {
-    private static final ResourceLocation GUI = new ResourceLocation("vehicle:textures/gui/workstation.png");
+    private static final ResourceLocation GUI = new ResourceLocation(Reference.MOD_ID, "textures/gui/workstation.png");
     private static CachedVehicle cachedVehicle;
     private static CachedVehicle prevCachedVehicle;
     private static int currentVehicle = 0;
