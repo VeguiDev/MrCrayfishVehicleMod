@@ -11,6 +11,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
@@ -66,6 +67,13 @@ public class WorkstationBlock extends RotatedEntityObjectBlock
             }
         }
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    @NotNull
+    public RenderShape getRenderShape(@NotNull BlockState state)
+    {
+        return RenderShape.MODEL;
     }
 
     @Nullable

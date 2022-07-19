@@ -856,8 +856,8 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
         }
 
         // Makes the player face the same direction of the vehicle
-        passenger.setYRot(this.getYRot());
-        passenger.setXRot(this.getXRot());
+        passenger.yRot = this.getYRot();
+        passenger.xRot = this.getXRot();
 
         // Resets the passenger yaw offset
         if(passenger instanceof Player && ((Player) passenger).isLocalPlayer())
