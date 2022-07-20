@@ -27,6 +27,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
@@ -62,7 +63,7 @@ public class EditVehicleScreen extends AbstractContainerScreen<EditVehicleContai
     }
 
     @Override
-    protected void renderBg(PoseStack matrices, float partialTicks, int mouseX, int mouseY)
+    protected void renderBg(@NotNull PoseStack matrices, float partialTicks, int mouseX, int mouseY)
     {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, GUI_TEXTURES);

@@ -41,6 +41,7 @@ import java.util.WeakHashMap;
  */
 public class VehicleHelper
 {
+    private static final Minecraft MINECRAFT = Minecraft.getInstance();
     private static final WeakHashMap<PoweredVehicleEntity, EnumMap<SoundType, TickableSoundInstance>> SOUND_TRACKER = new WeakHashMap<>();
 
     public static void tryPlayEngineSound(PoweredVehicleEntity vehicle)
@@ -49,11 +50,11 @@ public class VehicleHelper
         {
             Map<SoundType, TickableSoundInstance> soundMap = SOUND_TRACKER.computeIfAbsent(vehicle, v -> new EnumMap<>(SoundType.class));
             TickableSoundInstance sound = soundMap.get(SoundType.ENGINE);
-            if(sound == null || sound.isStopped() || !Minecraft.getInstance().getSoundManager().isActive(sound))
+            if(sound == null || sound.isStopped() || !MINECRAFT.getSoundManager().isActive(sound))
             {
-                sound = new MovingEngineSound(Minecraft.getInstance().player, vehicle);
+                sound = new MovingEngineSound(MINECRAFT.player, vehicle);
                 soundMap.put(SoundType.ENGINE, sound);
-                Minecraft.getInstance().getSoundManager().play(sound);
+                MINECRAFT.getSoundManager().play(sound);
             }
         }
     }
@@ -64,11 +65,11 @@ public class VehicleHelper
         {
             Map<SoundType, TickableSoundInstance> soundMap = SOUND_TRACKER.computeIfAbsent(vehicle, v -> new EnumMap<>(SoundType.class));
             TickableSoundInstance sound = soundMap.get(SoundType.HORN);
-            if(sound == null || sound.isStopped() || !Minecraft.getInstance().getSoundManager().isActive(sound))
+            if(sound == null || sound.isStopped() || !MINECRAFT.getSoundManager().isActive(sound))
             {
-                sound = new MovingHornSound(Minecraft.getInstance().player, vehicle);
+                sound = new MovingHornSound(MINECRAFT.player, vehicle);
                 soundMap.put(SoundType.HORN, sound);
-                Minecraft.getInstance().getSoundManager().play(sound);
+                MINECRAFT.getSoundManager().play(sound);
             }
         }
     }
@@ -76,12 +77,12 @@ public class VehicleHelper
     public static void playSound(SoundEvent soundEvent, BlockPos pos, float volume, float pitch)
     {
         SoundInstance sound = new SimpleSoundInstance(soundEvent, SoundSource.BLOCKS, volume, pitch, pos.getX() + 0.5F, pos.getY(), pos.getZ() + 0.5F);
-        Minecraft.getInstance().submitAsync(() -> Minecraft.getInstance().getSoundManager().play(sound));
+        MINECRAFT.submitAsync(() -> MINECRAFT.getSoundManager().play(sound));
     }
 
     public static void playSound(SoundEvent soundEvent, float volume, float pitch)
     {
-        Minecraft.getInstance().submitAsync(() -> Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(soundEvent, volume, pitch)));
+        MINECRAFT.submitAsync(() -> MINECRAFT.getSoundManager().play(SimpleSoundInstance.forUI(soundEvent, volume, pitch)));
     }
 
     //@SubscribeEvent(priority = EventPriority.NORMAL, receiveCanceled = true)
@@ -139,7 +140,7 @@ public class VehicleHelper
                 }
             }
         }
-        return Minecraft.getInstance().options.keyJump.isDown();
+        return MINECRAFT.options.keyJump.isDown();
     }
 
     public static boolean isHonking()
@@ -160,8 +161,8 @@ public class VehicleHelper
 
     public static float getLift()
     {
-        float up = Minecraft.getInstance().options.keyJump.isDown() ? 1.0F : 0F;
-        float down = Minecraft.getInstance().options.keySprint.isDown() ? -1.0F : 0F;
+        float up = MINECRAFT.options.keyJump.isDown() ? 1.0F : 0F;
+        float down = MINECRAFT.options.keySprint.isDown() ? -1.0F : 0F;
         if(ClientHandler.isControllableLoaded())
         {
             Controller controller = Controllable.getController();
@@ -184,8 +185,8 @@ public class VehicleHelper
                 return controller.getLThumbStickYValue();
             }
         }
-        float up = Minecraft.getInstance().options.keyJump.isDown() ? 1.0F : 0F;
-        float down = Minecraft.getInstance().options.keySprint.isDown() ? -1.0F : 0F;
+        float up = MINECRAFT.options.keyJump.isDown() ? 1.0F : 0F;
+        float down = MINECRAFT.options.keySprint.isDown() ? -1.0F : 0F;
         return up + down;
     }
 
@@ -289,7 +290,7 @@ public class VehicleHelper
 
     public static boolean canFollowVehicleOrientation(Entity passenger)
     {
-        if(passenger.equals(Minecraft.getInstance().player))
+        if(passenger.equals(MINECRAFT.player))
         {
             return Config.CLIENT.followVehicleOrientation.get();
         }
@@ -298,7 +299,7 @@ public class VehicleHelper
 
     public static void spawnWheelParticle(BlockPos pos, BlockState state, double x, double y, double z, Vec3 motion)
     {
-        Minecraft mc = Minecraft.getInstance();
+        Minecraft mc = MINECRAFT;
         ClientLevel world = mc.level;
         if(world != null)
         {
@@ -316,7 +317,7 @@ public class VehicleHelper
 
     public static void spawnSmokeParticle(double x, double y, double z, Vec3 motion)
     {
-        Minecraft mc = Minecraft.getInstance();
+        Minecraft mc = MINECRAFT;
         ClientLevel world = mc.level;
         if(world != null)
         {
@@ -330,12 +331,12 @@ public class VehicleHelper
 
     public static boolean isThirdPersonBack()
     {
-        return Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_BACK;
+        return MINECRAFT.options.getCameraType() == CameraType.THIRD_PERSON_BACK;
     }
 
     public static boolean isThirdPersonFront()
     {
-        return Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT;
+        return MINECRAFT.options.getCameraType() == CameraType.THIRD_PERSON_FRONT;
     }
 
     private enum SoundType
