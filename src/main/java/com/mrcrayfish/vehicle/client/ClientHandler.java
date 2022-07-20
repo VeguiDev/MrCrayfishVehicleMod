@@ -25,6 +25,7 @@ import com.mrcrayfish.vehicle.client.screen.FluidExtractorScreen;
 import com.mrcrayfish.vehicle.client.screen.FluidMixerScreen;
 import com.mrcrayfish.vehicle.client.screen.StorageScreen;
 import com.mrcrayfish.vehicle.client.screen.WorkstationScreen;
+import com.mrcrayfish.vehicle.client.util.OptifineHelper;
 import com.mrcrayfish.vehicle.entity.trailer.FertilizerTrailerEntity;
 import com.mrcrayfish.vehicle.entity.trailer.FluidTrailerEntity;
 import com.mrcrayfish.vehicle.entity.trailer.SeederTrailerEntity;
@@ -104,6 +105,7 @@ public class ClientHandler
 
         ((ReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener((ResourceManagerReloadListener) manager -> {
             FluidUtils.clearCacheFluidColor();
+            OptifineHelper.refresh();
             EntityRayTracer.instance().clearDataForReregistration();
             ComponentManager.clearCache();
         });

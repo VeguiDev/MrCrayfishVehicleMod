@@ -40,15 +40,13 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
     protected float bladeSpeed;
 
     @OnlyIn(Dist.CLIENT)
-    protected float bladeRotation;
+    protected float prevBladeRotation, bladeRotation;
+
     @OnlyIn(Dist.CLIENT)
-    protected float prevBladeRotation;
+    protected float prevJoystickStrafe, joystickStrafe;
 
-    protected float joystickStrafe;
-    protected float prevJoystickStrafe;
-
-    protected float joystickForward;
-    protected float prevJoystickForward;
+    @OnlyIn(Dist.CLIENT)
+    protected float prevJoystickForward, joystickForward;
 
     protected HelicopterEntity(EntityType<?> entityType, Level worldIn)
     {
@@ -135,18 +133,6 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
         {
             this.setDeltaMovement(this.getDeltaMovement().add(0, -0.04, 0));
         }
-    }
-
-    @Override
-    public void onVehicleTick()
-    {
-        super.onVehicleTick();
-
-        this.prevJoystickStrafe = this.joystickStrafe;
-        this.prevJoystickForward = this.joystickForward;
-
-        this.joystickStrafe = Mth.lerp(0.25F, this.joystickStrafe, this.getSideInput());
-        this.joystickForward = Mth.lerp(0.25F, this.joystickForward, this.getForwardInput());
     }
 
     private float getPitch()
@@ -236,6 +222,12 @@ public abstract class HelicopterEntity extends PoweredVehicleEntity
                 }
             }
         }
+
+        this.prevJoystickStrafe = this.joystickStrafe;
+        this.prevJoystickForward = this.joystickForward;
+
+        this.joystickStrafe = Mth.lerp(0.25F, this.joystickStrafe, this.getSideInput());
+        this.joystickForward = Mth.lerp(0.25F, this.joystickForward, this.getForwardInput());
     }
 
     @Override

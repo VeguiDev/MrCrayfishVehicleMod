@@ -8,6 +8,35 @@ import java.lang.reflect.InvocationTargetException;
 public class OptifineHelper
 {
     private static final boolean LOADED = Package.getPackage("net.optifine") != null;
+    private static boolean EMISSIVES_ENABLED;
+    private static boolean CUSTOM_COLORS_ENABLED;
+
+    public static void refresh()
+    {
+        try
+        {
+            Class<?> clazz = Class.forName("net.optifine.EmissiveTextures");
+            EMISSIVES_ENABLED = isLoaded() && (boolean) clazz.getDeclaredMethod("isActive").invoke(clazz, new Object[0]);
+        }
+        catch(ClassNotFoundException ignored)
+        {}
+        catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex)
+        {
+            ex.printStackTrace();
+        }
+
+        try
+        {
+            Class<?> clazz = Class.forName("net.optifine.Config");
+            CUSTOM_COLORS_ENABLED = isLoaded() && (boolean) clazz.getDeclaredMethod("isCustomColors").invoke(clazz, new Object[0]);
+        }
+        catch(ClassNotFoundException ignored)
+        {}
+        catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex)
+        {
+            ex.printStackTrace();
+        }
+    }
 
     public static boolean isLoaded()
     {
@@ -16,36 +45,12 @@ public class OptifineHelper
 
     public static boolean isEmissiveTexturesEnabled()
     {
-        try
-        {
-            Class<?> clazz = Class.forName("net.optifine.EmissiveTextures");
-            return isLoaded() && (boolean) clazz.getDeclaredMethod("isActive").invoke(clazz, new Object[0]);
-        }
-        catch(ClassNotFoundException ignored)
-        {}
-        catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex)
-        {
-            ex.printStackTrace();
-        }
-
-        return false;
+        return EMISSIVES_ENABLED;
     }
 
     public static boolean isCustomColorsEnabled()
     {
-        try
-        {
-            Class<?> clazz = Class.forName("net.optifine.Config");
-            return isLoaded() && (boolean) clazz.getDeclaredMethod("isCustomColors").invoke(clazz, new Object[0]);
-        }
-        catch(ClassNotFoundException ignored)
-        {}
-        catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex)
-        {
-            ex.printStackTrace();
-        }
-
-        return false;
+        return CUSTOM_COLORS_ENABLED;
     }
 
     public static int castAsCustomColor(ItemStack stack, int layer, int color)

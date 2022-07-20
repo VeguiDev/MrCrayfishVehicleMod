@@ -37,7 +37,7 @@ public class CompactHelicopterEntity extends HelicopterEntity
         if(this.canDrive() && this.tickCount % 2 == 0)
         {
             Vec3 exhaust = this.getExhaustFumesPosition().scale(0.0625);
-            Vector4f fumePosition = new Vector4f(new Vector3f(exhaust));
+            Vector4f fumePosition = new Vector4f((float) exhaust.x(), (float) exhaust.y(), (float) exhaust.z(), 1F);
             fumePosition.transform(this.getTransformMatrix(0F));
             this.level.addParticle(ParticleTypes.LARGE_SMOKE, this.getX() + fumePosition.x(), this.getY() + fumePosition.y(), this.getZ() + fumePosition.z(), -this.getDeltaMovement().x, 0.0D, -this.getDeltaMovement().z);
         }
@@ -85,12 +85,18 @@ public class CompactHelicopterEntity extends HelicopterEntity
         VehicleProperties properties = this.getProperties();
         Transform bodyPosition = properties.getBodyTransform();
         matrix.multiply((Matrix4f.createScaleMatrix((float) bodyPosition.getScale(), (float) bodyPosition.getScale(), (float) bodyPosition.getScale())));
-        Vector3f translate = new Vector3f();
-        translate.add((float) bodyPosition.getX() * 0.0625F, (float) bodyPosition.getY() * 0.0625F, (float) bodyPosition.getZ() * 0.0625F);
-        translate.add(0.0F, 0.5F, 0.0F);
-        translate.add(0.0F, properties.getAxleOffset() * 0.0625F, 0.0F);
-        translate.add(0.0F, properties.getWheelOffset() * 0.0625F, 0.0F);
-        matrix.multiply(Matrix4f.createTranslateMatrix(translate.x(), translate.y(), translate.z()));
+
+        float epsilon = 0.0625F;
+
+        float x = (float) (bodyPosition.getX() * epsilon);
+        float y = (float) (bodyPosition.getY() * epsilon);
+        float z = (float) (bodyPosition.getZ() * epsilon);
+
+        y += 0.5F;
+        y += properties.getAxleOffset() * epsilon;
+        y += properties.getWheelOffset() * epsilon;
+
+        matrix.multiply(Matrix4f.createTranslateMatrix(x, y, z));
         return matrix;
     }
 }
