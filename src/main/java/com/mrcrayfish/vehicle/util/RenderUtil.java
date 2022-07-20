@@ -30,7 +30,6 @@ import net.minecraftforge.client.model.data.EmptyModelData;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -137,7 +136,6 @@ public class RenderUtil
                     for(Pair<BakedModel,RenderType> layerModel : model.getLayerModels(stack, fabulous))
                     {
                         RenderType type = layerModel.getSecond();
-
                         ForgeHooksClient.setRenderType(type);
 
                         VertexConsumer buffer = fabulous ?
@@ -152,11 +150,6 @@ public class RenderUtil
                 {
                     RenderType type = ItemBlockRenderTypes.getRenderType(stack, fabulous);
                     ForgeHooksClient.setRenderType(type);
-
-                    if(isGui && Objects.equals(type, RenderType.translucentMovingBlock()))
-                    {
-                        type = RenderType.translucentMovingBlock();
-                    }
 
                     VertexConsumer buffer = fabulous ?
                             ItemRenderer.getFoilBufferDirect(renderTypeBuffer, type, true, stack.hasFoil()) :
@@ -195,9 +188,8 @@ public class RenderUtil
         // noinspection ForLoopReplaceableByForEach
         for (int i = 0, quadsSize = quads.size(); i < quadsSize; i++)
         {
-
             BakedQuad quad = quads.get(i);
-            int tintColor = 0xFFFFFF;
+            int tintColor = 0xFFFFFFFF;
 
             if(OptifineHelper.isEmissiveTexturesEnabled())
             {
@@ -235,7 +227,7 @@ public class RenderUtil
 
     protected static float normalise(int value)
     {
-        return value * (1F / 255.0F);
+        return (value & 0xFF) * (1F / 255.0F);
     }
 
     public static List<Component> lines(FormattedText text, int maxWidth)

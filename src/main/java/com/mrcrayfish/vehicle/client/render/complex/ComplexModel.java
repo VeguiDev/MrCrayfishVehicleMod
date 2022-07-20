@@ -137,11 +137,10 @@ public class ComplexModel
     }
 
     @Nullable
-    public static ComplexModel load(IComplexModel model)
+    public static ComplexModel load(Minecraft minecraft, IComplexModel model)
     {
         try
         {
-            Minecraft minecraft = Minecraft.getInstance();
             ResourceLocation modelLocation = model.getModelLocation();
             ResourceLocation complexLocation = new ResourceLocation(modelLocation.getNamespace(), "models/" + modelLocation.getPath() + ".complex");
             if(minecraft.getResourceManager().hasResource(complexLocation))

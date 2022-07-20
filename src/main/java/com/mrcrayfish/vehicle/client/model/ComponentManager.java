@@ -2,6 +2,7 @@ package com.mrcrayfish.vehicle.client.model;
 
 import com.mrcrayfish.vehicle.Reference;
 import com.mrcrayfish.vehicle.client.render.complex.ComplexModel;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -21,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Mod.EventBusSubscriber(modid = Reference.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ComponentManager
 {
+    private static final Minecraft MINECRAFT = Minecraft.getInstance();
     private static final Map<String, ComponentLoader> LOADERS = new ConcurrentHashMap<>();
     private static final Map<ResourceLocation, ComponentModel> ALL_MODELS = new HashMap<>();
 
@@ -52,7 +54,7 @@ public class ComponentManager
         {
             loader.getModels().forEach(model ->
             {
-                model.setComplexModel(ComplexModel.load(model));
+                model.setComplexModel(ComplexModel.load(MINECRAFT, model));
             });
         });
     }
