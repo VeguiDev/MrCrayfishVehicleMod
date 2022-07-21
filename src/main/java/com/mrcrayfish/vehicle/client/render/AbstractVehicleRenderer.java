@@ -1,6 +1,5 @@
 package com.mrcrayfish.vehicle.client.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
@@ -19,7 +18,6 @@ import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.item.IDyeable;
 import com.mrcrayfish.vehicle.util.RenderUtil;
 import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -116,7 +114,7 @@ public abstract class AbstractVehicleRenderer<T extends VehicleEntity>
      */
     public void applyPreRotations(T entity, PoseStack stack, float partialTicks) {}
 
-    public void applyPlayerModel(T entity, Player player, PlayerModel<AbstractClientPlayer> model, float partialTicks) {}
+    public void applyPlayerModel(T entity, Player player, PlayerModel<?> model, float partialTicks) {}
 
     public void applyPlayerRender(T entity, Player player, float partialTicks, PoseStack matrixStack, VertexConsumer buffers)
     {

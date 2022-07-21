@@ -34,7 +34,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -42,8 +41,6 @@ import java.util.UUID;
  */
 public class VehicleCrateTileEntity extends TileEntitySynced
 {
-    private static final Random RAND = new Random();
-
     private ResourceLocation entityId;
     private int color = VehicleEntity.DYE_TO_COLOR[0];
     private ItemStack engineStack = ItemStack.EMPTY;
@@ -197,7 +194,7 @@ public class VehicleCrateTileEntity extends TileEntitySynced
                 }
                 if(this.timer == 90 || this.timer == 110 || this.timer == 130 || this.timer == 150)
                 {
-                    float pitch = (float) (0.9F + 0.2F * RAND.nextDouble());
+                    float pitch = (float) (0.9F + 0.2F * this.level.random.nextDouble());
                     VehicleHelper.playSound(ModSounds.BLOCK_VEHICLE_CRATE_PANEL_LAND.get(), this.worldPosition, 1.0F, pitch);
                 }
                 if(this.timer == 150)

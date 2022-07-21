@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import com.mrcrayfish.framework.common.data.SyncedEntityData;
-import com.mrcrayfish.obfuscate.client.event.PlayerModelEvent;
+import com.mrcrayfish.posture.api.event.PlayerModelEvent;
 import com.mrcrayfish.vehicle.client.render.AbstractVehicleRenderer;
 import com.mrcrayfish.vehicle.client.render.VehicleRenderRegistry;
 import com.mrcrayfish.vehicle.common.Seat;
@@ -15,7 +15,6 @@ import com.mrcrayfish.vehicle.init.ModDataKeys;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -87,10 +86,10 @@ public class PlayerModelHandler
     }
 
     @SubscribeEvent
-    public void onSetupAngles(PlayerModelEvent.SetupAngles.Post event)
+    public void onSetupAngles(PlayerModelEvent.Pose.Post event)
     {
         Player player = event.getPlayer();
-        PlayerModel model = event.getModelPlayer();
+        PlayerModel<?> model = event.getPlayerModel();
 
         if(player.equals(Minecraft.getInstance().player) && Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON)
             return;
@@ -114,7 +113,7 @@ public class PlayerModelHandler
      * @param partialTicks the current partial ticks
      */
     @SuppressWarnings("unchecked")
-    private void applyPassengerPose(Player player, PlayerModel<AbstractClientPlayer> model, float partialTicks)
+    private void applyPassengerPose(Player player, PlayerModel<?> model, float partialTicks)
     {
         Entity ridingEntity = player.getVehicle();
         if(!(ridingEntity instanceof VehicleEntity vehicle))

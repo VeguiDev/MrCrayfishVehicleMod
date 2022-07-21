@@ -13,7 +13,6 @@ import com.mrcrayfish.vehicle.entity.vehicle.DirtBikeEntity;
 import com.mrcrayfish.vehicle.init.ModEntities;
 import com.mrcrayfish.vehicle.util.RenderUtil;
 import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -76,7 +75,7 @@ public class DirtBikeRenderer extends AbstractMotorcycleRenderer<DirtBikeEntity>
     }
 
     @Override
-    public void applyPlayerModel(DirtBikeEntity entity, Player player, PlayerModel<AbstractClientPlayer> model, float partialTicks)
+    public void applyPlayerModel(DirtBikeEntity entity, Player player, PlayerModel<?> model, float partialTicks)
     {
         int index = entity.getSeatTracker().getSeatIndex(player.getUUID());
         if(index == 0)

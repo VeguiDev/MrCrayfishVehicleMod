@@ -13,7 +13,6 @@ import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.entity.vehicle.JetSkiEntity;
 import com.mrcrayfish.vehicle.init.ModEntities;
 import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -53,7 +52,7 @@ public class JetSkiRenderer extends AbstractBoatRenderer<JetSkiEntity>
     }
 
     @Override
-    public void applyPlayerModel(JetSkiEntity entity, Player player, PlayerModel<AbstractClientPlayer> model, float partialTicks)
+    public void applyPlayerModel(JetSkiEntity entity, Player player, PlayerModel<?> model, float partialTicks)
     {
         float wheelAngle = this.wheelAngleProperty.get(entity, partialTicks);
         float maxSteeringAngle = this.vehiclePropertiesProperty.get(entity).getExtended(PoweredProperties.class).getMaxSteeringAngle();

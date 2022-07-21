@@ -16,6 +16,7 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -39,7 +40,8 @@ public class VehiclePropertiesDataLoader extends SimplePreparableReloadListener<
     private final Map<ResourceLocation, VehicleProperties> vehicleProperties = new HashMap<>();
 
     @Override
-    protected Map<ResourceLocation, VehicleProperties> prepare(ResourceManager manager, ProfilerFiller profiler)
+
+    protected Map<ResourceLocation, VehicleProperties> prepare(ResourceManager manager, @NotNull ProfilerFiller profiler)
     {
         Map<ResourceLocation, VehicleProperties> propertiesMap = new HashMap<>();
         manager.listResources(PROPERTIES_DIRECTORY, location -> location.endsWith(FILE_SUFFIX))
@@ -91,10 +93,10 @@ public class VehiclePropertiesDataLoader extends SimplePreparableReloadListener<
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, VehicleProperties> propertiesMap, ResourceManager manager, ProfilerFiller profiler)
+    protected void apply(@NotNull Map<ResourceLocation, VehicleProperties> data, @NotNull ResourceManager manager, @NotNull ProfilerFiller profiler)
     {
         this.vehicleProperties.clear();
-        this.vehicleProperties.putAll(propertiesMap);
+        this.vehicleProperties.putAll(data);
     }
 
     protected static VehicleProperties loadPropertiesFromStream(InputStream is)

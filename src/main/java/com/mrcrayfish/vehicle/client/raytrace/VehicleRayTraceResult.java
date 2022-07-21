@@ -2,7 +2,6 @@ package com.mrcrayfish.vehicle.client.raytrace;
 
 import com.mrcrayfish.vehicle.client.raytrace.data.RayTraceData;
 import com.mrcrayfish.vehicle.entity.VehicleEntity;
-import net.minecraft.client.Minecraft;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -10,7 +9,6 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 /**
  * Author: MrCrayfish

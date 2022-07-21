@@ -1,10 +1,9 @@
 package com.mrcrayfish.vehicle.client.handler;
 
-import com.mrcrayfish.obfuscate.client.event.PlayerModelEvent;
+import com.mrcrayfish.posture.api.event.PlayerModelEvent;
 import com.mrcrayfish.vehicle.client.render.layer.LayerHeldVehicle;
 import com.mrcrayfish.vehicle.common.entity.HeldVehicleDataHandler;
 import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -33,9 +32,9 @@ public class HeldVehicleHandler
     public static final Map<UUID, AnimationCounter> idToCounter = new HashMap<>();
 
     @SubscribeEvent
-    public void onSetupAngles(PlayerModelEvent.SetupAngles.Post event)
+    public void onSetupAngles(PlayerModelEvent.Pose.Post event)
     {
-        PlayerModel<AbstractClientPlayer> model = event.getModelPlayer();
+        PlayerModel<?> model = event.getPlayerModel();
         Player player = event.getPlayer();
 
         boolean holdingVehicle = HeldVehicleDataHandler.isHoldingVehicle(player);

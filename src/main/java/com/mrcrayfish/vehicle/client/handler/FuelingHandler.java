@@ -2,7 +2,7 @@ package com.mrcrayfish.vehicle.client.handler;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mrcrayfish.framework.common.data.SyncedEntityData;
-import com.mrcrayfish.obfuscate.client.event.PlayerModelEvent;
+import com.mrcrayfish.posture.api.event.PlayerModelEvent;
 import com.mrcrayfish.vehicle.client.model.VehicleModels;
 import com.mrcrayfish.vehicle.client.raytrace.EntityRayTracer;
 import com.mrcrayfish.vehicle.client.raytrace.RayTraceFunction;
@@ -14,7 +14,6 @@ import com.mrcrayfish.vehicle.util.RenderUtil;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -151,7 +150,7 @@ public class FuelingHandler
         PoseStack matrixStack = event.getPoseStack();
         matrixStack.pushPose();
 
-        PlayerModel<AbstractClientPlayer> model = event.getModelPlayer();
+        PlayerModel<?> model = event.getPlayerModel();
 
         if(model.young)
         {
