@@ -257,9 +257,9 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
                 if(this.isLockable())
                 {
                     CompoundTag tag = stack.getOrCreateTag();
-                    if(!tag.hasUUID("VehicleId") || this.getUUID().equals(tag.getUUID("VehicleId")))
+                    if(!tag.hasUUID("vehicleId") || this.getUUID().equals(tag.getUUID("vehicleId")))
                     {
-                        tag.putUUID("VehicleId", this.getUUID());
+                        tag.putUUID("vehicleId", this.getUUID());
                         if(!this.isKeyNeeded())
                         {
                             this.setKeyNeeded(true);
@@ -469,7 +469,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
         this.prevRenderWheelAngle = this.renderWheelAngle;
 
         Entity entity = this.getControllingPassenger();
-        if(entity instanceof LivingEntity && entity.equals(Minecraft.getInstance().player))
+        if(entity instanceof LivingEntity && entity.equals(MINECRAFT.player))
         {
             float throttle = VehicleHelper.getThrottle((LivingEntity) entity);
             if(throttle != this.getThrottle())
@@ -509,47 +509,41 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
     protected void readAdditionalSaveData(CompoundTag compound)
     {
         super.readAdditionalSaveData(compound);
-        if(compound.contains("Owner", Tag.TAG_COMPOUND))
+
+        if(compound.contains("owner", Tag.TAG_COMPOUND))
         {
-            this.owner = compound.getUUID("Owner");
+            this.owner = compound.getUUID("owner");
         }
-        if(compound.contains("EngineStack", Tag.TAG_COMPOUND))
-        {
-            this.setEngineStack(ItemStack.of(compound.getCompound("EngineStack")));
-        }
-        if(compound.contains("StepHeight", Tag.TAG_FLOAT))
-        {
-            this.setStepHeight(compound.getFloat("StepHeight"));
-        }
-        if(compound.contains("CurrentFuel", Tag.TAG_FLOAT))
-        {
-            this.setCurrentEnergy(compound.getFloat("CurrentFuel"));
-        }
-        if(compound.contains("KeyNeeded", Tag.TAG_BYTE))
-        {
-            this.setKeyNeeded(compound.getBoolean("KeyNeeded"));
-        }
-        this.setKeyStack(CommonUtils.readItemStackFromTag(compound, "KeyStack"));
+
+        this.setEngineStack(ItemStack.of(compound.getCompound("engineStack")));
+
+        this.setStepHeight(compound.getFloat("stepHeight"));
+        this.setCurrentEnergy(compound.getFloat("currentFuel"));
+
+        this.setKeyNeeded(compound.getBoolean("keyNeeded"));
+        this.setKeyStack(CommonUtils.readItemStackFromTag(compound, "keyStack"));
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag compound)
     {
         super.addAdditionalSaveData(compound);
+
         if(this.owner != null)
         {
-            compound.putUUID("Owner", this.owner);
+            compound.putUUID("owner", this.owner);
         }
-        compound.putBoolean("HasEngine", this.hasEngine());
-        CommonUtils.writeItemStackToTag(compound, "EngineStack", this.getEngineStack());
-        compound.putFloat("AccelerationSpeed", this.getAccelerationSpeed());
-        compound.putFloat("MaxSteeringAngle", this.getMaxSteeringAngle());
-        compound.putFloat("StepHeight", this.getStepHeight());
-        compound.putBoolean("RequiresFuel", this.requiresEnergy());
-        compound.putFloat("CurrentFuel", this.getCurrentEnergy());
-        compound.putFloat("FuelCapacity", this.getEnergyCapacity());
-        compound.putBoolean("KeyNeeded", this.isKeyNeeded());
-        CommonUtils.writeItemStackToTag(compound, "KeyStack", this.getKeyStack());
+
+        compound.putBoolean("hasEngine", this.hasEngine());
+        CommonUtils.writeItemStackToTag(compound, "engineStack", this.getEngineStack());
+
+        compound.putFloat("stepHeight", this.getStepHeight());
+
+        compound.putFloat("currentFuel", this.getCurrentEnergy());
+        compound.putFloat("fuelCapacity", this.getEnergyCapacity());
+
+        compound.putBoolean("keyNeeded", this.isKeyNeeded());
+        CommonUtils.writeItemStackToTag(compound, "keyStack", this.getKeyStack());
     }
 
     @Nullable
@@ -571,10 +565,15 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
         return null;
     }
 
-    //TODO test
     public boolean isMoving()
     {
-        return this.motion.length() != 0;
+        if(this.xOld != this.xo || this.yOld != this.yo || this.zOld != this.zo)
+        {
+            return true;
+        }
+
+     //   return this.motion.length() != 0;
+        return false;
     }
 
     //TODO remove these
@@ -941,7 +940,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
             ItemStack key = this.getKeyStack().copy();
             if(!key.isEmpty())
             {
-                key.getOrCreateTag().remove("VehicleId");
+                key.getOrCreateTag().remove("vehicleId");
                 InventoryUtil.spawnItemStack(this.level, this.getX(), this.getY(), this.getZ(), key);
             }
 
@@ -1032,6 +1031,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
     }
 
     @Override
+    @NotNull
     public Component getDisplayName()
     {
         return this.getName();
@@ -1045,7 +1045,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int windowId, Inventory inventory, Player player)
+    public AbstractContainerMenu createMenu(int windowId, @NotNull Inventory inventory, @NotNull Player player)
     {
         return new EditVehicleContainer(windowId, this.getVehicleInventory(), this, player, inventory);
     }

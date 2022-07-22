@@ -66,7 +66,7 @@ public class FertilizerTrailerRenderer extends AbstractTrailerRenderer<Fertilize
                             matrixStack.mulPose(Vector3f.ZP.rotationDegrees(47F * index));
                             matrixStack.mulPose(Vector3f.XP.rotationDegrees(2F * layerIndex));
                             matrixStack.translate(layer * 0.001, layer * 0.001, layer * 0.001); // Fixes Z fighting
-                            Minecraft.getInstance().getItemRenderer().render(stack, ItemTransforms.TransformType.NONE, false, matrixStack, renderTypeBuffer, light, OverlayTexture.NO_OVERLAY, RenderUtil.getModel(stack));
+                            MINECRAFT.getItemRenderer().render(stack, ItemTransforms.TransformType.NONE, false, matrixStack, renderTypeBuffer, light, OverlayTexture.NO_OVERLAY, RenderUtil.getModel(stack));
                         }
                         matrixStack.popPose();
                         index++;

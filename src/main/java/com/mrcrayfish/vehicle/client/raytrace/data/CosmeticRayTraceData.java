@@ -101,7 +101,13 @@ public class CosmeticRayTraceData extends RayTraceData
             complexTransforms.addAll(model.getTransforms());
             List<Transform> modelTransforms = new ArrayList<>(complexTransforms);
             this.matrixPairs.add(this.createEntry(model.getModel(), modelTransforms));
-            model.getChildren().forEach(child -> this.createAndAddMatrixPair(child, complexTransforms));
+
+            ComplexModel[] children = model.getChildren();
+            for(int idx = 0; idx < children.length; idx++)
+            {
+                ComplexModel child = children[idx];
+                this.createAndAddMatrixPair(child, complexTransforms);
+            }
             complexTransforms.removeAll(model.getTransforms());
         }
 

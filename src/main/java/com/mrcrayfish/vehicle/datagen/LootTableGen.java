@@ -20,6 +20,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.providers.nbt.ContextNbtProvider;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -41,12 +42,11 @@ public class LootTableGen extends LootTableProvider
     }
 
     @Override
-    protected void validate(Map<ResourceLocation, LootTable> map, ValidationContext ctx)
-    {
-
-    }
+    protected void validate(@NotNull Map<ResourceLocation, LootTable> map, @NotNull ValidationContext ctx)
+    {}
 
     @Override
+    @NotNull
     protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables()
     {
         return this.tables;
@@ -92,11 +92,11 @@ public class LootTableGen extends LootTableProvider
                                     .setRolls(ConstantValue.exactly(1))
                                     .add(LootItem.lootTableItem(block)
                                             .apply(CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY)
-                                                    .copy("Vehicle", "BlockEntityTag.Vehicle")
-                                                    .copy("Color", "BlockEntityTag.Color")
-                                                    .copy("EngineStack", "BlockEntityTag.EngineStack")
-                                                    .copy("Creative", "BlockEntityTag.Creative")
-                                                    .copy("WheelStack", "BlockEntityTag.WheelStack")
+                                                    .copy("vehicle", "BlockEntityTag.vehicle")
+                                                    .copy("color", "BlockEntityTag.color")
+                                                    .copy("engineStack", "BlockEntityTag.engineStack")
+                                                    .copy("creative", "BlockEntityTag.creative")
+                                                    .copy("wheelStack", "BlockEntityTag.wheelStack")
                                             )
                                     )
                     ));

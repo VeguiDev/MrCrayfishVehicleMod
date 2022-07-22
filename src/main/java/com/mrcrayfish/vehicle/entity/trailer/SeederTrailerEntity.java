@@ -225,7 +225,7 @@ public class SeederTrailerEntity extends TrailerEntity implements IStorage
         }, (entity, rightClick) -> {
             if(rightClick) {
                 PacketHandler.getPlayChannel().sendToServer(new MessageAttachTrailer(entity.getId()));
-                Minecraft.getInstance().player.swing(InteractionHand.MAIN_HAND);
+                MINECRAFT.player.swing(InteractionHand.MAIN_HAND);
             }
         }, entity -> true);
     }

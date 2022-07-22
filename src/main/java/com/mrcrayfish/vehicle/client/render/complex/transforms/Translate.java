@@ -12,59 +12,62 @@ import com.mrcrayfish.vehicle.client.render.complex.value.IValue;
 import com.mrcrayfish.vehicle.client.render.complex.value.Static;
 import com.mrcrayfish.vehicle.entity.VehicleEntity;
 
-import java.lang.reflect.Type;
-
 /**
  * Author: MrCrayfish
  */
-public class Translate implements Transform
+public record Translate(IValue x, IValue y, IValue z) implements Transform
 {
-    private final IValue x, y, z;
+    private static final float EPSILON = 0.0625F;
 
-    public Translate(IValue x, IValue y, IValue z)
+    public static JsonDeserializer<Translate> deserializer()
     {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        return (json, type, ctx) -> fromJson(json.getAsJsonObject(), ctx);
+    }
+
+    public static Translate fromJson(JsonObject object, JsonDeserializationContext ctx)
+    {
+        IValue x = get(object, "x", ctx);
+        IValue y = get(object, "y", ctx);
+        IValue z = get(object, "z", ctx);
+        return new Translate(x, y, z);
+    }
+
+    private static IValue get(JsonObject object, String key, JsonDeserializationContext ctx)
+    {
+        if(!object.has(key))
+        {
+            return Static.ZERO;
+        }
+
+        JsonElement e = object.get(key);
+        if(e.isJsonObject())
+        {
+            return ctx.deserialize(e, Dynamic.class);
+        }
+        else if(e.isJsonPrimitive())
+        {
+            return ctx.deserialize(e, Static.class);
+        }
+        throw new JsonParseException("Translate values can only be a number or object");
     }
 
     @Override
     public void apply(VehicleEntity entity, PoseStack stack, float partialTicks)
     {
-        stack.translate(this.x.getValue(entity, partialTicks) * 0.0625, this.y.getValue(entity, partialTicks) * 0.0625, this.z.getValue(entity, partialTicks) * 0.0625);
+        stack.translate(
+                this.x.getValue(entity, partialTicks) * EPSILON,
+                this.y.getValue(entity, partialTicks) * EPSILON,
+                this.z.getValue(entity, partialTicks) * EPSILON
+        );
     }
 
     @Override
     public MatrixTransform create(VehicleEntity entity, float partialTicks)
     {
-        return MatrixTransform.translate((float) this.x.getValue(entity, partialTicks) * 0.0625F, (float) this.y.getValue(entity, partialTicks) * 0.0625F, (float) this.z.getValue(entity, partialTicks) * 0.0625F);
-    }
-
-    public static class Deserializer implements JsonDeserializer<Translate>
-    {
-        @Override
-        public Translate deserialize(JsonElement json, Type type, JsonDeserializationContext context) throws JsonParseException
-        {
-            JsonObject object = json.getAsJsonObject();
-            IValue x = this.get(object, "x", context);
-            IValue y = this.get(object, "y", context);
-            IValue z = this.get(object, "z", context);
-            return new Translate(x, y, z);
-        }
-
-        private IValue get(JsonObject object, String key, JsonDeserializationContext context)
-        {
-            if(!object.has(key)) return Static.ZERO;
-            JsonElement e = object.get(key);
-            if(e.isJsonObject())
-            {
-                return context.deserialize(e, Dynamic.class);
-            }
-            else if(e.isJsonPrimitive())
-            {
-                return context.deserialize(e, Static.class);
-            }
-            throw new JsonParseException("Rotate values can only be a number or object");
-        }
+        return MatrixTransform.translate(
+                (float) this.x.getValue(entity, partialTicks) * EPSILON,
+                (float) this.y.getValue(entity, partialTicks) * EPSILON,
+                (float) this.z.getValue(entity, partialTicks) * EPSILON
+        );
     }
 }

@@ -256,7 +256,7 @@ public class MopedEntity extends MotorcycleEntity implements IStorage, IAttachab
         }, (entity, rightClick) -> {
             if(rightClick) {
                 PacketHandler.getPlayChannel().sendToServer(new MessageOpenStorage(entity.getId(), "Chest"));
-                Minecraft.getInstance().player.swing(InteractionHand.MAIN_HAND);
+                MINECRAFT.player.swing(InteractionHand.MAIN_HAND);
             }
         }, MopedEntity::hasChest);
 
@@ -265,7 +265,7 @@ public class MopedEntity extends MotorcycleEntity implements IStorage, IAttachab
         }, (entity, rightClick) -> {
             if(rightClick) {
                 PacketHandler.getPlayChannel().sendToServer(new MessageAttachChest(entity.getId(), "Chest"));
-                Minecraft.getInstance().player.swing(InteractionHand.MAIN_HAND);
+                MINECRAFT.player.swing(InteractionHand.MAIN_HAND);
             }
         }, entity -> !entity.hasChest());
     }

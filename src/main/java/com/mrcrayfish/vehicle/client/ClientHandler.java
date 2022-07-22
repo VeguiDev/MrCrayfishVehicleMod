@@ -39,6 +39,7 @@ import com.mrcrayfish.vehicle.init.ModEntities;
 import com.mrcrayfish.vehicle.init.ModFluids;
 import com.mrcrayfish.vehicle.init.ModParticleTypes;
 import com.mrcrayfish.vehicle.init.ModTileEntities;
+import com.mrcrayfish.vehicle.item.IDyeable;
 import com.mrcrayfish.vehicle.item.PartItem;
 import com.mrcrayfish.vehicle.item.SprayCanItem;
 import com.mrcrayfish.vehicle.util.FluidUtils;
@@ -192,11 +193,12 @@ public class ClientHandler
     {
         ItemColor color = (stack, index) ->
         {
-            if(index == 0 && stack.hasTag() && stack.getTag().contains("Color", Tag.TAG_INT))
+            if(index != 0 || stack.getTag() == null || !stack.getTag().contains(IDyeable.NBT_KEY))
             {
-                return stack.getTag().getInt("Color");
+                return 0xFFFFFF;
             }
-            return 0xFFFFFF;
+
+            return stack.getTag().getInt(IDyeable.NBT_KEY);
         };
 
         ForgeRegistries.ITEMS.forEach(item ->

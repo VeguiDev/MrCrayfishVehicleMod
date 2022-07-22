@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.mrcrayfish.vehicle.init.ModBlocks;
 import com.mrcrayfish.vehicle.init.ModItems;
 import com.mrcrayfish.vehicle.init.ModTileEntities;
+import com.mrcrayfish.vehicle.item.IDyeable;
 import com.mrcrayfish.vehicle.tileentity.VehicleCrateTileEntity;
 import com.mrcrayfish.vehicle.util.RenderUtil;
 import net.minecraft.ChatFormatting;
@@ -210,8 +211,6 @@ public class VehicleCrateBlock extends RotatedEntityObjectBlock
     @Override
     public void appendHoverText(@NotNull ItemStack stack, @Nullable BlockGetter level, @NotNull List<Component> tooltips, @NotNull TooltipFlag flag)
     {
-        super.appendHoverText(stack, level, tooltips, flag);
-
         Component vehicleName = EntityType.PIG.getDescription();
         CompoundTag tagCompound = stack.getTag();
         if(tagCompound != null)
@@ -242,7 +241,7 @@ public class VehicleCrateBlock extends RotatedEntityObjectBlock
     {
         CompoundTag blockEntityTag = new CompoundTag();
         blockEntityTag.putString("vehicle", entityId.toString());
-        blockEntityTag.putInt("color", color);
+        blockEntityTag.putInt(IDyeable.NBT_KEY, color);
         blockEntityTag.put("engineStack", engine.save(new CompoundTag()));
         blockEntityTag.put("wheelStack", wheel.save(new CompoundTag()));
         CompoundTag itemTag = new CompoundTag();

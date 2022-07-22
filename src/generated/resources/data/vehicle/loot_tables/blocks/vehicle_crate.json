@@ -13,28 +13,28 @@
               "source": "block_entity",
               "ops": [
                 {
-                  "source": "Vehicle",
-                  "target": "BlockEntityTag.Vehicle",
+                  "source": "vehicle",
+                  "target": "BlockEntityTag.vehicle",
                   "op": "replace"
                 },
                 {
-                  "source": "Color",
-                  "target": "BlockEntityTag.Color",
+                  "source": "color",
+                  "target": "BlockEntityTag.color",
                   "op": "replace"
                 },
                 {
-                  "source": "EngineStack",
-                  "target": "BlockEntityTag.EngineStack",
+                  "source": "engineStack",
+                  "target": "BlockEntityTag.engineStack",
                   "op": "replace"
                 },
                 {
-                  "source": "Creative",
-                  "target": "BlockEntityTag.Creative",
+                  "source": "creative",
+                  "target": "BlockEntityTag.creative",
                   "op": "replace"
                 },
                 {
-                  "source": "WheelStack",
-                  "target": "BlockEntityTag.WheelStack",
+                  "source": "wheelStack",
+                  "target": "BlockEntityTag.wheelStack",
                   "op": "replace"
                 }
               ]

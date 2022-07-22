@@ -12,6 +12,7 @@ import com.mrcrayfish.vehicle.init.ModItems;
 import com.mrcrayfish.vehicle.init.ModSounds;
 import com.mrcrayfish.vehicle.init.ModTileEntities;
 import com.mrcrayfish.vehicle.item.EngineItem;
+import com.mrcrayfish.vehicle.item.IDyeable;
 import com.mrcrayfish.vehicle.util.CommonUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -150,41 +151,34 @@ public class VehicleCrateTileEntity extends TileEntitySynced
     {
         if(this.opened)
         {
-            if(this.level != null && this.level.isClientSide())
+            if(this.entityId != null && this.entity == null)
             {
-                if(this.entityId != null && this.entity == null)
+                EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(this.entityId);
+                if(entityType != null)
                 {
-                    EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(this.entityId);
-                    if(entityType != null)
+                    this.entity = entityType.create(this.level);
+                    if(this.entity != null)
                     {
-                        this.entity = entityType.create(this.level);
-                        if(this.entity != null)
+                        VehicleHelper.playSound(SoundEvents.ITEM_BREAK, this.worldPosition, 1.0F, 0.5F);
+                        List<SynchedEntityData.DataItem<?>> entryList = this.entity.getEntityData().getAll();
+                        if(entryList != null)
                         {
-                            VehicleHelper.playSound(SoundEvents.ITEM_BREAK, this.worldPosition, 1.0F, 0.5F);
-                            List<SynchedEntityData.DataItem<?>> entryList = this.entity.getEntityData().getAll();
-                            if(entryList != null)
+                            entryList.forEach(dataEntry -> this.entity.onSyncedDataUpdated(dataEntry.getAccessor()));
+                        }
+                        if(this.entity instanceof VehicleEntity vehicleEntity)
+                        {
+                            vehicleEntity.setColor(this.color);
+                            if(!this.wheelStack.isEmpty())
                             {
-                                entryList.forEach(dataEntry -> this.entity.onSyncedDataUpdated(dataEntry.getAccessor()));
-                            }
-                            if(this.entity instanceof VehicleEntity vehicleEntity)
-                            {
-                                vehicleEntity.setColor(this.color);
-                                if(!this.wheelStack.isEmpty())
-                                {
-                                    vehicleEntity.setWheelStack(this.wheelStack);
-                                }
-                            }
-                            if(this.entity instanceof PoweredVehicleEntity entityPoweredVehicle)
-                            {
-                                if(this.engineStack != null)
-                                {
-                                    entityPoweredVehicle.setEngineStack(this.engineStack);
-                                }
+                                vehicleEntity.setWheelStack(this.wheelStack);
                             }
                         }
-                        else
+                        if(this.entity instanceof PoweredVehicleEntity entityPoweredVehicle)
                         {
-                            this.entityId = null;
+                            if(this.engineStack != null)
+                            {
+                                entityPoweredVehicle.setEngineStack(this.engineStack);
+                            }
                         }
                     }
                     else
@@ -192,16 +186,20 @@ public class VehicleCrateTileEntity extends TileEntitySynced
                         this.entityId = null;
                     }
                 }
-                if(this.timer == 90 || this.timer == 110 || this.timer == 130 || this.timer == 150)
+                else
                 {
-                    float pitch = (float) (0.9F + 0.2F * this.level.random.nextDouble());
-                    VehicleHelper.playSound(ModSounds.BLOCK_VEHICLE_CRATE_PANEL_LAND.get(), this.worldPosition, 1.0F, pitch);
+                    this.entityId = null;
                 }
-                if(this.timer == 150)
-                {
-                    VehicleHelper.playSound(SoundEvents.GENERIC_EXPLODE, this.worldPosition, 1.0F, 1.0F);
-                    this.level.addParticle(ParticleTypes.EXPLOSION_EMITTER, false, this.worldPosition.getX() + 0.5, this.worldPosition.getY() + 0.5, this.worldPosition.getZ() + 0.5, 0, 0, 0);
-                }
+            }
+            if(this.timer == 90 || this.timer == 110 || this.timer == 130 || this.timer == 150)
+            {
+                float pitch = (float) (0.9F + 0.2F * this.level.random.nextDouble());
+                VehicleHelper.playSound(ModSounds.BLOCK_VEHICLE_CRATE_PANEL_LAND.get(), this.worldPosition, 1.0F, pitch);
+            }
+            if(this.timer == 150)
+            {
+                VehicleHelper.playSound(SoundEvents.GENERIC_EXPLODE, this.worldPosition, 1.0F, 1.0F);
+                this.level.addParticle(ParticleTypes.EXPLOSION_EMITTER, false, this.worldPosition.getX() + 0.5, this.worldPosition.getY() + 0.5, this.worldPosition.getZ() + 0.5, 0, 0, 0);
             }
         }
     }
@@ -216,7 +214,7 @@ public class VehicleCrateTileEntity extends TileEntitySynced
             this.entityId = new ResourceLocation(compound.getString("vehicle"));
         }
 
-        this.color = compound.getInt("color");
+        this.color = compound.getInt(IDyeable.NBT_KEY);
 
         if(compound.contains("engineStack", Tag.TAG_COMPOUND))
         {
@@ -269,7 +267,7 @@ public class VehicleCrateTileEntity extends TileEntitySynced
             CommonUtils.writeItemStackToTag(compound, "wheelStack", this.wheelStack);
         }
 
-        compound.putInt("color", this.color);
+        compound.putInt(IDyeable.NBT_KEY, this.color);
         compound.putBoolean("opened", this.opened);
     }
 

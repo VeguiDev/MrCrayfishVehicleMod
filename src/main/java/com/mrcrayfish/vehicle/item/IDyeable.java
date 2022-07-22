@@ -12,25 +12,27 @@ import java.util.List;
  */
 public interface IDyeable
 {
+    String NBT_KEY = "color";
+
     default boolean hasColor(ItemStack stack)
     {
         CompoundTag compound = stack.getTag();
-        return compound != null && compound.contains("Color", Tag.TAG_INT);
+        return compound != null && compound.contains(NBT_KEY, Tag.TAG_INT);
     }
 
     default int getColor(ItemStack stack)
     {
         CompoundTag compound = stack.getTag();
-        return compound != null ? compound.getInt("Color") : -1;
+        return compound != null ? compound.getInt(NBT_KEY) : -1;
     }
 
     default void setColor(ItemStack stack, int color)
     {
         CompoundTag compound = stack.getOrCreateTag();
-        compound.putInt("Color", color);
+        compound.putInt(NBT_KEY, color);
     }
 
-    public static ItemStack dyeStack(ItemStack stack, List<DyeItem> dyes)
+    static ItemStack dyeStack(ItemStack stack, List<DyeItem> dyes)
     {
         ItemStack resultStack = ItemStack.EMPTY;
         int[] combinedColors = new int[3];

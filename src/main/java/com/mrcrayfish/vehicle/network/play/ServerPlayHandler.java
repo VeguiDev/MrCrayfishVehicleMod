@@ -346,7 +346,7 @@ public class ServerPlayHandler
                 {
                     if(!stack.isEmpty() && stack.getItem() == ModItems.KEY.get())
                     {
-                        UUID keyUuid = stack.getOrCreateTag().getUUID("VehicleId");
+                        UUID keyUuid = stack.getOrCreateTag().getUUID("vehicleId");
                         if(poweredVehicle.getUUID().equals(keyUuid))
                         {
                             poweredVehicle.setKeyStack(stack.copy());

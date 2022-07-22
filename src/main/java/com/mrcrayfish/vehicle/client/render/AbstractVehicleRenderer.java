@@ -17,6 +17,7 @@ import com.mrcrayfish.vehicle.entity.Wheel;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.item.IDyeable;
 import com.mrcrayfish.vehicle.util.RenderUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -43,6 +44,7 @@ import java.util.function.Function;
  */
 public abstract class AbstractVehicleRenderer<T extends VehicleEntity>
 {
+    protected static final Minecraft MINECRAFT = Minecraft.getInstance();
     protected final EntityType<T> type;
     protected final PropertyFunction<T, VehicleProperties> vehiclePropertiesProperty;
     protected final PropertyFunction<T, CosmeticTracker> cosmeticTrackerProperty;

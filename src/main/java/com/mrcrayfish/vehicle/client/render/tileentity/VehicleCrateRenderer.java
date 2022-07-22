@@ -23,6 +23,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
@@ -128,6 +129,12 @@ public class VehicleCrateRenderer implements BlockEntityRenderer<VehicleCrateTil
             renderer.render(entity.getEntity(), 0.0F, delta, matrices, buffers, light);
         }
         matrices.popPose();
+    }
+
+    @Override
+    public boolean shouldRenderOffScreen(@NotNull VehicleCrateTileEntity entity)
+    {
+        return true;
     }
 
     @Override

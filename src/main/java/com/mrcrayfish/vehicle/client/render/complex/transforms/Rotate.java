@@ -14,20 +14,41 @@ import com.mrcrayfish.vehicle.client.render.complex.value.IValue;
 import com.mrcrayfish.vehicle.client.render.complex.value.Static;
 import com.mrcrayfish.vehicle.entity.VehicleEntity;
 
-import java.lang.reflect.Type;
-
 /**
  * Author: MrCrayfish
  */
-public class Rotate implements Transform
+public record Rotate(IValue x, IValue y, IValue z) implements Transform
 {
-    private final IValue x, y, z;
-
-    public Rotate(IValue x, IValue y, IValue z)
+    public static JsonDeserializer<Rotate> deserializer()
     {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        return (json, type, ctx) -> fromJson(json.getAsJsonObject(), ctx);
+    }
+
+    public static Rotate fromJson(JsonObject object, JsonDeserializationContext ctx)
+    {
+        IValue x = get(object, "x", ctx);
+        IValue y = get(object, "y", ctx);
+        IValue z = get(object, "z", ctx);
+        return new Rotate(x, y, z);
+    }
+
+    private static IValue get(JsonObject object, String key, JsonDeserializationContext ctx)
+    {
+        if(!object.has(key))
+        {
+            return Static.ZERO;
+        }
+
+        JsonElement e = object.get(key);
+        if(e.isJsonObject())
+        {
+            return ctx.deserialize(e, Dynamic.class);
+        }
+        else if(e.isJsonPrimitive())
+        {
+            return ctx.deserialize(e, Static.class);
+        }
+        throw new JsonParseException("Rotate values can only be a number or object");
     }
 
     @Override
@@ -41,34 +62,13 @@ public class Rotate implements Transform
     @Override
     public MatrixTransform create(VehicleEntity entity, float partialTicks)
     {
-        return MatrixTransform.rotate(new Quaternion((float) this.x.getValue(entity, partialTicks), (float) this.y.getValue(entity, partialTicks), (float) this.z.getValue(entity, partialTicks), true));
-    }
-
-    public static class Deserializer implements JsonDeserializer<Rotate>
-    {
-        @Override
-        public Rotate deserialize(JsonElement json, Type type, JsonDeserializationContext context) throws JsonParseException
-        {
-            JsonObject object = json.getAsJsonObject();
-            IValue x = this.get(object, "x", context);
-            IValue y = this.get(object, "y", context);
-            IValue z = this.get(object, "z", context);
-            return new Rotate(x, y, z);
-        }
-
-        private IValue get(JsonObject object, String key, JsonDeserializationContext context)
-        {
-            if(!object.has(key)) return Static.ZERO;
-            JsonElement e = object.get(key);
-            if(e.isJsonObject())
-            {
-                return context.deserialize(e, Dynamic.class);
-            }
-            else if(e.isJsonPrimitive())
-            {
-                return context.deserialize(e, Static.class);
-            }
-            throw new JsonParseException("Rotate values can only be a number or object");
-        }
+        return MatrixTransform.rotate(
+                new Quaternion(
+                        (float) this.x.getValue(entity, partialTicks),
+                        (float) this.y.getValue(entity, partialTicks),
+                        (float) this.z.getValue(entity, partialTicks),
+                        true
+                )
+        );
     }
 }

@@ -10,6 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mrcrayfish.vehicle.VehicleMod;
 import com.mrcrayfish.vehicle.client.model.IComplexModel;
 import com.mrcrayfish.vehicle.client.render.complex.transforms.Rotate;
 import com.mrcrayfish.vehicle.client.render.complex.transforms.Transform;
@@ -32,7 +33,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,92 +48,50 @@ import java.util.List;
 public class ComplexModel
 {
     private static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(ComplexModel.class, new ComplexModel.Deserializer())
-            .registerTypeAdapter(Translate.class, new Translate.Deserializer())
-            .registerTypeAdapter(Rotate.class, new Rotate.Deserializer())
-            .registerTypeAdapter(Static.class, new Static.Deserializer())
-            .registerTypeAdapter(Dynamic.class, new Dynamic.Deserializer())
+            .registerTypeAdapter(ComplexModel.class, ComplexModel.deserializer())
+            .registerTypeAdapter(Translate.class, Translate.deserializer())
+            .registerTypeAdapter(Rotate.class, Rotate.deserializer())
+            .registerTypeAdapter(Static.class, Static.deserializer())
+            .registerTypeAdapter(Dynamic.class, Dynamic.deserializer())
             .create();
 
-    private final ResourceLocation modelLocation;
-    private final List<Transform> transforms;
-    private final List<ComplexModel> children;
-    private BakedModel cachedModel;
-
-    public ComplexModel(ResourceLocation modelLocation, List<Transform> transforms, List<ComplexModel> children)
+    public static JsonDeserializer<ComplexModel> deserializer()
     {
-        this.modelLocation = modelLocation;
-        this.transforms = ImmutableList.copyOf(transforms);
-        this.children = ImmutableList.copyOf(children);
+        return (json, type, ctx) -> fromJson(json.getAsJsonObject(), ctx);
     }
 
-    public void render(VehicleEntity entity, PoseStack matrixStack, MultiBufferSource renderTypeBuffer, float partialTicks, int color, int light)
+    public static ComplexModel fromJson(JsonObject object, JsonDeserializationContext ctx)
     {
-        this.transforms.forEach(transform -> transform.apply(entity, matrixStack, partialTicks));
-        RenderUtil.renderColoredModel(this.getModel(), ItemTransforms.TransformType.NONE, false, matrixStack, renderTypeBuffer, color, light, OverlayTexture.NO_OVERLAY);
-        this.children.forEach(model -> {
-            matrixStack.pushPose();
-            model.render(entity, matrixStack, renderTypeBuffer, partialTicks, color, light);
-            matrixStack.popPose();
-        });
-    }
-
-    public final BakedModel getModel()
-    {
-        if(this.cachedModel == null)
+        ResourceLocation location = new ResourceLocation(GsonHelper.getAsString(object, "model"));
+        List<Transform> transforms = Collections.emptyList();
+        if(object.has("transforms") && object.get("transforms").isJsonArray())
         {
-            this.cachedModel = Minecraft.getInstance().getModelManager().getModel(this.modelLocation);
-        }
-        return this.cachedModel;
-    }
-
-    public List<Transform> getTransforms()
-    {
-        return this.transforms;
-    }
-
-    public List<ComplexModel> getChildren()
-    {
-        return this.children;
-    }
-
-    public static class Deserializer implements JsonDeserializer<ComplexModel>
-    {
-        @Override
-        public ComplexModel deserialize(JsonElement root, Type type, JsonDeserializationContext context) throws JsonParseException
-        {
-            JsonObject object = root.getAsJsonObject();
-            ResourceLocation location = new ResourceLocation(GsonHelper.getAsString(object, "model"));
-            List<Transform> transforms = Collections.emptyList();
-            if(object.has("transforms") && object.get("transforms").isJsonArray())
+            transforms = new ArrayList<>();
+            JsonArray transformArray = GsonHelper.getAsJsonArray(object, "transforms");
+            for(JsonElement e : transformArray)
             {
-                transforms = new ArrayList<>();
-                JsonArray transformArray = GsonHelper.getAsJsonArray(object, "transforms");
-                for(JsonElement e : transformArray)
-                {
-                    if(!e.isJsonObject()) throw new JsonParseException("Transforms array can only contain objects");
-                    JsonObject transformObj = e.getAsJsonObject();
-                    String transformType = GsonHelper.getAsString(transformObj, "type");
-                    switch (transformType) {
-                        case "translate" -> transforms.add(context.deserialize(transformObj, Translate.class));
-                        case "rotate" -> transforms.add(context.deserialize(transformObj, Rotate.class));
-                    }
+                if(!e.isJsonObject()) throw new JsonParseException("Transforms array can only contain objects");
+                JsonObject transformObj = e.getAsJsonObject();
+                String transformType = GsonHelper.getAsString(transformObj, "type");
+                switch (transformType) {
+                    case "translate" -> transforms.add(ctx.deserialize(transformObj, Translate.class));
+                    case "rotate" -> transforms.add(ctx.deserialize(transformObj, Rotate.class));
                 }
             }
-            List<ComplexModel> children = Collections.emptyList();
-            if(object.has("children") && object.get("children").isJsonArray())
-            {
-                children = new ArrayList<>();
-                JsonArray childrenArray = GsonHelper.getAsJsonArray(object, "children");
-                for(JsonElement e : childrenArray)
-                {
-                    if(!e.isJsonObject()) throw new JsonParseException("Children array can only contain objects");
-                    JsonObject childrenObj = e.getAsJsonObject();
-                    children.add(context.deserialize(childrenObj, ComplexModel.class));
-                }
-            }
-            return new ComplexModel(location, transforms, children);
         }
+        List<ComplexModel> children = Collections.emptyList();
+        if(object.has("children") && object.get("children").isJsonArray())
+        {
+            children = new ArrayList<>();
+            JsonArray childrenArray = GsonHelper.getAsJsonArray(object, "children");
+            for(JsonElement e : childrenArray)
+            {
+                if(!e.isJsonObject()) throw new JsonParseException("Children array can only contain objects");
+                JsonObject childrenObj = e.getAsJsonObject();
+                children.add(ctx.deserialize(childrenObj, ComplexModel.class));
+            }
+        }
+        return new ComplexModel(location, transforms, children.toArray(ComplexModel[]::new));
     }
 
     @Nullable
@@ -152,10 +110,58 @@ public class ComplexModel
                 }
             }
         }
-        catch(JsonParseException | ResourceLocationException | IOException e)
+        catch(JsonParseException | ResourceLocationException | IOException ex)
         {
-            e.printStackTrace();
+            VehicleMod.LOGGER.error("Unable to load complex model", ex);
         }
         return null;
+    }
+
+    private final ResourceLocation modelLocation;
+    private final List<Transform> transforms;
+    private final ComplexModel[] children;
+    private BakedModel cachedModel;
+
+    public ComplexModel(ResourceLocation modelLocation, List<Transform> transforms, ComplexModel[] children)
+    {
+        this.modelLocation = modelLocation;
+        this.transforms = ImmutableList.copyOf(transforms);
+        this.children = children;
+    }
+
+    public void render(VehicleEntity entity, PoseStack matrices, MultiBufferSource buffers, float delta, int color, int light)
+    {
+        this.transforms.forEach(transform -> transform.apply(entity, matrices, delta));
+        RenderUtil.renderColoredModel(this.getModel(), ItemTransforms.TransformType.NONE, false, matrices, buffers, color, light, OverlayTexture.NO_OVERLAY);
+
+        for(int idx = 0; idx < this.children.length; idx++)
+        {
+            ComplexModel child = this.children[idx];
+
+            matrices.pushPose();
+            {
+                child.render(entity, matrices, buffers, delta, color, light);
+            }
+            matrices.popPose();
+        }
+    }
+
+    public final BakedModel getModel()
+    {
+        if(this.cachedModel == null)
+        {
+            this.cachedModel = Minecraft.getInstance().getModelManager().getModel(this.modelLocation);
+        }
+        return this.cachedModel;
+    }
+
+    public List<Transform> getTransforms()
+    {
+        return this.transforms;
+    }
+
+    public ComplexModel[] getChildren()
+    {
+        return this.children;
     }
 }

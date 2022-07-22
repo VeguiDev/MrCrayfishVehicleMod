@@ -14,9 +14,11 @@ import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.init.ModDataKeys;
 import com.mrcrayfish.vehicle.init.ModItems;
 import com.mrcrayfish.vehicle.init.ModSounds;
+import com.mrcrayfish.vehicle.item.IDyeable;
 import com.mrcrayfish.vehicle.item.SprayCanItem;
 import com.mrcrayfish.vehicle.network.datasync.VehicleDataValue;
 import com.mrcrayfish.vehicle.util.CommonUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -67,6 +69,8 @@ import java.util.UUID;
  */
 public abstract class VehicleEntity extends Entity implements IEntityAdditionalSpawnData
 {
+    @OnlyIn(Dist.CLIENT)
+    protected static final Minecraft MINECRAFT = Minecraft.getInstance();
     public static final int[] DYE_TO_COLOR = new int[] {16383998, 16351261, 13061821, 3847130, 16701501, 8439583, 15961002, 4673362, 10329495, 1481884, 8991416, 3949738, 8606770, 6192150, 11546150, 1908001};
 
     protected static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(VehicleEntity.class, EntityDataSerializers.INT);
@@ -201,20 +205,20 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
                 CompoundTag compound = heldItem.getTag();
                 if(compound != null)
                 {
-                    if(!compound.contains("RemainingSprays", IntTag.TAG_INT))
+                    if(!compound.contains("remainingSprays", IntTag.TAG_INT))
                     {
-                        compound.putInt("RemainingSprays", ModItems.SPRAY_CAN.get().getCapacity(heldItem));
+                        compound.putInt("remainingSprays", ModItems.SPRAY_CAN.get().getCapacity(heldItem));
                     }
 
-                    int remainingSprays = compound.getInt("RemainingSprays");
-                    if(compound.contains("Color", IntTag.TAG_INT) && remainingSprays > 0)
+                    int remainingSprays = compound.getInt("remainingSprays");
+                    if(compound.contains(IDyeable.NBT_KEY, IntTag.TAG_INT) && remainingSprays > 0)
                     {
-                        int color = compound.getInt("Color");
+                        int color = compound.getInt(IDyeable.NBT_KEY);
                         if(this.getColor() != color)
                         {
-                            this.setColor(compound.getInt("Color"));
+                            this.setColor(compound.getInt(IDyeable.NBT_KEY));
                             player.level.playSound(null, this.getX(), this.getY(), this.getZ(), ModSounds.ITEM_SPRAY_CAN_SPRAY.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-                            compound.putInt("RemainingSprays", remainingSprays - 1);
+                            compound.putInt("remainingSprays", remainingSprays - 1);
                         }
                     }
                 }
@@ -280,53 +284,53 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     @Override
     protected void readAdditionalSaveData(CompoundTag compound)
     {
-        if(compound.contains("Color", IntArrayTag.TAG_INT_ARRAY))
+        if(compound.contains(IDyeable.NBT_KEY, IntArrayTag.TAG_INT_ARRAY))
         {
-            int[] c = compound.getIntArray("Color");
+            int[] c = compound.getIntArray(IDyeable.NBT_KEY);
             if(c.length == 3)
             {
                 int color = ((c[0] & 0xFF) << 16) | ((c[1] & 0xFF) << 8) | ((c[2] & 0xFF));
                 this.setColor(color);
             }
         }
-        if(compound.contains("Health", FloatTag.TAG_FLOAT))
+        if(compound.contains("health", FloatTag.TAG_FLOAT))
         {
-            this.setHealth(compound.getFloat("Health"));
+            this.setHealth(compound.getFloat("health"));
         }
-        if(compound.hasUUID("Trailer"))
+        if(compound.hasUUID("trailer"))
         {
-            this.trailerId = compound.getUUID("Trailer");
+            this.trailerId = compound.getUUID("trailer");
         }
-        if(compound.contains("SeatTracker", CompoundTag.TAG_COMPOUND))
+        if(compound.contains("seatTracker", CompoundTag.TAG_COMPOUND))
         {
-            this.seatTracker.read(compound.getCompound("SeatTracker"));
+            this.seatTracker.read(compound.getCompound("seatTracker"));
         }
-        if(compound.contains("CosmeticTracker", CompoundTag.TAG_COMPOUND))
+        if(compound.contains("cosmeticTracker", CompoundTag.TAG_COMPOUND))
         {
-            this.cosmeticTracker.read(compound.getCompound("CosmeticTracker"));
+            this.cosmeticTracker.read(compound.getCompound("cosmeticTracker"));
         }
-        if(compound.contains("WheelStack", CompoundTag.TAG_COMPOUND))
+        if(compound.contains("wheelStack", CompoundTag.TAG_COMPOUND))
         {
-            this.setWheelStack(ItemStack.of(compound.getCompound("WheelStack")));
+            this.setWheelStack(ItemStack.of(compound.getCompound("wheelStack")));
         }
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag compound)
     {
-        compound.putIntArray("Color", this.getColorRGB());
-        compound.putFloat("MaxHealth", this.getMaxHealth());
-        compound.putFloat("Health", this.getHealth());
+        compound.putIntArray(IDyeable.NBT_KEY, this.getColorRGB());
+        compound.putFloat("maxHealth", this.getMaxHealth());
+        compound.putFloat("health", this.getHealth());
 
         //TODO make it save the entity
         if(this.trailerId != null)
         {
-            compound.putUUID("Trailer", this.trailerId);
+            compound.putUUID("trailer", this.trailerId);
         }
 
-        compound.put("SeatTracker", this.seatTracker.write());
-        compound.put("CosmeticTracker", this.cosmeticTracker.write());
-        CommonUtils.writeItemStackToTag(compound, "WheelStack", this.getWheelStack());
+        compound.put("seatTracker", this.seatTracker.write());
+        compound.put("cosmeticTracker", this.cosmeticTracker.write());
+        CommonUtils.writeItemStackToTag(compound, "wheelStack", this.getWheelStack());
     }
 
     @Override

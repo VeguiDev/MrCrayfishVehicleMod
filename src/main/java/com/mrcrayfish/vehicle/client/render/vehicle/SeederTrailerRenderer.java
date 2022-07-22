@@ -70,7 +70,7 @@ public class SeederTrailerRenderer extends AbstractTrailerRenderer<SeederTrailer
                                 matrixStack.mulPose(Axis.POSITIVE_Z.rotationDegrees(47F * index));
                                 matrixStack.mulPose(Axis.POSITIVE_X.rotationDegrees(2F * layerIndex));
                                 matrixStack.translate(layer * 0.001, layer * 0.001, layer * 0.001); // Fixes Z fighting
-                                Minecraft.getInstance().getItemRenderer().renderStatic(stack,
+                                MINECRAFT.getItemRenderer().renderStatic(stack,
                                         ItemTransforms.TransformType.NONE,
                                         light,
                                         OverlayTexture.NO_OVERLAY,
