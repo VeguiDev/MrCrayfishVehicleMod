@@ -567,13 +567,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
 
     public boolean isMoving()
     {
-        if(this.xOld != this.xo || this.yOld != this.yo || this.zOld != this.zo)
-        {
-            return true;
-        }
-
-     //   return this.motion.length() != 0;
-        return false;
+        return this.motion.length() != 0;
     }
 
     //TODO remove these
