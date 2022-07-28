@@ -41,7 +41,7 @@ public class BoxRayTraceData extends RayTraceData
         List<Triangle> transformedTriangles = new ArrayList<>();
         for(Triangle triangle : triangleList.getTriangles())
         {
-            transformedTriangles.add(new Triangle(EntityRayTracer.getTransformedTriangle(triangle.getVertices(), this.matrix)));
+            transformedTriangles.add(new Triangle(EntityRayTracer.getTransformedTriangle(triangle.vertices(), this.matrix)));
         }
         return new TriangleList(transformedTriangles);
     }

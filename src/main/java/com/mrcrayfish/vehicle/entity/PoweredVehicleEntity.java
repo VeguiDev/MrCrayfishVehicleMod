@@ -469,7 +469,7 @@ public abstract class PoweredVehicleEntity extends VehicleEntity implements Cont
         this.prevRenderWheelAngle = this.renderWheelAngle;
 
         Entity entity = this.getControllingPassenger();
-        if(entity instanceof LivingEntity && entity.equals(MINECRAFT.player))
+        if(entity instanceof LivingEntity && entity.equals(Minecraft.getInstance().player))
         {
             float throttle = VehicleHelper.getThrottle((LivingEntity) entity);
             if(throttle != this.getThrottle())

@@ -543,7 +543,7 @@ public class EntityRayTracer
             {
                 for(Triangle triangle : triangleList.getTriangles())
                 {
-                    float[] vertices = triangle.getVertices();
+                    float[] vertices = triangle.vertices();
                     for(int i = 0; i < vertices.length; i += 3)
                     {
                         min = Math.min(min, vertices[i]);
@@ -699,7 +699,7 @@ public class EntityRayTracer
 
                     for(Triangle triangle : triangleList.getTriangles(data, entity))
                     {
-                        InterceptResult result = InterceptResult.calculate(entityPos, eyePos, direction, triangle.getVertices(), data);
+                        InterceptResult result = InterceptResult.calculate(entityPos, eyePos, direction, triangle.vertices(), data);
                         if(result != null && result.getDistance() < closestDistance)
                         {
                             closestResult = result;

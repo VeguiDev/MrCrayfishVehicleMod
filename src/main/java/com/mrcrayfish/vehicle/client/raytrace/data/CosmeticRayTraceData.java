@@ -138,7 +138,7 @@ public class CosmeticRayTraceData extends RayTraceData
                 Matrix4f matrix = pair.getRight().apply(data, entity);
                 for(Triangle triangle : pair.getLeft())
                 {
-                    triangles.add(new Triangle(EntityRayTracer.getTransformedTriangle(triangle.getVertices(), matrix)));
+                    triangles.add(new Triangle(EntityRayTracer.getTransformedTriangle(triangle.vertices(), matrix)));
                 }
             });
             return triangles;

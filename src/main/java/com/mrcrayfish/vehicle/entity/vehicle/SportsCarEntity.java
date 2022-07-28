@@ -55,12 +55,13 @@ public class SportsCarEntity extends LandVehicleEntity implements IStorage
     @OnlyIn(Dist.CLIENT)
     public static void registerInteractionBoxes()
     {
+        Minecraft minecraft = Minecraft.getInstance();
         EntityRayTracer.instance().registerInteractionBox(ModEntities.SPORTS_CAR.get(), () -> {
             return createScaledBoundingBox(2.0, 3.5, 5.0, 8.0, 7.5, 3.0, 0.0625);
         }, (entity, rightClick) -> {
             if(rightClick) {
                 PacketHandler.getPlayChannel().sendToServer(new MessageOpenStorage(entity.getId(), GLOVE_BOX_STORAGE_KEY));
-                MINECRAFT.player.swing(InteractionHand.MAIN_HAND);
+                minecraft.player.swing(InteractionHand.MAIN_HAND);
             }
         }, entity -> true);
 
@@ -69,7 +70,7 @@ public class SportsCarEntity extends LandVehicleEntity implements IStorage
         }, (entity, rightClick) -> {
             if(rightClick) {
                 PacketHandler.getPlayChannel().sendToServer(new MessageOpenStorage(entity.getId(), TRUNK_STORAGE_KEY));
-                MINECRAFT.player.swing(InteractionHand.MAIN_HAND);
+                minecraft.player.swing(InteractionHand.MAIN_HAND);
             }
         }, entity -> true);
     }

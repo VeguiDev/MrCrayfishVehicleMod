@@ -9,7 +9,6 @@ import com.mrcrayfish.vehicle.client.raytrace.TransformHelper;
 import com.mrcrayfish.vehicle.client.render.AbstractTrailerRenderer;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.entity.trailer.FluidTrailerEntity;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;

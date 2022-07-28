@@ -124,7 +124,7 @@ public class FluidTrailerEntity extends TrailerEntity implements IEntityAddition
         }, (entity, rightClick) -> {
             if(rightClick) {
                 PacketHandler.getPlayChannel().sendToServer(new MessageAttachTrailer(entity.getId()));
-                MINECRAFT.player.swing(InteractionHand.MAIN_HAND);
+                Minecraft.getInstance().player.swing(InteractionHand.MAIN_HAND);
             }
         }, entity -> true);
     }

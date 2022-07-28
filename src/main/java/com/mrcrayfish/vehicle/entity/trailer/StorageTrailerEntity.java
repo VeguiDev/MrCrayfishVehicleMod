@@ -101,12 +101,13 @@ public class StorageTrailerEntity extends TrailerEntity implements IStorage
     @OnlyIn(Dist.CLIENT)
     public static void registerInteractionBoxes()
     {
+        Minecraft minecraft = Minecraft.getInstance();
         EntityRayTracer.instance().registerInteractionBox(ModEntities.STORAGE_TRAILER.get(), () -> {
             return createScaledBoundingBox(-6.0, -0.5, 9.0, 6.0, 3.5, 17.0, 0.0625);
         }, (entity, rightClick) -> {
             if(rightClick) {
                 PacketHandler.getPlayChannel().sendToServer(new MessageAttachTrailer(entity.getId()));
-                MINECRAFT.player.swing(InteractionHand.MAIN_HAND);
+                minecraft.player.swing(InteractionHand.MAIN_HAND);
             }
         }, entity -> true);
 
@@ -117,7 +118,7 @@ public class StorageTrailerEntity extends TrailerEntity implements IStorage
         }, (entity, rightClick) -> {
             if(rightClick) {
                 PacketHandler.getPlayChannel().sendToServer(new MessageOpenStorage(entity.getId(), INVENTORY_STORAGE_KEY));
-                MINECRAFT.player.swing(InteractionHand.MAIN_HAND);
+                minecraft.player.swing(InteractionHand.MAIN_HAND);
             }
         }, entity -> true);
     }

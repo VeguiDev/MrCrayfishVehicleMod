@@ -18,7 +18,7 @@ import com.mrcrayfish.vehicle.item.IDyeable;
 import com.mrcrayfish.vehicle.item.SprayCanItem;
 import com.mrcrayfish.vehicle.network.datasync.VehicleDataValue;
 import com.mrcrayfish.vehicle.util.CommonUtils;
-import net.minecraft.client.Minecraft;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -59,7 +59,6 @@ import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -67,11 +66,9 @@ import java.util.UUID;
 /**
  * Author: MrCrayfish
  */
-//TODO: Create datafixer for change nbt keys
+//TODO: Create datafixer for changed nbt keys
 public abstract class VehicleEntity extends Entity implements IEntityAdditionalSpawnData
 {
-    @OnlyIn(Dist.CLIENT)
-    protected static final Minecraft MINECRAFT = Minecraft.getInstance();
     public static final int[] DYE_TO_COLOR = new int[] {16383998, 16351261, 13061821, 3847130, 16701501, 8439583, 15961002, 4673362, 10329495, 1481884, 8991416, 3949738, 8606770, 6192150, 11546150, 1908001};
 
     protected static final EntityDataAccessor<Integer> COLOR = SynchedEntityData.defineId(VehicleEntity.class, EntityDataSerializers.INT);
@@ -93,7 +90,7 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
 
     protected final SeatTracker seatTracker;
     protected final CosmeticTracker cosmeticTracker;
-    protected final Map<EntityDataAccessor<?>, VehicleDataValue<?>> paramToDataValue = new HashMap<>();
+    protected final Map<EntityDataAccessor<?>, VehicleDataValue<?>> paramToDataValue = new Object2ObjectOpenHashMap<>();
 
     @OnlyIn(Dist.CLIENT)
     protected float prevBodyRotationPitch, bodyRotationPitch;
@@ -158,7 +155,8 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
     /* Overridden to prevent odd step sound when driving vehicles. Ain't no subclasses getting
      * the ability to override this. */
     @Override
-    protected final void playStepSound(@NotNull BlockPos pos, @NotNull BlockState state) {}
+    protected final void playStepSound(@NotNull BlockPos pos, @NotNull BlockState state)
+    {}
 
     @Override
     @NotNull

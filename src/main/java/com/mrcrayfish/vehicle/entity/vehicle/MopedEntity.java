@@ -251,12 +251,13 @@ public class MopedEntity extends MotorcycleEntity implements IStorage, IAttachab
     @OnlyIn(Dist.CLIENT)
     public static void registerInteractionBoxes()
     {
+        Minecraft minecraft = Minecraft.getInstance();
         EntityRayTracer.instance().registerInteractionBox(ModEntities.MOPED.get(), () -> {
             return createScaledBoundingBox(-3.5, 8.0, -7.0, 3.5, 15.0, -14.0, 0.0625);
         }, (entity, rightClick) -> {
             if(rightClick) {
                 PacketHandler.getPlayChannel().sendToServer(new MessageOpenStorage(entity.getId(), "Chest"));
-                MINECRAFT.player.swing(InteractionHand.MAIN_HAND);
+                minecraft.player.swing(InteractionHand.MAIN_HAND);
             }
         }, MopedEntity::hasChest);
 
@@ -265,7 +266,7 @@ public class MopedEntity extends MotorcycleEntity implements IStorage, IAttachab
         }, (entity, rightClick) -> {
             if(rightClick) {
                 PacketHandler.getPlayChannel().sendToServer(new MessageAttachChest(entity.getId(), "Chest"));
-                MINECRAFT.player.swing(InteractionHand.MAIN_HAND);
+                minecraft.player.swing(InteractionHand.MAIN_HAND);
             }
         }, entity -> !entity.hasChest());
     }

@@ -46,7 +46,7 @@ public class TriangleList implements ITriangleList
             Matrix4f matrix = this.dynamicMatrix.apply(data, entity);
             for(Triangle triangle : this.triangles)
             {
-                triangles.add(new Triangle(EntityRayTracer.getTransformedTriangle(triangle.getVertices(), matrix)));
+                triangles.add(new Triangle(EntityRayTracer.getTransformedTriangle(triangle.vertices(), matrix)));
             }
             return triangles;
         }
