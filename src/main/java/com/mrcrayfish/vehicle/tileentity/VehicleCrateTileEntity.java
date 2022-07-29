@@ -100,6 +100,7 @@ public class VehicleCrateTileEntity extends TileEntitySynced
     }
 
     @OnlyIn(Dist.CLIENT)
+    @SuppressWarnings("unchecked")
     public <E extends Entity> E getEntity()
     {
         return (E) entity;
@@ -151,6 +152,8 @@ public class VehicleCrateTileEntity extends TileEntitySynced
     {
         if(this.opened)
         {
+            this.onServerTick();
+
             if(this.entityId != null && this.entity == null)
             {
                 EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(this.entityId);

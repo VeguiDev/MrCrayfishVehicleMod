@@ -72,21 +72,25 @@ public class SurfaceHelper
             return defaultValue;
 
         Optional<IWheelType> optional = vehicle.getWheelType();
-        if(!optional.isPresent())
+        if(optional.isEmpty())
             return defaultValue;
 
         int wheelCount = 0;
         float surfaceModifier = 0F;
         double[] wheelPositions = vehicle.getWheelPositions();
+        BlockPos.MutableBlockPos mpos = new BlockPos.MutableBlockPos();
+
         for(int i = 0; i < wheels.size(); i++)
         {
             double wheelX = wheelPositions[i * 3];
             double wheelY = wheelPositions[i * 3 + 1];
             double wheelZ = wheelPositions[i * 3 + 2];
+
             int x = Mth.floor(vehicle.getX() + wheelX);
             int y = Mth.floor(vehicle.getY() + wheelY - 0.2D);
             int z = Mth.floor(vehicle.getZ() + wheelZ);
-            BlockState state = vehicle.level.getBlockState(new BlockPos(x, y, z));
+
+            BlockState state = vehicle.level.getBlockState(mpos.set(x, y, z));
             SurfaceType surfaceType = getSurfaceTypeForMaterial(state.getMaterial());
             if(surfaceType == SurfaceType.NONE)
                 continue;
@@ -99,7 +103,7 @@ public class SurfaceHelper
 
     public static float getFriction(PoweredVehicleEntity vehicle)
     {
-        return getValue(vehicle, (wheelType, surfaceType) -> surfaceType.friction * surfaceType.wheelFunction.apply(wheelType), 0.0F);
+        return getValue(vehicle, (wheelType, surfaceType) -> surfaceType.friction * surfaceType.frictionFunction.apply(wheelType), 0.0F);
     }
 
     public static float getSurfaceTraction(PoweredVehicleEntity vehicle, float original)
@@ -107,23 +111,12 @@ public class SurfaceHelper
         return getValue(vehicle, (wheelType, surfaceType) -> surfaceType.tractionFactor, 1.0F) * original;
     }
 
-    public enum SurfaceType
+    public record SurfaceType(Function<IWheelType, Float> frictionFunction, float friction, float tractionFactor)
     {
-        SOLID(IWheelType::getRoadFrictionFactor, 0.9F, 1.0F),
-        DIRT(IWheelType::getDirtFrictionFactor, 1.1F, 0.9F),
-        SNOW(IWheelType::getSnowFrictionFactor, 1.5F, 0.9F),
-        ICE(type -> 1F, 1.5F, 0.01F),
-        NONE(type -> 0F, 1.0F, 1.0F);
-
-        private final Function<IWheelType, Float> wheelFunction;
-        private final float friction;
-        private final float tractionFactor;
-
-        SurfaceType(Function<IWheelType, Float> frictionFunction, float friction, float tractionFactor)
-        {
-            this.wheelFunction = frictionFunction;
-            this.friction = friction;
-            this.tractionFactor = tractionFactor;
-        }
+        public static final SurfaceType SOLID = new SurfaceType(IWheelType::getRoadFrictionFactor, 0.9F, 1.0F);
+        public static final SurfaceType DIRT = new SurfaceType(IWheelType::getDirtFrictionFactor, 1.1F, 0.9F);
+        public static final SurfaceType SNOW = new SurfaceType(IWheelType::getSnowFrictionFactor, 1.5F, 0.9F);
+        public static final SurfaceType ICE = new SurfaceType(type -> 1F, 1.5F, 0.01F);
+        public static final SurfaceType NONE = new SurfaceType(type -> 0F, 1.0F, 1.0F);
     }
 }
