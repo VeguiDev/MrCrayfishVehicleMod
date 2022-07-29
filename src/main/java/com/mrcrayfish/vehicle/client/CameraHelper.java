@@ -197,11 +197,6 @@ public class CameraHelper
                 quaternion.mul(Vector3f.XP.rotationDegrees(Mth.lerp(partialTicks, player.xRotO, player.xRot)));
             }
 
-            if(Config.CLIENT.shouldFollowRoll.get())
-            {
-                rotation.mul(Vector3f.ZP.rotationDegrees(vehicle.getBodyRotationRoll(partialTicks)));
-            }
-
             // If the player is in third person, applies additional vehicle specific camera rotations
             if(Config.CLIENT.useVehicleAsFocusPoint.get() && VehicleHelper.isThirdPersonBack())
             {

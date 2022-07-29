@@ -2,6 +2,7 @@ package com.mrcrayfish.vehicle.client.handler;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mrcrayfish.framework.common.data.SyncedEntityData;
+import com.mrcrayfish.obfuscate.client.event.RenderItemEvent;
 import com.mrcrayfish.posture.api.event.PlayerModelEvent;
 import com.mrcrayfish.vehicle.client.model.VehicleModels;
 import com.mrcrayfish.vehicle.client.raytrace.EntityRayTracer;
@@ -178,7 +179,7 @@ public class FuelingHandler
     }
 
     @SubscribeEvent
-    public void onRenderThirdPerson(RenderPlayerEvent.Pre event)
+    public void onRenderThirdPerson(RenderItemEvent.Held.Pre event)
     {
         Entity entity = event.getEntity();
         if(entity instanceof Player && SyncedEntityData.instance().get((Player) entity, ModDataKeys.GAS_PUMP).isPresent())

@@ -1,5 +1,8 @@
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
+buildscript {
+    dependencies {
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+    }
+}
 
 plugins {
     id 'net.minecraftforge.gradle' version '5.1.+'
@@ -8,7 +11,7 @@ plugins {
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-apply plugin: 'maven-publish'
+apply plugin: 'org.spongepowered.mixin'
 
 version = "0.45.3-1.18.2"
 group = "com.mrcrayfish"
@@ -62,6 +65,11 @@ minecraft {
     }
 }
 
+mixin {
+    add sourceSets.main, "vehicle.refmap.json"
+    config "vehicle.mixins.json"
+}
+
 repositories {
     maven {
         url = "https://www.cursemaven.com"
@@ -76,14 +84,17 @@ dependencies {
     implementation fg.deobf('curse.maven:controllable-317269:3707285')
     implementation fg.deobf('curse.maven:configured-457570:3721946')
     implementation fg.deobf('curse.maven:catalogue-459701:3803098')
-}
 
-processResources {
-    doLast {
-        fileTree(dir: outputs.files.asPath, include: "**/*.json").each {
-            File file -> file.text = JsonOutput.toJson(new JsonSlurper().parse(file))
-        }
+    implementation ("org.spongepowered:mixin:0.8.5") {
+        exclude module: "asm-commons"
+        exclude module: "asm-tree"
+        exclude module: "launchwrapper"
+        exclude module: "guava"
+        exclude module: "log4j-core"
+        exclude module: "gson"
+        exclude module: "commons-io"
     }
+    annotationProcessor("org.spongepowered:mixin:0.8.5:processor")
 }
 
 jar {
@@ -95,27 +106,9 @@ jar {
             "Implementation-Title": "Vehicle Mod",
             "Implementation-Version": project.version,
             "Implementation-Vendor" : "MrCrayfish",
+            "MixinConfigs" : "vehicle.mixins.json",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
-    }
-}
-
-def reobfFile = file("$buildDir/reobfJar/output.jar")
-def reobfArtifact = artifacts.add('default', reobfFile) {
-    type 'jar'
-    builtBy 'reobfJar'
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact reobfArtifact
-        }
-    }
-    repositories {
-        maven {
-            url "file:///X:/localmaven/mcmods"
-        }
     }
 }
 

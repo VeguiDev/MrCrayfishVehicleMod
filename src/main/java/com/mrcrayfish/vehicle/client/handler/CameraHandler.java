@@ -198,10 +198,6 @@ public class CameraHandler
         this.cameraHelper.setupVanillaCamera(info, pointOfView, vehicle, player, partialTicks);
     }
 
-    /*
-     * Called via transformer. Do not delete!
-     */
-    @SuppressWarnings("unused")
     public static void setupVehicleCamera(PoseStack matrixStack)
     {
         if(!Config.CLIENT.immersiveCamera.get())
@@ -224,19 +220,11 @@ public class CameraHandler
         matrixStack.mulPose(quaternion);
     }
 
-    /*
-     * Called via transformer. Do not delete!
-     */
-    @SuppressWarnings("unused")
     public static void setupShaderCamera(Camera info, float partialTicks)
     {
         CameraHandler.instance().setupVanillaCamera(info, partialTicks);
     }
 
-    /*
-     * Called via transformer. Do not delete!
-     */
-    @SuppressWarnings("unused")
     public static void onPlayerTurn(double x, double y)
     {
         CameraHandler.instance().cameraHelper.turnPlayerView(x, y);
