@@ -11,8 +11,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
-import java.util.function.Supplier;
-
 /**
  * The base class for item rendering events. It is possible to subscribe to this event to capture
  * all rendering events.

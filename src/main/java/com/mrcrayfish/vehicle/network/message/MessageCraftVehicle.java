@@ -15,27 +15,24 @@ import java.util.function.Supplier;
 public class MessageCraftVehicle extends PlayMessage<MessageCraftVehicle>
 {
     private String vehicleId;
-    private BlockPos pos;
 
     public MessageCraftVehicle() {}
 
-    public MessageCraftVehicle(String vehicleId, BlockPos pos)
+    public MessageCraftVehicle(String vehicleId)
     {
         this.vehicleId = vehicleId;
-        this.pos = pos;
     }
 
     @Override
     public void encode(MessageCraftVehicle message, FriendlyByteBuf buffer)
     {
         buffer.writeUtf(message.vehicleId, 128);
-        buffer.writeBlockPos(message.pos);
     }
 
     @Override
     public MessageCraftVehicle decode(FriendlyByteBuf buffer)
     {
-        return new MessageCraftVehicle(buffer.readUtf(128), buffer.readBlockPos());
+        return new MessageCraftVehicle(buffer.readUtf(128));
     }
 
     @Override
@@ -55,10 +52,5 @@ public class MessageCraftVehicle extends PlayMessage<MessageCraftVehicle>
     public String getVehicleId()
     {
         return this.vehicleId;
-    }
-
-    public BlockPos getPos()
-    {
-        return this.pos; //TODO should be able to derive from the container instead
     }
 }

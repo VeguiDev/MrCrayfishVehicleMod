@@ -32,6 +32,7 @@ import com.mrcrayfish.vehicle.item.WheelItem;
 import com.mrcrayfish.vehicle.network.message.*;
 import com.mrcrayfish.vehicle.tileentity.WorkstationTileEntity;
 import com.mrcrayfish.vehicle.util.CommonUtils;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -105,9 +106,6 @@ public class ServerPlayHandler
         if(!(player.containerMenu instanceof WorkstationContainer workstation))
             return;
 
-        if(!workstation.getPos().equals(message.getPos()))
-            return;
-
         ResourceLocation entityId = new ResourceLocation(message.getVehicleId());
         if(Config.SERVER.disabledVehicles.get().contains(entityId.toString()))
             return;
@@ -155,6 +153,7 @@ public class ServerPlayHandler
         recipe.consumeMaterials(player);
 
         WorkstationTileEntity workstationTileEntity = workstation.getTileEntity();
+        BlockPos pos = workstationTileEntity.getBlockPos();
 
         /* Gets the color based on the dye */
         int color = VehicleEntity.DYE_TO_COLOR[0];
@@ -191,7 +190,7 @@ public class ServerPlayHandler
         }
 
         ItemStack stack = VehicleCrateBlock.create(entityId, color, engineStack, wheelStack);
-        world.addFreshEntity(new ItemEntity(world, message.getPos().getX() + 0.5, message.getPos().getY() + 1.125, message.getPos().getZ() + 0.5, stack));
+        world.addFreshEntity(new ItemEntity(world, pos.getX() + 0.5, pos.getY() + 1.125, pos.getZ() + 0.5, stack));
     }
 
     public static void handleCycleSeatsMessage(ServerPlayer player, MessageCycleSeats message)
@@ -409,7 +408,7 @@ public class ServerPlayHandler
 
         CompoundTag heldTag = HeldVehicleDataHandler.getHeldVehicle(player);
         Optional<EntityType<?>> optional = EntityType.byString(heldTag.getString("id"));
-        if(!optional.isPresent())
+        if(optional.isEmpty())
             return;
 
         EntityType<?> entityType = optional.get();
@@ -480,20 +479,16 @@ public class ServerPlayHandler
 
         if(targetEntity instanceof IAttachableChest attachableChest)
         {
-            //TODO prevent non-owners from removing chest
-            /*if(targetEntity instanceof VehicleEntity)
+            if(targetEntity instanceof PoweredVehicleEntity vehicle)
             {
-                VehicleEntity vehicle = (VehicleEntity) targetEntity;
-                vehicle.get
-            }*/
-
-            if(attachableChest.hasChest(message.getKey()))
-            {
-                ItemStack stack = player.getInventory().getSelected();
-                if(stack.getItem() == ModItems.WRENCH.get())
+                if(attachableChest.hasChest(message.getKey()))
                 {
-                    ((IAttachableChest) targetEntity).removeChest(message.getKey());
-                    return;
+                    ItemStack stack = player.getInventory().getSelected();
+                    if(stack.getItem() == ModItems.WRENCH.get() && vehicle.isOwner(player))
+                    {
+                        ((IAttachableChest) targetEntity).removeChest(message.getKey());
+                        return;
+                    }
                 }
             }
         }
