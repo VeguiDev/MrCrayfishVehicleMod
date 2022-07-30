@@ -1,8 +1,10 @@
 package com.mrcrayfish.vehicle.client.render.tileentity;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import com.mrcrayfish.vehicle.Config;
 import com.mrcrayfish.vehicle.block.GasPumpBlock;
@@ -16,6 +18,7 @@ import com.mrcrayfish.vehicle.util.CollisionHelper;
 import com.mrcrayfish.vehicle.util.RenderUtil;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -27,24 +30,32 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
+import java.awt.*;
 
 /**
  * Author: MrCrayfish
  */
 public class GasPumpRenderer implements BlockEntityRenderer<GasPumpTileEntity>
 {
+    private final Font font;
+
     public GasPumpRenderer(BlockEntityRendererProvider.Context ctx)
-    {}
+    {
+        this.font = ctx.getFont();
+    }
 
     @Override
     public void render(GasPumpTileEntity entity, float delta, @NotNull PoseStack matrices, @NotNull MultiBufferSource buffers, int light, int overlay)
     {
+        Font font = this.font;
         BlockState state = entity.getBlockState();
         if(state.getBlock() != ModBlocks.GAS_PUMP.get())
             return;
@@ -101,13 +112,59 @@ public class GasPumpRenderer implements BlockEntityRenderer<GasPumpTileEntity>
             matrices.pushPose();
             double[] nozzlePos = CollisionHelper.fixRotation(facing, 0.29, 1.06, 0.29, 1.06);
             matrices.translate(nozzlePos[0], 0.5, nozzlePos[1]);
-            matrices.mulPose(Axis.POSITIVE_Y.rotationDegrees(facing.get2DDataValue() * -90F));
+            matrices.mulPose(Axis.POSITIVE_Y.rotationDegrees(facing.get2DDataValue() * -90));
             matrices.mulPose(Axis.POSITIVE_Y.rotationDegrees(180F));
             matrices.mulPose(Axis.POSITIVE_X.rotationDegrees(90F));
             matrices.scale(0.8F, 0.8F, 0.8F);
             RenderUtil.renderColoredModel(VehicleModels.NOZZLE.getBaseModel(), ItemTransforms.TransformType.NONE, false, matrices, buffers, -1, light, OverlayTexture.NO_OVERLAY);
             matrices.popPose();
         }
+
+        matrices.pushPose();
+        {
+            matrices.translate(0.5, 0, 0.5);
+            matrices.mulPose(Axis.POSITIVE_Y.rotationDegrees(facing.get2DDataValue() * -90));
+            matrices.translate(-0.5, 0, -0.5);
+            matrices.translate(0.5, 11 * 0.0625, 3 * 0.0625);
+            matrices.mulPose(Axis.POSITIVE_Y.rotationDegrees(180F));
+            matrices.translate(0, 0, 0.07);
+
+            matrices.pushPose();
+            {
+                matrices.scale(0.015F, -0.015F, 0.015F);
+                matrices.last().normal().set(0, 0, -0.010416667F);
+                if(entity.getTank() != null)
+                {
+                    int amount = (int) Math.ceil(100 * (entity.getTank().getFluidAmount() / (double) entity.getTank().getCapacity()));
+                    String percent = String.format("%d%%", amount);
+                    int width = font.width(percent);
+
+                    RenderSystem.depthMask(false);
+                    font.drawInBatch(
+                            percent, -width / 2, 10, DyeColor.WHITE.getTextColor(), false, matrices.last().pose(), buffers, false, 0, light
+                    );
+                    RenderSystem.depthMask(true);
+                }
+            }
+            matrices.popPose();
+
+            matrices.pushPose();
+            {
+                matrices.translate(0, 1 * 0.0625, 0);
+                matrices.scale(0.01F, -0.01F, 0.01F);
+                matrices.last().normal().set(0, 0, -0.010416667F);
+
+                int width = font.width("Fuelium");
+
+                RenderSystem.depthMask(false);
+                font.drawInBatch(
+                        "Fuelium", -width / 2, 10, DyeColor.LIME.getTextColor(), false, matrices.last().pose(), buffers, false, 0, light
+                );
+                RenderSystem.depthMask(true);
+            }
+            matrices.popPose();
+        }
+        matrices.popPose();
 
         matrices.popPose();
     }

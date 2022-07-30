@@ -2,12 +2,14 @@ package com.mrcrayfish.vehicle.network.play;
 
 import com.mrcrayfish.framework.common.data.SyncedEntityData;
 import com.mrcrayfish.vehicle.Config;
+import com.mrcrayfish.vehicle.VehicleMod;
 import com.mrcrayfish.vehicle.block.VehicleCrateBlock;
 import com.mrcrayfish.vehicle.common.CommonEvents;
 import com.mrcrayfish.vehicle.common.CosmeticTracker;
 import com.mrcrayfish.vehicle.common.Seat;
 import com.mrcrayfish.vehicle.common.SeatTracker;
 import com.mrcrayfish.vehicle.common.VehicleRegistry;
+import com.mrcrayfish.vehicle.common.cosmetic.actions.Action;
 import com.mrcrayfish.vehicle.common.entity.HeldVehicleDataHandler;
 import com.mrcrayfish.vehicle.common.inventory.IAttachableChest;
 import com.mrcrayfish.vehicle.common.inventory.IStorage;
@@ -55,6 +57,7 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -454,13 +457,18 @@ public class ServerPlayHandler
         if(!(targetEntity instanceof VehicleEntity vehicle))
             return;
 
-        if(player.distanceTo(targetEntity) > 20.0D) //TODO determine a better condition to check if player is close to vehicle
-            return;
-
-        //TODO log if player tries to interact with cosmetic that doesn't exist?
-
-        CosmeticTracker tracker = vehicle.getCosmeticTracker();
-        tracker.getActions(message.getCosmeticId()).forEach(action -> action.onInteract(vehicle, player));
+        Collection<Action> cosmeticActions = vehicle.getCosmeticTracker().getActions(message.getCosmeticId());
+        if(cosmeticActions == null)
+        {
+            VehicleMod.LOGGER.warn("Attempting to interact with unknown cosmetic id '{}'", message.getCosmeticId());
+        }
+        else
+        {
+            for(Action action : cosmeticActions)
+            {
+                action.onInteract(vehicle, player);
+            }
+        }
     }
 
     public static void handleOpenStorageMessage(ServerPlayer player, MessageOpenStorage message)

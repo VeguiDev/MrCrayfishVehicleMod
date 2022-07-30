@@ -17,9 +17,10 @@ public class ShadersRenderMixin
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/Camera;setup(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/world/entity/Entity;ZZF)V"
-            )
+            ),
+            require = 0
     )
-    private void onUpdateActiveRenderInfo$setup(Camera camera, Minecraft mc, float delta, CallbackInfo ci)
+    private static void onUpdateActiveRenderInfo$setup(Camera camera, Minecraft mc, float delta, CallbackInfo ci)
     {
         CameraHandler.setupShaderCamera(camera, delta);
     }

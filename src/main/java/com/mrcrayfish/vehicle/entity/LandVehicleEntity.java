@@ -2,6 +2,7 @@ package com.mrcrayfish.vehicle.entity;
 
 import com.mrcrayfish.vehicle.common.SurfaceHelper;
 import com.mrcrayfish.vehicle.common.entity.Transform;
+import com.mrcrayfish.vehicle.common.entity.Wheel;
 import com.mrcrayfish.vehicle.entity.properties.LandProperties;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import com.mrcrayfish.vehicle.util.CommonUtils;

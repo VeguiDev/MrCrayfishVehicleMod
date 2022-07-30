@@ -67,11 +67,11 @@ public class GasPumpBlock extends RotatedEntityObjectBlock
         List<VoxelShape> shapes = new ArrayList<>();
         if (top)
         {
-            shapes.add(VoxelShapeHelper.getRotatedShapes(VoxelShapeHelper.rotate(box(3, -16, 0, 13, 15, 16), Direction.EAST))[direction.get2DDataValue()]);
+            shapes.add(VoxelShapeHelper.getHorizontalShapes(VoxelShapeHelper.rotate(box(3, -16, 0, 13, 15, 16), Direction.EAST))[direction.get2DDataValue()]);
         }
         else
         {
-            shapes.add(VoxelShapeHelper.getRotatedShapes(VoxelShapeHelper.rotate(box(3, 0, 0, 13, 31, 16), Direction.EAST))[direction.get2DDataValue()]);
+            shapes.add(VoxelShapeHelper.getHorizontalShapes(VoxelShapeHelper.rotate(box(3, 0, 0, 13, 31, 16), Direction.EAST))[direction.get2DDataValue()]);
         }
         VoxelShape shape = VoxelShapeHelper.combineAll(shapes);
         SHAPES.put(state, shape);

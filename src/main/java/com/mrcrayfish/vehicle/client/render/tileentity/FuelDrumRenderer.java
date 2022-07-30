@@ -20,6 +20,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
@@ -48,7 +49,7 @@ public class FuelDrumRenderer implements BlockEntityRenderer<FuelDrumTileEntity>
     }
 
     @Override
-    public void render(FuelDrumTileEntity entity, float delta, PoseStack matrices, MultiBufferSource buffers, int light, int overlay)
+    public void render(@NotNull FuelDrumTileEntity entity, float delta, @NotNull PoseStack matrices, @NotNull MultiBufferSource buffers, int light, int overlay)
     {
         if(this.camera == null)
             return;

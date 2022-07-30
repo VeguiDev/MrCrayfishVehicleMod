@@ -11,7 +11,7 @@ import com.mrcrayfish.vehicle.common.VehicleRegistry;
 import com.mrcrayfish.vehicle.common.cosmetic.CosmeticProperties;
 import com.mrcrayfish.vehicle.common.entity.Transform;
 import com.mrcrayfish.vehicle.datagen.VehiclePropertiesProvider;
-import com.mrcrayfish.vehicle.entity.Wheel;
+import com.mrcrayfish.vehicle.common.entity.Wheel;
 import com.mrcrayfish.vehicle.network.HandshakeMessages;
 import com.mrcrayfish.vehicle.util.ExtraJSONUtils;
 import net.minecraft.resources.ResourceLocation;

@@ -8,6 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
@@ -20,7 +21,7 @@ public class RecipeRefillSprayCan extends CustomRecipe
     }
 
     @Override
-    public boolean matches(CraftingContainer inventory, Level worldIn)
+    public boolean matches(CraftingContainer inventory, @NotNull Level level)
     {
         ItemStack sprayCan = ItemStack.EMPTY;
         ItemStack emptySprayCan = ItemStack.EMPTY;
@@ -55,6 +56,7 @@ public class RecipeRefillSprayCan extends CustomRecipe
     }
 
     @Override
+    @NotNull
     public ItemStack assemble(CraftingContainer inventory)
     {
         ItemStack sprayCan = ItemStack.EMPTY;
@@ -104,6 +106,7 @@ public class RecipeRefillSprayCan extends CustomRecipe
     }
 
     @Override
+    @NotNull
     public RecipeSerializer<?> getSerializer()
     {
         return ModRecipeSerializers.REFILL_SPRAY_CAN.get();

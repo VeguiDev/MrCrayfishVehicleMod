@@ -1,9 +1,9 @@
 package com.mrcrayfish.vehicle.common;
 
 import com.google.common.collect.ImmutableMap;
+import com.mrcrayfish.vehicle.common.entity.Wheel;
 import com.mrcrayfish.vehicle.entity.IWheelType;
 import com.mrcrayfish.vehicle.entity.PoweredVehicleEntity;
-import com.mrcrayfish.vehicle.entity.Wheel;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;

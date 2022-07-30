@@ -26,6 +26,7 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.text.DecimalFormat;
@@ -49,7 +50,7 @@ public class JerryCanItem extends Item
     }
 
     @Override
-    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items)
+    public void fillItemCategory(@NotNull CreativeModeTab group, @NotNull NonNullList<ItemStack> items)
     {
         if(this.allowdedIn(group))
         {
@@ -59,7 +60,7 @@ public class JerryCanItem extends Item
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltips, TooltipFlag flag)
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> tooltips, @NotNull TooltipFlag flag)
     {
         if(Screen.hasShiftDown())
         {
@@ -80,6 +81,7 @@ public class JerryCanItem extends Item
                     tooltips.add(new TranslatableComponent("item.vehicle.jerry_can.empty").withStyle(ChatFormatting.RED));
                 }
             });
+
             tooltips.add(new TextComponent(ChatFormatting.YELLOW + I18n.get("vehicle.info_help")));
         }
     }
@@ -134,13 +136,13 @@ public class JerryCanItem extends Item
     }
 
     @Override
-    public boolean isBarVisible(ItemStack stack)
+    public boolean isBarVisible(@NotNull ItemStack stack)
     {
         return this.getCurrentFuel(stack) > 0;
     }
 
     @Override
-    public int getBarWidth(ItemStack stack)
+    public int getBarWidth(@NotNull ItemStack stack)
     {
         return (int) (1.0 - (this.getCurrentFuel(stack) / (double) this.capacitySupplier.get()));
     }

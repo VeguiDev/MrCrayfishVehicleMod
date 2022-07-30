@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -122,7 +123,7 @@ public class GasPumpTileEntity extends TileEntitySynced
             }
         }
 
-        if(!this.level.isClientSide && this.fuelingEntity != null)
+        if(this.fuelingEntity != null)
         {
             if(Math.sqrt(this.fuelingEntity.distanceToSqr(this.worldPosition.getX() + 0.5, this.worldPosition.getY() + 0.5, this.worldPosition.getZ() + 0.5)) > Config.SERVER.maxHoseDistance.get() || !this.fuelingEntity.isAlive())
             {
@@ -140,6 +141,8 @@ public class GasPumpTileEntity extends TileEntitySynced
 
     public void onClientTick()
     {
+        this.onServerTick();
+
         if(this.fuelingEntity != null)
         {
             this.fuelingEntity = null;
@@ -147,7 +150,7 @@ public class GasPumpTileEntity extends TileEntitySynced
     }
 
     @Override
-    public void load(CompoundTag compound)
+    public void load(@NotNull CompoundTag compound)
     {
         super.load(compound);
 
@@ -158,7 +161,7 @@ public class GasPumpTileEntity extends TileEntitySynced
     }
 
     @Override
-    protected void saveAdditional(CompoundTag compound)
+    protected void saveAdditional(@NotNull CompoundTag compound)
     {
         super.saveAdditional(compound);
 

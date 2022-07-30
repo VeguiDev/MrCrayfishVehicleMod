@@ -9,42 +9,23 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
  */
-public class FluidExtractorRecipe implements Recipe<FluidExtractorTileEntity>
+public record FluidExtractorRecipe(ResourceLocation id, ItemStack ingredient, FluidEntry result) implements Recipe<FluidExtractorTileEntity>
 {
-    private ResourceLocation id;
-    private ItemStack ingredient;
-    private FluidEntry result;
-
-    public FluidExtractorRecipe(ResourceLocation id, ItemStack ingredient, FluidEntry result)
-    {
-        this.id = id;
-        this.ingredient = ingredient;
-        this.result = result;
-    }
-
-    public ItemStack getIngredient()
-    {
-        return ingredient;
-    }
-
-    public FluidEntry getResult()
-    {
-        return result;
-    }
-
     @Override
-    public boolean matches(FluidExtractorTileEntity fluidExtractor, Level p_44003_)
+    public boolean matches(FluidExtractorTileEntity fluidExtractor, @NotNull Level level)
     {
         ItemStack source = fluidExtractor.getItem(FluidExtractorTileEntity.SLOT_FLUID_SOURCE);
         return InventoryUtil.areItemStacksEqualIgnoreCount(source, this.ingredient);
     }
 
     @Override
-    public ItemStack assemble(FluidExtractorTileEntity inv)
+    @NotNull
+    public ItemStack assemble(@NotNull FluidExtractorTileEntity inv)
     {
         return ItemStack.EMPTY;
     }
@@ -56,24 +37,28 @@ public class FluidExtractorRecipe implements Recipe<FluidExtractorTileEntity>
     }
 
     @Override
+    @NotNull
     public ItemStack getResultItem()
     {
         return ItemStack.EMPTY;
     }
 
     @Override
+    @NotNull
     public ResourceLocation getId()
     {
         return this.id;
     }
 
     @Override
+    @NotNull
     public RecipeSerializer<?> getSerializer()
     {
         return ModRecipeSerializers.FLUID_EXTRACTOR.get();
     }
 
     @Override
+    @NotNull
     public RecipeType<?> getType()
     {
         return RecipeTypes.FLUID_EXTRACTOR;

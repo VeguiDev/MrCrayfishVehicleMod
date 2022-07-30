@@ -11,6 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -20,8 +21,8 @@ import java.util.List;
  */
 public class EngineItem extends PartItem
 {
-    private IEngineType type;
-    private IEngineTier tier;
+    private final IEngineType type;
+    private final IEngineTier tier;
 
     public EngineItem(IEngineType type, IEngineTier tier, Item.Properties properties)
     {
@@ -32,7 +33,7 @@ public class EngineItem extends PartItem
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltips, TooltipFlag flag)
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, List<Component> tooltips, @NotNull TooltipFlag flag)
     {
         tooltips.add(new TranslatableComponent("vehicle.engine_info.acceleration").append(": ").withStyle(ChatFormatting.YELLOW).append(new TextComponent(this.tier.getPowerMultiplier() + "x").withStyle(ChatFormatting.GRAY)));
         tooltips.add(new TranslatableComponent("vehicle.engine_info.additional_max_speed").append(": ").withStyle(ChatFormatting.YELLOW).append(new TextComponent((this.tier.getAdditionalMaxSpeed()) + "bps").withStyle(ChatFormatting.GRAY)));

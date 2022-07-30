@@ -9,6 +9,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeHooks;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
@@ -22,7 +23,7 @@ public class FluidMixerContainer extends AbstractContainerMenu
     private int enderSapLevel;
     private int fueliumLevel;
 
-    private FluidMixerTileEntity fluidExtractor;
+    private final FluidMixerTileEntity fluidExtractor;
 
     public FluidMixerContainer(int windowId, Inventory playerInventory, FluidMixerTileEntity fluidExtractor)
     {
@@ -54,18 +55,19 @@ public class FluidMixerContainer extends AbstractContainerMenu
     }
 
     @Override
-    public boolean stillValid(Player playerIn)
+    public boolean stillValid(@NotNull Player playerIn)
     {
         return true;
     }
 
     @Override
-    public ItemStack quickMoveStack(Player playerIn, int index)
+    @NotNull
+    public ItemStack quickMoveStack(@NotNull Player playerIn, int index)
     {
         ItemStack stack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
 
-        if(slot != null && slot.hasItem())
+        if(slot.hasItem())
         {
             ItemStack slotStack = slot.getItem();
             stack = slotStack.copy();

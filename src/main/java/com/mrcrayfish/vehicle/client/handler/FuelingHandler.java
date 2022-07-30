@@ -11,10 +11,12 @@ import com.mrcrayfish.vehicle.client.raytrace.VehicleRayTraceResult;
 import com.mrcrayfish.vehicle.client.render.Axis;
 import com.mrcrayfish.vehicle.init.ModDataKeys;
 import com.mrcrayfish.vehicle.init.ModSounds;
+import com.mrcrayfish.vehicle.item.SprayCanItem;
 import com.mrcrayfish.vehicle.util.RenderUtil;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -23,6 +25,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.event.TickEvent;
@@ -33,6 +36,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  */
 public class FuelingHandler
 {
+    private float fuelingHandOffset;
     private int fuelTickCounter;
     private boolean fueling;
     private boolean renderNozzle;
@@ -89,13 +93,6 @@ public class FuelingHandler
     @SubscribeEvent
     public void onRenderHand(RenderHandEvent event)
     {
-        /*if(event.getHand() == Hand.OFF_HAND && this.fuelingHandOffset > -1)
-        {
-            double offset = Math.sin((this.fuelTickCounter + minecraft.getRenderPartialTicks()) / 3.0) * 0.1;
-            matrixStack.rotate(Axis.POSITIVE_X.rotationDegrees(25F));
-            matrixStack.translate(0, -0.35 - this.fuelingHandOffset, 0.2);
-        }*/
-
         Minecraft minecraft = Minecraft.getInstance();
         Player player = minecraft.player;
         PoseStack matrixStack = event.getPoseStack();

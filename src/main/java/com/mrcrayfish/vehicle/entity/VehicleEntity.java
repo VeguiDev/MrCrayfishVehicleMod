@@ -8,6 +8,7 @@ import com.mrcrayfish.vehicle.common.CosmeticTracker;
 import com.mrcrayfish.vehicle.common.Seat;
 import com.mrcrayfish.vehicle.common.SeatTracker;
 import com.mrcrayfish.vehicle.common.entity.Transform;
+import com.mrcrayfish.vehicle.common.entity.Wheel;
 import com.mrcrayfish.vehicle.crafting.WorkstationRecipe;
 import com.mrcrayfish.vehicle.crafting.WorkstationRecipes;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
@@ -204,12 +205,12 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
                 CompoundTag compound = heldItem.getTag();
                 if(compound != null)
                 {
-                    if(!compound.contains("remainingSprays", IntTag.TAG_INT))
+                    if(!compound.contains(SprayCanItem.REMAINING_SPRAYS_TAG, IntTag.TAG_INT))
                     {
-                        compound.putInt("remainingSprays", ModItems.SPRAY_CAN.get().getCapacity(heldItem));
+                        compound.putInt(SprayCanItem.REMAINING_SPRAYS_TAG, ModItems.SPRAY_CAN.get().getCapacity(heldItem));
                     }
 
-                    int remainingSprays = compound.getInt("remainingSprays");
+                    int remainingSprays = compound.getInt(SprayCanItem.REMAINING_SPRAYS_TAG);
                     if(compound.contains(IDyeable.NBT_KEY, IntTag.TAG_INT) && remainingSprays > 0)
                     {
                         int color = compound.getInt(IDyeable.NBT_KEY);
@@ -217,7 +218,7 @@ public abstract class VehicleEntity extends Entity implements IEntityAdditionalS
                         {
                             this.setColor(compound.getInt(IDyeable.NBT_KEY));
                             player.level.playSound(null, this.getX(), this.getY(), this.getZ(), ModSounds.ITEM_SPRAY_CAN_SPRAY.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-                            compound.putInt("remainingSprays", remainingSprays - 1);
+                            compound.putInt(SprayCanItem.REMAINING_SPRAYS_TAG, remainingSprays - 1);
                         }
                     }
                 }

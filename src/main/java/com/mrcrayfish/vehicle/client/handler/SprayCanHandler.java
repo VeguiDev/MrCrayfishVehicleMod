@@ -1,11 +1,17 @@
 package com.mrcrayfish.vehicle.client.handler;
 
+import com.mrcrayfish.framework.common.data.SyncedEntityData;
+import com.mrcrayfish.obfuscate.client.event.RenderItemEvent;
+import com.mrcrayfish.vehicle.init.ModDataKeys;
 import com.mrcrayfish.vehicle.init.ModSounds;
 import com.mrcrayfish.vehicle.item.SprayCanItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -41,6 +47,7 @@ public class SprayCanHandler
         float pitch = 0.85F + 0.15F * sprayCan.getRemainingSprays(player.getInventory().getSelected());
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.ITEM_SPRAY_CAN_SHAKE.get(), pitch, 0.75F));
     }
+
 
     /**
      * Applies a pose to the player model if they are holding a spray can item

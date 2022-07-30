@@ -1,6 +1,7 @@
 package com.mrcrayfish.vehicle.entity;
 
 import com.mrcrayfish.vehicle.Config;
+import com.mrcrayfish.vehicle.common.entity.Wheel;
 import com.mrcrayfish.vehicle.entity.properties.TrailerProperties;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import net.minecraft.network.syncher.EntityDataAccessor;

@@ -4,8 +4,10 @@ import com.mrcrayfish.vehicle.client.screen.DashboardScreen;
 import com.mrcrayfish.vehicle.entity.VehicleEntity;
 import com.mrcrayfish.vehicle.entity.properties.VehicleProperties;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -36,18 +38,4 @@ public class ClientEvents
             VehicleProperties.loadDefaultProperties();
         }
     }
-
-    /*@SubscribeEvent
-    public void setLiquidFogDensity(EntityViewRenderEvent.FogDensity event)
-    {
-        event.getInfo().getBlockAtCamera();
-        *//*Block block = event.getState().getBlock(); //TODO do i need to fix this
-        boolean isSap = block == ModBlocks.ENDER_SAP.get();
-        if (isSap || block == ModBlocks.FUELIUM.get() || block == ModBlocks.BLAZE_JUICE.get())
-        {
-            GlStateManager.setFog(GlStateManager.FogMode.EXP);
-            event.setDensity(isSap ? 1 : 0.5F);
-            event.setCanceled(true);
-        }*//*
-    }*/
 }

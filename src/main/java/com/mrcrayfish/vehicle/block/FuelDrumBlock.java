@@ -98,11 +98,11 @@ public class FuelDrumBlock extends Block implements EntityBlock
             if(tag != null && tag.contains("BlockEntityTag", Tag.TAG_COMPOUND))
             {
                 CompoundTag blockEntityTag = tag.getCompound("BlockEntityTag");
-                if(blockEntityTag.contains("FluidName", Tag.TAG_STRING))
+                if(blockEntityTag.contains("fluidName", Tag.TAG_STRING))
                 {
-                    String fluidName = blockEntityTag.getString("FluidName");
+                    String fluidName = blockEntityTag.getString("fluidName");
                     Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluidName));
-                    int amount = blockEntityTag.getInt("Amount");
+                    int amount = blockEntityTag.getInt("amount");
                     if(fluid != null && amount > 0)
                     {
                         tooltips.add(new TranslatableComponent(fluid.getAttributes().getTranslationKey()).withStyle(ChatFormatting.BLUE));

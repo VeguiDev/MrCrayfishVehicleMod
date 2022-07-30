@@ -145,7 +145,7 @@ public class FluidExtractorTileEntity extends TileFluidHandlerSynced implements 
 
                 if(this.extractionProgress++ == Config.SERVER.extractorExtractTime.get())
                 {
-                    this.tank.fill(this.currentRecipe.getResult().createStack(), IFluidHandler.FluidAction.EXECUTE);
+                    this.tank.fill(this.currentRecipe.result().createStack(), IFluidHandler.FluidAction.EXECUTE);
                     this.extractionProgress = 0;
                     this.shrinkItem(SLOT_FLUID_SOURCE);
                     this.currentRecipe = null;
@@ -183,7 +183,7 @@ public class FluidExtractorTileEntity extends TileFluidHandlerSynced implements 
 
     private boolean canFillWithFluid(ItemStack stack)
     {
-        return this.currentRecipe != null && this.currentRecipe.getIngredient().getItem() == stack.getItem() && this.tank.getFluidAmount() < this.tank.getCapacity() && (this.tank.isEmpty() || this.tank.getFluid().getFluid() == this.currentRecipe.getResult().getFluid()) && (this.tank.getFluidAmount() + this.currentRecipe.getResult().getAmount()) <= this.tank.getCapacity();
+        return this.currentRecipe != null && this.currentRecipe.ingredient().getItem() == stack.getItem() && this.tank.getFluidAmount() < this.tank.getCapacity() && (this.tank.isEmpty() || this.tank.getFluid().getFluid() == this.currentRecipe.result().fluid()) && (this.tank.getFluidAmount() + this.currentRecipe.result().amount()) <= this.tank.getCapacity();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -418,7 +418,7 @@ public class FluidExtractorTileEntity extends TileFluidHandlerSynced implements 
     public boolean isValidIngredient(ItemStack ingredient)
     {
         List<FluidExtractorRecipe> recipes = this.level.getRecipeManager().getRecipes().stream().filter(recipe -> recipe.getType() == RecipeTypes.FLUID_EXTRACTOR).map(recipe -> (FluidExtractorRecipe) recipe).collect(Collectors.toList());
-        return recipes.stream().anyMatch(recipe -> InventoryUtil.areItemStacksEqualIgnoreCount(ingredient, recipe.getIngredient()));
+        return recipes.stream().anyMatch(recipe -> InventoryUtil.areItemStacksEqualIgnoreCount(ingredient, recipe.ingredient()));
     }
 
     private final net.minecraftforge.common.util.LazyOptional<?> itemHandler = net.minecraftforge.common.util.LazyOptional.of(this::createUnSidedHandler);

@@ -94,12 +94,14 @@ public class SeatTracker
         {
             VehicleProperties properties = vehicle.getProperties();
             List<Seat> seats = properties.getSeats();
+
             for(int i = 0; i < seats.size(); i++)
             {
-                if(!this.playerSeatMap.values().contains(i))
+                if(!this.playerSeatMap.containsValue(i))
                 {
                     return i;
                 }
+
                 UUID uuid = this.playerSeatMap.inverse().get(i);
                 if(vehicle.getPassengers().stream().noneMatch(entity -> entity.getUUID().equals(uuid)))
                 {
@@ -153,24 +155,26 @@ public class SeatTracker
         ListTag list = new ListTag();
         this.playerSeatMap.forEach((uuid, seatIndex) -> {
             CompoundTag seatTag = new CompoundTag();
-            seatTag.putUUID("UUID", uuid);
-            seatTag.putInt("SeatIndex", seatIndex);
+            seatTag.putUUID("uuid", uuid);
+            seatTag.putInt("seatIndex", seatIndex);
             list.add(seatTag);
         });
-        compound.put("PlayerSeatMap", list);
+
+        compound.put("playerSeatMap", list);
         return compound;
     }
 
     public void read(CompoundTag compound)
     {
-        if(compound.contains("PlayerSeatMap", ListTag.TAG_LIST))
+        if(compound.contains("playerSeatMap", ListTag.TAG_LIST))
         {
             this.playerSeatMap.clear();
-            ListTag list = compound.getList("PlayerSeatMap", CompoundTag.TAG_COMPOUND);
+
+            ListTag list = compound.getList("playerSeatMap", CompoundTag.TAG_COMPOUND);
             list.forEach(nbt -> {
                 CompoundTag seatTag = (CompoundTag) nbt;
-                UUID uuid = seatTag.getUUID("UUID");
-                int seatIndex = seatTag.getInt("SeatIndex");
+                UUID uuid = seatTag.getUUID("uuid");
+                int seatIndex = seatTag.getInt("seatIndex");
                 this.playerSeatMap.put(uuid, seatIndex);
             });
         }
@@ -179,6 +183,7 @@ public class SeatTracker
     public void write(FriendlyByteBuf buffer)
     {
         buffer.writeVarInt(this.playerSeatMap.size());
+
         this.playerSeatMap.forEach((uuid, seatIndex) -> {
             buffer.writeUUID(uuid);
             buffer.writeVarInt(seatIndex);
@@ -188,6 +193,7 @@ public class SeatTracker
     public void read(FriendlyByteBuf buffer)
     {
         this.playerSeatMap.clear();
+
         int size = buffer.readVarInt();
         for(int i = 0; i < size; i++)
         {

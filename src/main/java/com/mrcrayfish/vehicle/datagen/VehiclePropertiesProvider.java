@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedWriter;
@@ -66,7 +67,7 @@ public abstract class VehiclePropertiesProvider implements DataProvider
     public abstract void registerProperties();
 
     @Override
-    public void run(HashCache cache) throws IOException
+    public void run(@NotNull HashCache cache) throws IOException
     {
         this.vehiclePropertiesMap.clear();
         this.registerProperties();

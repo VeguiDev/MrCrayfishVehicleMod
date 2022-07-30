@@ -409,14 +409,14 @@ public class RecipeGen extends RecipeProvider
 
     private static void fluidExtracting(Consumer<FinishedRecipe> consumer, ItemLike provider, FluidEntry output)
     {
-        ResourceLocation id = Objects.requireNonNull(output.getFluid().getRegistryName());
+        ResourceLocation id = Objects.requireNonNull(output.fluid().getRegistryName());
         FluidExtractorRecipeBuilder.extracting(Ingredient.of(provider), output)
                 .save(consumer, new ResourceLocation(id.getNamespace(), id.getPath() + "_extracting"));
     }
 
     private static void fluidMixing(Consumer<FinishedRecipe> consumer, FluidEntry inputOne, FluidEntry inputTwo, ItemLike provider, FluidEntry output)
     {
-        ResourceLocation id = Objects.requireNonNull(output.getFluid().getRegistryName());
+        ResourceLocation id = Objects.requireNonNull(output.fluid().getRegistryName());
         FluidMixerRecipeBuilder.mixing(inputOne, inputTwo, Ingredient.of(provider), output).save(consumer, new ResourceLocation(id.getNamespace(), id.getPath() + "_mixing"));
     }
 }

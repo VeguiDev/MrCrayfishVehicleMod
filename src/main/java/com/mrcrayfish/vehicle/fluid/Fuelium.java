@@ -12,6 +12,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
@@ -35,13 +36,13 @@ public abstract class Fuelium extends ForgeFlowingFluid
     public static class Source extends Fuelium
     {
         @Override
-        public boolean isSource(FluidState state)
+        public boolean isSource(@NotNull FluidState state)
         {
             return true;
         }
 
         @Override
-        public int getAmount(FluidState state)
+        public int getAmount(@NotNull FluidState state)
         {
             return 8;
         }
@@ -50,7 +51,7 @@ public abstract class Fuelium extends ForgeFlowingFluid
     public static class Flowing extends Fuelium
     {
         @Override
-        protected void createFluidStateDefinition(StateDefinition.Builder<Fluid, FluidState> builder)
+        protected void createFluidStateDefinition(StateDefinition.@NotNull Builder<Fluid, FluidState> builder)
         {
             super.createFluidStateDefinition(builder);
             builder.add(LEVEL);
@@ -63,7 +64,7 @@ public abstract class Fuelium extends ForgeFlowingFluid
         }
 
         @Override
-        public boolean isSource(FluidState state)
+        public boolean isSource(@NotNull FluidState state)
         {
             return false;
         }

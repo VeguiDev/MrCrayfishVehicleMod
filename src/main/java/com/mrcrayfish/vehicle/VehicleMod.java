@@ -39,6 +39,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
@@ -50,6 +51,7 @@ public class VehicleMod
     public static final CreativeModeTab CREATIVE_TAB = new CreativeModeTab(Reference.MOD_ID)
     {
         @Override
+        @NotNull
         public ItemStack makeIcon()
         {
             return new ItemStack(ModItems.IRON_SMALL_ENGINE.get());

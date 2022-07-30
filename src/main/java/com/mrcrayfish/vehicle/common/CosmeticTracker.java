@@ -10,6 +10,10 @@ import com.mrcrayfish.vehicle.entity.VehicleEntity;
 import com.mrcrayfish.vehicle.network.PacketHandler;
 import com.mrcrayfish.vehicle.network.message.MessageSyncActionData;
 import com.mrcrayfish.vehicle.network.message.MessageSyncCosmetics;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -39,7 +43,11 @@ import java.util.stream.Collectors;
 public class CosmeticTracker
 {
     private final ImmutableMap<ResourceLocation, Entry> selectedCosmetics;
-    private final Map<ResourceLocation, List<Action>> dirtyActions = new HashMap<>();
+    private final Object2ObjectMap<ResourceLocation, List<Action>> dirtyActions = Util.make(() -> {
+        Object2ObjectMap<ResourceLocation, List<Action>> map = new Object2ObjectOpenHashMap<>();
+        map.defaultReturnValue(new ObjectArrayList<>());
+        return map;
+    });
     private final WeakReference<VehicleEntity> vehicleRef;
     private boolean dirty = false;
 
@@ -68,7 +76,7 @@ public class CosmeticTracker
                 action.tick(vehicle);
                 if(!vehicle.level.isClientSide() && action.isDirty())
                 {
-                    this.dirtyActions.computeIfAbsent(cosmeticId, id -> new ArrayList<>()).add(action);
+                    this.dirtyActions.get(cosmeticId).add(action);
                 }
             });
         });
@@ -164,7 +172,7 @@ public class CosmeticTracker
 
     private List<Pair<ResourceLocation, ResourceLocation>> getDirtyEntries()
     {
-        List<Pair<ResourceLocation, ResourceLocation>> dirtyEntries = new ArrayList<>();
+        List<Pair<ResourceLocation, ResourceLocation>> dirtyEntries = new ObjectArrayList<>();
         this.selectedCosmetics.forEach((cosmeticId, entry) ->
         {
             if(entry.dirty)

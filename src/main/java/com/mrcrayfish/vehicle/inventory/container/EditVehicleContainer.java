@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
@@ -32,7 +33,7 @@ public class EditVehicleContainer extends AbstractContainerMenu
         this.addSlot(new Slot(EditVehicleContainer.this.vehicleInventory, 0, 8, 17)
         {
             @Override
-            public boolean mayPlace(ItemStack stack)
+            public boolean mayPlace(@NotNull ItemStack stack)
             {
                 return vehicle.getEngineType() != EngineType.NONE && stack.getItem() instanceof EngineItem && ((EngineItem) stack.getItem()).getEngineType() == vehicle.getEngineType();
             }
@@ -47,7 +48,7 @@ public class EditVehicleContainer extends AbstractContainerMenu
         this.addSlot(new Slot(EditVehicleContainer.this.vehicleInventory, 1, 8, 35)
         {
             @Override
-            public boolean mayPlace(ItemStack stack)
+            public boolean mayPlace(@NotNull ItemStack stack)
             {
                 return vehicle.canChangeWheels() && stack.getItem() instanceof WheelItem;
             }
@@ -59,17 +60,17 @@ public class EditVehicleContainer extends AbstractContainerMenu
             }
         });
 
-        for(int i = 0; i < 3; i++)
+        for(int y = 0; y < 3; y++)
         {
-            for(int j = 0; j < 9; j++)
+            for(int x = 0; x < 9; x++)
             {
-                this.addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, 102 + i * 18));
+                this.addSlot(new Slot(playerInventory, x + y * 9 + 9, 8 + x * 18, 102 * y * 18));
             }
         }
 
-        for(int i = 0; i < 9; i++)
+        for(int x = 0; x < 9; x++)
         {
-            this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 160));
+            this.addSlot(new Slot(playerInventory, x, 8 + x * 18, 160));
         }
     }
 
@@ -84,12 +85,13 @@ public class EditVehicleContainer extends AbstractContainerMenu
     }
 
     @Override
-    public ItemStack quickMoveStack(Player playerIn, int index)
+    @NotNull
+    public ItemStack quickMoveStack(@NotNull Player playerIn, int index)
     {
         ItemStack stack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
 
-        if(slot != null && slot.hasItem())
+        if(slot.hasItem())
         {
             ItemStack slotStack = slot.getItem();
             stack = slotStack.copy();
@@ -127,14 +129,14 @@ public class EditVehicleContainer extends AbstractContainerMenu
     }
 
     @Override
-    public void removed(Player player)
+    public void removed(@NotNull Player player)
     {
         super.removed(player);
         this.vehicleInventory.stopOpen(player);
     }
 
     @Override
-    public boolean stillValid(Player player)
+    public boolean stillValid(@NotNull Player player)
     {
         return this.vehicleInventory.stillValid(player) && vehicle.isAlive() && vehicle.distanceTo(player) < 8.0F;
     }

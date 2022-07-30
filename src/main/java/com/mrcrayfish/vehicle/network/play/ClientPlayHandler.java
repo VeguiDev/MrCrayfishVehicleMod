@@ -116,9 +116,7 @@ public class ClientPlayHandler
             return;
 
         CosmeticTracker tracker = ((VehicleEntity) entity).getCosmeticTracker();
-        message.getDirtyEntries().forEach(pair -> {
-            tracker.setSelectedModel(pair.getLeft(), pair.getRight());
-        });
+        message.getDirtyEntries().forEach(pair -> tracker.setSelectedModel(pair.getLeft(), pair.getRight()));
     }
 
     public static void handleSyncActionData(MessageSyncActionData message)

@@ -26,6 +26,9 @@ import java.util.List;
  */
 public class SprayCanItem extends Item implements IDyeable
 {
+    public static final String REMAINING_SPRAYS_TAG = "remainingSprays";
+    public static final String CAPACITY = "capacity";
+
     public SprayCanItem(Item.Properties properties)
     {
         super(properties);
@@ -70,9 +73,9 @@ public class SprayCanItem extends Item implements IDyeable
         {
             CompoundTag compound = stack.getOrCreateTag();
 
-            if (!compound.contains("remainingSprays", IntTag.TAG_INT))
+            if (!compound.contains(REMAINING_SPRAYS_TAG, IntTag.TAG_INT))
             {
-                compound.putInt("remainingSprays", sprayCan.getCapacity(stack));
+                compound.putInt(REMAINING_SPRAYS_TAG, sprayCan.getCapacity(stack));
             }
         }
         return stack.getTag();
@@ -82,9 +85,9 @@ public class SprayCanItem extends Item implements IDyeable
     public boolean isBarVisible(ItemStack stack)
     {
         CompoundTag compound = stack.getTag();
-        if (compound != null && compound.contains("remainingSprays", IntTag.TAG_INT))
+        if (compound != null && compound.contains(REMAINING_SPRAYS_TAG, IntTag.TAG_INT))
         {
-            int remainingSprays = compound.getInt("remainingSprays");
+            int remainingSprays = compound.getInt(REMAINING_SPRAYS_TAG);
             return this.hasColor(stack) && remainingSprays < this.getCapacity(stack);
         }
         return true;
@@ -94,9 +97,9 @@ public class SprayCanItem extends Item implements IDyeable
     public int getBarWidth(ItemStack stack)
     {
         CompoundTag compound = stack.getTag();
-        if (compound != null && compound.contains("remainingSprays", IntTag.TAG_INT))
+        if (compound != null && compound.contains(REMAINING_SPRAYS_TAG, IntTag.TAG_INT))
         {
-            return (int) Mth.clamp(1.0 - (compound.getInt("remainingSprays") / (double) this.getCapacity(stack)), 0.0, 1.0);
+            return (int) Mth.clamp(1.0 - (compound.getInt(REMAINING_SPRAYS_TAG) / (double) this.getCapacity(stack)), 0.0, 1.0);
         }
         return 0;
     }
@@ -104,9 +107,9 @@ public class SprayCanItem extends Item implements IDyeable
     public float getRemainingSprays(ItemStack stack)
     {
         CompoundTag compound = stack.getTag();
-        if (compound != null && compound.contains("remainingSprays", IntTag.TAG_INT))
+        if (compound != null && compound.contains(REMAINING_SPRAYS_TAG, IntTag.TAG_INT))
         {
-            return compound.getInt("remainingSprays") / (float) this.getCapacity(stack);
+            return compound.getInt(REMAINING_SPRAYS_TAG) / (float) this.getCapacity(stack);
         }
         return 0.0F;
     }
@@ -114,9 +117,9 @@ public class SprayCanItem extends Item implements IDyeable
     public int getCapacity(ItemStack stack)
     {
         CompoundTag compound = stack.getTag();
-        if (compound != null && compound.contains("capacity", IntTag.TAG_INT))
+        if (compound != null && compound.contains(CAPACITY, IntTag.TAG_INT))
         {
-            return compound.getInt("capacity");
+            return compound.getInt(CAPACITY);
         }
         return Config.SERVER.sprayCanCapacity.get();
     }
@@ -124,6 +127,6 @@ public class SprayCanItem extends Item implements IDyeable
     public void refill(ItemStack stack)
     {
         CompoundTag compound = getStackTag(stack);
-        compound.putInt("remainingSprays", this.getCapacity(stack));
+        compound.putInt(REMAINING_SPRAYS_TAG, this.getCapacity(stack));
     }
 }

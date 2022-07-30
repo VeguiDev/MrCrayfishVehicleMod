@@ -43,12 +43,13 @@ public class VoxelShapeHelper
         return result.get().optimize();
     }
 
-    public static VoxelShape[] getRotatedShapes(VoxelShape source)
+    public static VoxelShape[] getHorizontalShapes(VoxelShape source)
     {
         VoxelShape shapeNorth = rotate(source, Direction.NORTH);
         VoxelShape shapeEast = rotate(source, Direction.EAST);
         VoxelShape shapeSouth = rotate(source, Direction.SOUTH);
         VoxelShape shapeWest = rotate(source, Direction.WEST);
+
         return new VoxelShape[] { shapeSouth, shapeWest, shapeNorth, shapeEast };
     }
 

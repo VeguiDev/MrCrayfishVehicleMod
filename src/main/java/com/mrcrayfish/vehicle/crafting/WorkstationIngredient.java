@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.crafting.IIngredientSerializer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +22,26 @@ import java.util.stream.Stream;
  */
 public class WorkstationIngredient extends Ingredient
 {
+    public static WorkstationIngredient of(ItemLike provider, int count)
+    {
+        return new WorkstationIngredient(new Ingredient.ItemValue(new ItemStack(provider)), count);
+    }
+
+    public static WorkstationIngredient of(ItemStack stack, int count)
+    {
+        return new WorkstationIngredient(new Ingredient.ItemValue(stack), count);
+    }
+
+    public static WorkstationIngredient of(TagKey<Item> tag, int count)
+    {
+        return new WorkstationIngredient(new Ingredient.TagValue(tag), count);
+    }
+
+    public static WorkstationIngredient of(ResourceLocation id, int count)
+    {
+        return new WorkstationIngredient(new MissingSingleItemList(id), count);
+    }
+
     private final Ingredient.Value itemList;
     private final int count;
 
@@ -44,6 +65,7 @@ public class WorkstationIngredient extends Ingredient
     }
 
     @Override
+    @NotNull
     public IIngredientSerializer<? extends Ingredient> getSerializer()
     {
         return Serializer.INSTANCE;
@@ -57,6 +79,7 @@ public class WorkstationIngredient extends Ingredient
     }
 
     @Override
+    @NotNull
     public JsonElement toJson()
     {
         JsonObject object = this.itemList.serialize();
@@ -64,42 +87,24 @@ public class WorkstationIngredient extends Ingredient
         return object;
     }
 
-    public static WorkstationIngredient of(ItemLike provider, int count)
-    {
-        return new WorkstationIngredient(new Ingredient.ItemValue(new ItemStack(provider)), count);
-    }
-
-    public static WorkstationIngredient of(ItemStack stack, int count)
-    {
-        return new WorkstationIngredient(new Ingredient.ItemValue(stack), count);
-    }
-
-    public static WorkstationIngredient of(TagKey<Item> tag, int count)
-    {
-        return new WorkstationIngredient(new Ingredient.TagValue(tag), count);
-    }
-
-    public static WorkstationIngredient of(ResourceLocation id, int count)
-    {
-        return new WorkstationIngredient(new MissingSingleItemList(id), count);
-    }
-
     public static class Serializer implements IIngredientSerializer<WorkstationIngredient>
     {
         public static final WorkstationIngredient.Serializer INSTANCE = new WorkstationIngredient.Serializer();
 
         @Override
+        @NotNull
         public WorkstationIngredient parse(FriendlyByteBuf buffer)
         {
             int itemCount = buffer.readVarInt();
             int count = buffer.readVarInt();
-            Stream<Ingredient.ItemValue> values = Stream.generate(() ->
-                    new ItemValue(buffer.readItem())).limit(itemCount);
+            Stream<Ingredient.ItemValue> values = Stream.generate(() -> new ItemValue(buffer.readItem())).limit(itemCount);
+
             return new WorkstationIngredient(values, count);
         }
 
         @Override
-        public WorkstationIngredient parse(JsonObject object)
+        @NotNull
+        public WorkstationIngredient parse(@NotNull JsonObject object)
         {
             return WorkstationIngredient.fromJson(object);
         }
@@ -109,6 +114,7 @@ public class WorkstationIngredient extends Ingredient
         {
             buffer.writeVarInt(ingredient.getItems().length);
             buffer.writeVarInt(ingredient.count);
+
             for(ItemStack stack : ingredient.getItems())
             {
                 buffer.writeItem(stack);
@@ -132,12 +138,14 @@ public class WorkstationIngredient extends Ingredient
         }
 
         @Override
+        @NotNull
         public Collection<ItemStack> getItems()
         {
             return Collections.emptyList();
         }
 
         @Override
+        @NotNull
         public JsonObject serialize()
         {
             JsonObject object = new JsonObject();

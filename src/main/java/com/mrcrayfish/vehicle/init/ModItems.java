@@ -51,7 +51,7 @@ public class ModItems
     public static final RegistryObject<BucketItem> ENDER_SAP_BUCKET = register("ender_sap_bucket", () -> new BucketItem(ModFluids.ENDER_SAP, (new Item.Properties()).craftRemainder(Items.BUCKET).stacksTo(1).tab(VehicleMod.CREATIVE_TAB)));
     public static final RegistryObject<BucketItem> BLAZE_JUICE_BUCKET = register("blaze_juice_bucket", () -> new BucketItem(ModFluids.BLAZE_JUICE, (new Item.Properties()).craftRemainder(Items.BUCKET).stacksTo(1).tab(VehicleMod.CREATIVE_TAB)));
 
-    public static final RegistryObject<LazyBlockItem<Block>> TRAFFIC_CONE = register("traffic_cone", () -> new LazyBlockItem<>(ModBlocks.TRAFFIC_CONE, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
+    public static final RegistryObject<LazyBlockItem<Block>> TRAFFIC_CONE = register("traffic_cone", () -> new ItemTrafficCone(ModBlocks.TRAFFIC_CONE));
     public static final RegistryObject<LazyBlockItem<Block>> FLUID_EXTRACTOR = register("fluid_extractor", () -> new LazyBlockItem<>(ModBlocks.FLUID_EXTRACTOR, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
     public static final RegistryObject<LazyBlockItem<Block>> FLUID_MIXER = register("fluid_mixer", () -> new LazyBlockItem<>(ModBlocks.FLUID_MIXER, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));
     public static final RegistryObject<LazyBlockItem<Block>> GAS_PUMP = register("gas_pump", () -> new LazyBlockItem<>(ModBlocks.GAS_PUMP, new Item.Properties().tab(VehicleMod.CREATIVE_TAB)));

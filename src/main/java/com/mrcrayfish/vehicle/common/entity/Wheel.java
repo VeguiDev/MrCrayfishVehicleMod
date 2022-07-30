@@ -1,4 +1,4 @@
-package com.mrcrayfish.vehicle.entity;
+package com.mrcrayfish.vehicle.common.entity;
 
 import com.google.gson.JsonObject;
 import com.mrcrayfish.vehicle.util.ExtraJSONUtils;

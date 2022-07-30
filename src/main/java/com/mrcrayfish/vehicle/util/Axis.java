@@ -1,8 +1,11 @@
 package com.mrcrayfish.vehicle.util;
 
 import com.mojang.math.Vector3f;
+import net.minecraft.world.level.levelgen.GenerationStep;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Author: MrCrayfish
@@ -12,6 +15,9 @@ public enum Axis
     X(Vector3f.XP, "x"),
     Y(Vector3f.YP, "y"),
     Z(Vector3f.ZP, "z");
+
+    public static final Axis[] VALUES = values();
+    private static final Map<String, Axis> BY_KEY = Arrays.stream(VALUES).collect(Collectors.toMap(Axis::getKey, (axis) -> axis));
 
     private final Vector3f axis;
     private final String key;
@@ -34,6 +40,6 @@ public enum Axis
 
     public static Axis fromKey(String key)
     {
-        return Arrays.stream(values()).filter(axis -> axis.key.equals(key)).findFirst().orElse(Axis.X);
+        return BY_KEY.getOrDefault(key, Axis.X);
     }
 }

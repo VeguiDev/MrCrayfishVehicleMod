@@ -11,14 +11,15 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
  */
 public class WorkstationContainer extends AbstractContainerMenu
 {
-    private WorkstationTileEntity workstationTileEntity;
-    private BlockPos pos;
+    private final WorkstationTileEntity workstationTileEntity;
+    private final BlockPos pos;
 
     public WorkstationContainer(int windowId, Inventory playerInventory, WorkstationTileEntity workstationTileEntity)
     {
@@ -29,7 +30,7 @@ public class WorkstationContainer extends AbstractContainerMenu
         this.addSlot(new Slot(workstationTileEntity, 0, 173, 30)
         {
             @Override
-            public boolean mayPlace(ItemStack stack)
+            public boolean mayPlace(@NotNull ItemStack stack)
             {
                 return stack.getItem() instanceof DyeItem;
             }
@@ -44,7 +45,7 @@ public class WorkstationContainer extends AbstractContainerMenu
         this.addSlot(new Slot(workstationTileEntity, 1, 193, 30)
         {
             @Override
-            public boolean mayPlace(ItemStack stack)
+            public boolean mayPlace(@NotNull ItemStack stack)
             {
                 return stack.getItem() instanceof EngineItem;
             }
@@ -59,7 +60,7 @@ public class WorkstationContainer extends AbstractContainerMenu
         this.addSlot(new Slot(workstationTileEntity, 2, 213, 30)
         {
             @Override
-            public boolean mayPlace(ItemStack stack)
+            public boolean mayPlace(@NotNull ItemStack stack)
             {
                 return stack.getItem() instanceof WheelItem;
             }
@@ -86,18 +87,19 @@ public class WorkstationContainer extends AbstractContainerMenu
     }
 
     @Override
-    public boolean stillValid(Player playerIn)
+    public boolean stillValid(@NotNull Player playerIn)
     {
         return true;
     }
 
     @Override
-    public ItemStack quickMoveStack(Player playerIn, int index)
+    @NotNull
+    public ItemStack quickMoveStack(@NotNull Player playerIn, int index)
     {
         ItemStack stack = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
 
-        if(slot != null && slot.hasItem())
+        if(slot.hasItem())
         {
             ItemStack slotStack = slot.getItem();
             stack = slotStack.copy();

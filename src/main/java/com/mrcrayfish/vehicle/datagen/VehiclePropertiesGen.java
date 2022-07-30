@@ -10,7 +10,7 @@ import com.mrcrayfish.vehicle.common.cosmetic.actions.RotateAction;
 import com.mrcrayfish.vehicle.common.entity.Transform;
 import com.mrcrayfish.vehicle.entity.EngineType;
 import com.mrcrayfish.vehicle.entity.FuelFillerType;
-import com.mrcrayfish.vehicle.entity.Wheel;
+import com.mrcrayfish.vehicle.common.entity.Wheel;
 import com.mrcrayfish.vehicle.entity.properties.PlaneProperties;
 import com.mrcrayfish.vehicle.entity.properties.PoweredProperties;
 import com.mrcrayfish.vehicle.entity.properties.TrailerProperties;

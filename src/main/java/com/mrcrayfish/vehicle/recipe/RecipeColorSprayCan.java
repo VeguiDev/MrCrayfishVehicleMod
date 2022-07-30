@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.Tags;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class RecipeColorSprayCan extends CustomRecipe
     }
 
     @Override
-    public boolean matches(CraftingContainer inventory, Level worldIn)
+    public boolean matches(CraftingContainer inventory, @NotNull Level level)
     {
         ItemStack dyeableItem = ItemStack.EMPTY;
         List<ItemStack> dyes = Lists.newArrayList();
@@ -57,6 +58,7 @@ public class RecipeColorSprayCan extends CustomRecipe
     }
 
     @Override
+    @NotNull
     public ItemStack assemble(CraftingContainer inventory)
     {
         ItemStack dyeableItem = ItemStack.EMPTY;
@@ -96,6 +98,7 @@ public class RecipeColorSprayCan extends CustomRecipe
     }
 
     @Override
+    @NotNull
     public RecipeSerializer<?> getSerializer()
     {
         return ModRecipeSerializers.COLOR_SPRAY_CAN.get();

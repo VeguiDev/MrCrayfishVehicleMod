@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -21,15 +22,15 @@ import java.util.function.Supplier;
 /**
  * Author: MrCrayfish
  */
-public class ItemTrafficCone extends BlockItem
+public class ItemTrafficCone extends LazyBlockItem<Block>
 {
     public ItemTrafficCone(Supplier<Block> block)
     {
-        super(block.get(), new Item.Properties().tab(VehicleMod.CREATIVE_TAB));
+        super(block, new Item.Properties().tab(VehicleMod.CREATIVE_TAB));
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltips, TooltipFlag flag)
+    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> tooltips, @NotNull TooltipFlag flag)
     {
         if(Screen.hasShiftDown())
         {

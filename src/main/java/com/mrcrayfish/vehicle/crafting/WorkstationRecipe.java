@@ -12,15 +12,16 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Author: MrCrayfish
  */
 public class WorkstationRecipe implements Recipe<WorkstationTileEntity>
 {
-    private ResourceLocation id;
-    private EntityType<?> vehicle;
-    private ImmutableList<WorkstationIngredient> materials;
+    private final ResourceLocation id;
+    private final EntityType<?> vehicle;
+    private final ImmutableList<WorkstationIngredient> materials;
 
     public WorkstationRecipe(ResourceLocation id, EntityType<?> vehicle, ImmutableList<WorkstationIngredient> materials)
     {
@@ -40,13 +41,14 @@ public class WorkstationRecipe implements Recipe<WorkstationTileEntity>
     }
 
     @Override
-    public boolean matches(WorkstationTileEntity inv, Level worldIn)
+    public boolean matches(@NotNull WorkstationTileEntity inv, @NotNull Level worldIn)
     {
         return false;
     }
 
     @Override
-    public ItemStack assemble(WorkstationTileEntity inv)
+    @NotNull
+    public ItemStack assemble(@NotNull WorkstationTileEntity inv)
     {
         return ItemStack.EMPTY;
     }
@@ -58,24 +60,28 @@ public class WorkstationRecipe implements Recipe<WorkstationTileEntity>
     }
 
     @Override
+    @NotNull
     public ItemStack getResultItem()
     {
         return ItemStack.EMPTY;
     }
 
     @Override
+    @NotNull
     public ResourceLocation getId()
     {
         return this.id;
     }
 
     @Override
+    @NotNull
     public RecipeSerializer<?> getSerializer()
     {
         return ModRecipeSerializers.WORKSTATION.get();
     }
 
     @Override
+    @NotNull
     public RecipeType<?> getType()
     {
         return RecipeTypes.WORKSTATION;
