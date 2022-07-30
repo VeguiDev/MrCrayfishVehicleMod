@@ -14,7 +14,7 @@ targetCompatibility = JavaVersion.VERSION_17
 apply plugin: 'org.spongepowered.mixin'
 
 archivesBaseName = project.archives_base_name
-version = project.version
+version = project.mod_version
 group = project.maven_group
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
