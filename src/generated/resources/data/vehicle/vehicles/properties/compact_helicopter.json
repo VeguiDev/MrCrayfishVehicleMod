@@ -27,6 +27,7 @@
   },
   "extended": {
     "vehicle:powered": {
+      "engineType": "vehicle:large_motor",
       "enginePower": 25.0,
       "maxEnginePitch": 1.0,
       "exhaustFumesPosition": [
