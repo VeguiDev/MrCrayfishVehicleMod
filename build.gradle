@@ -77,7 +77,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.2-40.1.54'
+    minecraft 'net.minecraftforge:forge:1.18.2-40.2.0'
 
     implementation fg.deobf("curse.maven:posture-${project.posture_file}:${project.posture_project}")
     implementation fg.deobf("curse.maven:framework-${project.framework_file}:${project.framework_project}")
